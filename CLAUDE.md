@@ -9,13 +9,13 @@
 
 | Document | Purpose |
 |----------|---------|
-| **Docs/chapters/** | Complete tutorial-style documentation (32 chapters + 4 appendices). Teaches engine concepts progressively in "Crafting Interpreters" style. **Primary reference for all technical details.** |
+| **Docs/** | Complete tutorial-style documentation (32 chapters + 4 appendices). Teaches engine concepts progressively in "Crafting Interpreters" style. **Primary reference for all technical details.** |
 | **CLAUDE.md** (this file) | Porting-focused guide. Platform abstraction strategies, Mac API replacements, and practical porting decisions. |
 | **Docs/porting_progress.md** | Step-by-step porting plan with 12 milestones, checkboxes, and chapter references. |
 
 ### Chapter Files (Tutorial Style) - ALL COMPLETE
 
-The `Docs/chapters/` directory contains tutorial-style documentation that teaches engine concepts progressively. See `Docs/chapters/README.md` for the full table of contents.
+The `Docs/` directory contains tutorial-style documentation that teaches engine concepts progressively. See `Docs/README.md` for the full table of contents.
 
 | Section | Chapters | Key Topics |
 |---------|----------|------------|
@@ -29,10 +29,10 @@ The `Docs/chapters/` directory contains tutorial-style documentation that teache
 | **Engine Internals** | 30-32 | Error handling, resource forks, life of a frame |
 | **Appendices** | A-D | Glossary, quick reference, source index, fixed-point |
 
-**For learning how the engine works**: Start with `chapters/04_world.md` → `05_rendering.md` → `06_physics.md`
-**Essential for porting**: `chapters/32_frame.md` (Life of a Frame) shows complete frame lifecycle
-**For quick reference**: See `chapters/appendix_b_reference.md`
-**For porting tasks**: See porting_progress.md
+**For learning how the engine works**: Start with `Docs/04_world.md` → `05_rendering.md` → `06_physics.md`
+**Essential for porting**: `Docs/32_frame.md` (Life of a Frame) shows complete frame lifecycle
+**For quick reference**: See `Docs/appendix_b_reference.md`
+**For porting tasks**: See `Docs/porting_progress.md`
 
 ---
 
@@ -53,7 +53,7 @@ The `Docs/chapters/` directory contains tutorial-style documentation that teache
 
 **Bottom line**: You can port Marathon 2 without touching resource forks at all! Only the Images file (interface graphics) uses them, and that's optional.
 
-> **For complete resource fork documentation**: See `Docs/chapters/31_resource_forks.md` - includes binary format details, extraction strategies, and decision trees for porting.
+> **For complete resource fork documentation**: See `Docs/31_resource_forks.md` - includes binary format details, extraction strategies, and decision trees for porting.
 
 ---
 
@@ -107,8 +107,8 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 
 ## Rendering System Overview
 
-> **For complete details**: See `Docs/chapters/05_rendering.md`
-> **For frame lifecycle**: See `Docs/chapters/32_frame.md`
+> **For complete details**: See `Docs/05_rendering.md`
+> **For frame lifecycle**: See `Docs/32_frame.md`
 
 **Quick summary**:
 - Portal-based visibility culling (50-100 polygons rendered from 500-1000 total)
@@ -322,7 +322,7 @@ uint32_t marathon_to_argb(struct rgb_color* c) {
 
 ### Marathon File Formats Summary
 
-> **For complete specifications**: See `Docs/chapters/10_file_formats.md`
+> **For complete specifications**: See `Docs/10_file_formats.md`
 
 Marathon uses three types of data files:
 
@@ -351,7 +351,7 @@ uint32_t swap32(uint32_t val) {
 
 ## Resource Forks Reference
 
-> **Complete documentation**: See `Docs/chapters/31_resource_forks.md`
+> **Complete documentation**: See `Docs/31_resource_forks.md`
 >
 > Includes:
 > - Detailed binary format specifications with diagrams

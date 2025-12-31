@@ -105,7 +105,7 @@ For quick lookup of specific values and formulas, see:
 - **[Appendix C: Source File Index](appendix_c_files.md)** - File-by-file reference
 
 For porting Marathon to modern platforms, see:
-- **[porting_progress.md](../porting_progress.md)** - Step-by-step porting plan with milestones
+- **[porting_progress.md](porting_progress.md)** - Step-by-step porting plan with milestones
 - **[Chapter 31: Resource Forks Guide](31_resource_forks.md)** - Clarifies what files need special handling
 - **[Chapter 24: cseries.lib](24_cseries.md)** - Core type definitions with modern stdint equivalents
 
@@ -123,7 +123,7 @@ Different readers have different goals. Here are recommended reading paths:
 3. **[Chapter 31: Resource Forks](31_resource_forks.md)** - What files need special handling
 4. **[Chapter 5: Rendering](05_rendering.md)** - The core rendering pipeline
 5. **[Appendix D: Fixed-Point](appendix_d_fixedpoint.md)** - Number format conversion
-6. **[porting_progress.md](../porting_progress.md)** - Milestone-by-milestone guide
+6. **[porting_progress.md](porting_progress.md)** - Milestone-by-milestone guide
 
 ### 🔧 "I want to understand how a 1990s game engine works"
 
@@ -209,7 +209,7 @@ When editing or adding chapters:
 ```bash
 # Search source code for key terms, verify they match chapter
 grep -n "keyword" marathon2/*.c | head -20
-grep -n "keyword" chapters/XX_chapter.md
+grep -n "keyword" Docs/XX_chapter.md
 ```
 
 ---

@@ -1139,7 +1139,7 @@ Note: Y is inverted (screen Y increases downward, world Z increases upward)
 
 ## 4. World Representation
 
-> **🔧 For Porting:** `map.c`, `map.h`, and `map_constructors.c` are fully portable. All data structures use platform-independent types (`short`, `long`, `word`). Just ensure `word` is defined as `unsigned short` and handle byte swapping when loading from files.
+> **🔧 For Porting:** `map.c`, `map.h`, and `map_constructors.c` are fully portable. All data structures use platform-independent types (`short`, `long`, `word`). Just ensure `word` is defined as `uint16_t` (see Section 24 for full type mappings) and handle byte swapping when loading from files.
 
 ### Polygon-Based Geometry
 

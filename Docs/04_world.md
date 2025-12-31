@@ -2,7 +2,7 @@
 
 ## Building the Marathon Universe
 
-> **For Porting:** `map.c`, `map.h`, and `map_constructors.c` are fully portable! All data structures use platform-independent types (`short`, `long`, `word`). Just ensure `word` is defined as `unsigned short` and handle byte swapping when loading from big-endian files.
+> **For Porting:** `map.c`, `map.h`, and `map_constructors.c` are fully portable! All data structures use platform-independent types (`short`, `long`, `word`). Just ensure `word` is defined as `uint16_t` (see Chapter 24 for full type mappings) and handle byte swapping when loading from big-endian files.
 
 ---
 
