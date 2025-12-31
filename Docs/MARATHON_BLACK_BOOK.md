@@ -2095,33 +2095,52 @@ Why affine works for floors:
 **Affine vs Perspective-Correct Comparison**:
 
 ```
-Affine mapping (what would happen on a wall):
+The problem: A wall receding into the distance. Near parts should show
+MORE texture detail (more texels per pixel), far parts show LESS.
 
-        Texture (8×8 grid):              Wall in 3D:              Screen result:
-        ┌─┬─┬─┬─┬─┬─┬─┬─┐                   far                  ┌─┬─┬─┬─────────┐
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │                   ├─┼─┼─┼─────────┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │  Receding         ├─┼─┼─┼─────────┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │  into             ├─┼─┼─┼─────────┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │  distance         ├─┼─┼─┼─────────┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │                   ├─┼─┼─┼─────────┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │                   ├─┼─┼─┼─────────┤
-        └─┴─┴─┴─┴─┴─┴─┴─┘                  near                 └─┴─┴─┴─────────┘
-                                                                 INCORRECT!
-                                                                 (stretched at bottom)
+Top-down view of wall:              What we see on screen:
+                                    (wall spans left-to-right)
+    far end ─────┐
+                 │                       FAR          NEAR
+                 │  wall surface        (left)       (right)
+                 │                         │            │
+    near end ────┘                         ▼            ▼
+         ↑
+       player
 
-Perspective-correct mapping (Marathon's wall approach):
 
-        Texture (8×8 grid):              Wall in 3D:              Screen result:
-        ┌─┬─┬─┬─┬─┬─┬─┬─┐                   far                  ┌─┬─┬─┬─┬─┬─┬─┬─┐
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │                   ├─┼─┼─┼─┼─┼─┼─┼─┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │  Receding         ├─┼─┼─┼─┼─┼─┼─┼─┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │  into             ├─┼─┼─┼─┼─┼─┼─┼─┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │  distance         ├─┼─┼─┼─┼─┼─┼─┼─┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │                   ├─┼─┼─┼─┼─┼─┼─┼─┤
-        ├─┼─┼─┼─┼─┼─┼─┼─┤                    │                   ├─┼─┼─┼─┼─┼─┼─┼─┤
-        └─┴─┴─┴─┴─┴─┴─┴─┘                  near                 └─┴─┴─┴─┴─┴─┴─┴─┘
-                                                                 CORRECT!
-                                                                 (even spacing)
+AFFINE mapping (linear interpolation - INCORRECT for walls):
+
+    Texture source:     Screen result:
+    ┌──┬──┬──┬──┐       ┌───┬───┬───┬───┐
+    │ 1│ 2│ 3│ 4│  ───► │ 1 │ 2 │ 3 │ 4 │   Problem: Texture cells
+    └──┴──┴──┴──┘       └───┴───┴───┴───┘   are evenly spaced on screen,
+     (even 25% each)     25%  25%  25%  25%  but wall ISN'T evenly spaced
+                         ◄─far    near─►    in 3D! Far part should be
+                                            compressed, near part stretched.
+
+    This causes a "swimming" or "warping" effect as you move,
+    because the texture slides incorrectly across the surface.
+
+
+PERSPECTIVE-CORRECT mapping (Marathon's wall approach):
+
+    Texture source:     Screen result:
+    ┌──┬──┬──┬──┐       ┌─┬─┬──┬────────┐
+    │ 1│ 2│ 3│ 4│  ───► │1│2│ 3│    4   │   Correct: Far texels (1,2)
+    └──┴──┴──┴──┘       └─┴─┴──┴────────┘   are compressed (far = small),
+     (even 25% each)     5% 10% 20%  65%    near texels (4) are stretched
+                         ◄─far    near─►    (near = large on screen).
+
+    The 1/z correction ensures texture coordinates account for
+    depth, so the texture appears "painted on" the 3D surface.
+
+
+Why Marathon uses affine for FLOORS (it's OK there):
+  - Floors are nearly perpendicular to view direction
+  - Depth variation across a floor scanline is small
+  - Distortion is minimal and hard to notice
+  - Affine is MUCH faster (no divide per pixel)
 ```
 
 #### 2. Vertical Surfaces (Walls)
