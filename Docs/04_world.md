@@ -539,7 +539,7 @@ Real-world example showing all data structures together:
              ╱          ╲
            L4            L5
            ╱              ╲
-         e4 ─────L6───── e5
+         e4 ───── L6 ───── e5
 
 Data in memory:
 

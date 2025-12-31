@@ -396,9 +396,9 @@ struct physics_constants {
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                    PHYSICS MODEL COMPARISON                               │
+│                    PHYSICS MODEL COMPARISON                              │
 ├──────────────────────────────────┬───────────────────────────────────────┤
-│           WALKING                │              RUNNING                   │
+│           WALKING                │              RUNNING                  │
 ├──────────────────────────────────┼───────────────────────────────────────┤
 │ Max Forward:    FIXED_ONE/14     │ Max Forward:    FIXED_ONE/8           │
 │                 (~4,681)         │                 (~8,192)  [1.75x]     │

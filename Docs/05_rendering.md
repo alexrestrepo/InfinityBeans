@@ -68,8 +68,8 @@ You're standing in Room A, looking through a doorway into Room B:
         │                                          │
         │               ROOM B                     │
         │                                          │
-        │    You can only see the part of Room B  │
-        │    that's visible THROUGH the portal!   │
+        │    You can only see the part of Room B   │
+        │    that's visible THROUGH the portal!    │
         │                                          │
         └──────────────────────────────────────────┘
 ```
@@ -437,8 +437,8 @@ Marathon's `build_render_tree()` works as follows:
                   ╱               ╲
                  ╱    View Cone    ╲
                 ╱                   ╲
-               ╱         @          ╲
-                    (Player)
+               ╱          @          ╲
+                       (Player)
 
 1. Cast ray at left screen edge (counterclockwise bias*)
 2. Cast ray at right screen edge (clockwise bias*)
@@ -1225,11 +1225,11 @@ Given edge from (x0,y0) to (x1,y1), builds table of x values for each y:
   (x1,y1)
 
 Algorithm (Bresenham's DDA):
-┌─────────────────────────────────────────────────────────────────┐
-│  dx = x1 - x0;  adx = |dx|;  dx = SGN(dx)                       │
-│  dy = y1 - y0;  ady = |dy|;  dy = SGN(dy)                       │
+┌──────────────────────────────────────────────────────────────────┐
+│  dx = x1 - x0;  adx = |dx|;  dx = SGN(dx)                        │
+│  dy = y1 - y0;  ady = |dy|;  dy = SGN(dy)                        │
 │                                                                  │
-│  if (adx >= ady)  // X-dominant line                            │
+│  if (adx >= ady)  // X-dominant line                             │
 │  {                                                               │
 │      d = adx - ady                                               │
 │      delta_d = -2 * ady                                          │
@@ -1257,7 +1257,7 @@ Algorithm (Bresenham's DDA):
 │          y += 1, d += delta_d                                    │
 │      }                                                           │
 │  }                                                               │
-└─────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 **Edge Table Usage in Polygon Rasterization:**
@@ -1803,16 +1803,16 @@ enum {
 │  As render tree is built, each portal crossing adds clipping:   │
 │                                                                 │
 │    Parent polygon         Child polygon (through portal)        │
-│    ┌──────────────┐       ┌──────────────┐                     │
-│    │              │       │              │                     │
-│    │    ┌────┐    │       │    Content   │                     │
-│    │    │ P  │────┼───────┼──> clipped   │                     │
-│    │    │ O  │    │       │    by portal │                     │
-│    │    │ R  │    │       │    edges     │                     │
-│    │    │ T  │    │       │              │                     │
-│    │    │ A  │    │       │              │                     │
-│    │    │ L  │    │       │              │                     │
-│    │    └────┘    │       └──────────────┘                     │
+│    ┌──────────────┐       ┌──────────────┐                      │
+│    │              │       │              │                      │
+│    │    ┌────┐    │       │    Content   │                      │
+│    │    │ P  │────┼───────┼──> clipped   │                      │
+│    │    │ O  │    │       │    by portal │                      │
+│    │    │ R  │    │       │    edges     │                      │
+│    │    │ T  │    │       │              │                      │
+│    │    │ A  │    │       │              │                      │
+│    │    │ L  │    │       │              │                      │
+│    │    └────┘    │       └──────────────┘                      │
 │    └──────────────┘                                             │
 │                                                                 │
 │  Child inherits parent's clip window PLUS portal edges          │

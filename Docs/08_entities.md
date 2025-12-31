@@ -40,25 +40,25 @@ Marathon uses arrays with linked lists for efficient access:
 Entity Organization:
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                     OBJECTS ARRAY                                │
+│                     OBJECTS ARRAY                               │
 │  Global storage for all world objects (monsters, items, etc.)   │
-│                                                                  │
+│                                                                 │
 │  ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐      │
 │  │Obj 0 │Obj 1 │Obj 2 │ ...  │ ...  │ ...  │ ...  │Obj N │      │
 │  │Monster│Item │Effect│      │      │      │      │      │      │
 │  └──┬───┴──┬───┴──┬───┴──────┴──────┴──────┴──────┴──────┘      │
-│     │      │      │                                              │
-└─────│──────│──────│──────────────────────────────────────────────┘
+│     │      │      │                                             │
+└─────│──────│──────│─────────────────────────────────────────────┘
       │      │      │
       ▼      ▼      ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  POLYGON OBJECT LISTS                                            │
+│  POLYGON OBJECT LISTS                                           │
 │  Each polygon has a linked list of objects inside it            │
-│                                                                  │
+│                                                                 │
 │  Polygon 0: Obj 0 → Obj 5 → Obj 12 → NULL                       │
 │  Polygon 1: Obj 1 → NULL                                        │
 │  Polygon 2: Obj 2 → Obj 7 → NULL                                │
-│                                                                  │
+│                                                                 │
 │  Enables fast "what's in this room?" queries                    │
 └─────────────────────────────────────────────────────────────────┘
 ```

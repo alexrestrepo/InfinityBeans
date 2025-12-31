@@ -9,7 +9,7 @@
 The Marathon Infinity source code is organized into two main directories:
 
 ```
-m2-infinity-source-code-main/
+marathon_src/
 ├── marathon2/              # Main game code (~68,000 lines)
 │   ├── *.c, *.h           # Core game source files (75 .c, 71 .h)
 │   ├── *.a                # 68K assembly files
@@ -110,23 +110,23 @@ Marathon uses a consistent pattern for platform abstraction:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Game Logic Layer                          │
+│                    Game Logic Layer                         │
 │  render.c, physics.c, monsters.c, weapons.c, etc.           │
-│  (Platform-independent, uses abstract interfaces)            │
+│  (Platform-independent, uses abstract interfaces)           │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Abstract Interface                         │
+│                   Abstract Interface                        │
 │  shapes.c, game_sound.c, vbl.c, screen.c                    │
-│  (Defines interface, may have some portable code)            │
+│  (Defines interface, may have some portable code)           │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                 Platform Implementation                      │
+│                 Platform Implementation                     │
 │  shapes_macintosh.c, sound_macintosh.c, vbl_macintosh.c     │
-│  (Mac-specific code, replace for porting)                    │
+│  (Mac-specific code, replace for porting)                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 

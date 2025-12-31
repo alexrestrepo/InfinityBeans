@@ -9,13 +9,13 @@
 
 | Document | Purpose |
 |----------|---------|
-| **chapters/** | Complete tutorial-style documentation (32 chapters + 4 appendices). Teaches engine concepts progressively in "Crafting Interpreters" style. **Primary reference for all technical details.** |
+| **Docs/chapters/** | Complete tutorial-style documentation (32 chapters + 4 appendices). Teaches engine concepts progressively in "Crafting Interpreters" style. **Primary reference for all technical details.** |
 | **CLAUDE.md** (this file) | Porting-focused guide. Platform abstraction strategies, Mac API replacements, and practical porting decisions. |
-| **porting_progress.md** | Step-by-step porting plan with 12 milestones, checkboxes, and chapter references. |
+| **Docs/porting_progress.md** | Step-by-step porting plan with 12 milestones, checkboxes, and chapter references. |
 
 ### Chapter Files (Tutorial Style) - ALL COMPLETE
 
-The `chapters/` directory contains tutorial-style documentation that teaches engine concepts progressively. See `chapters/README.md` for the full table of contents.
+The `Docs/chapters/` directory contains tutorial-style documentation that teaches engine concepts progressively. See `Docs/chapters/README.md` for the full table of contents.
 
 | Section | Chapters | Key Topics |
 |---------|----------|------------|
@@ -53,7 +53,7 @@ The `chapters/` directory contains tutorial-style documentation that teaches eng
 
 **Bottom line**: You can port Marathon 2 without touching resource forks at all! Only the Images file (interface graphics) uses them, and that's optional.
 
-> **For complete resource fork documentation**: See `chapters/31_resource_forks.md` - includes binary format details, extraction strategies, and decision trees for porting.
+> **For complete resource fork documentation**: See `Docs/chapters/31_resource_forks.md` - includes binary format details, extraction strategies, and decision trees for porting.
 
 ---
 
@@ -81,8 +81,8 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 - Originally for Macintosh (68K and PowerPC architectures)
 
 **Structure**:
-- `marathon2/` - Main game code (~68,000 lines of C, 78 files)
-- `cseries.lib/` - Shared utilities (~4,400 lines)
+- `marathon_src/marathon2/` - Main game code (~68,000 lines of C, 78 files)
+- `marathon_src/cseries.lib/` - Shared utilities (~4,400 lines)
 - Built for Classic Mac OS using MPW (Macintosh Programmer's Workshop)
 
 **Key Technologies**:
@@ -107,8 +107,8 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 
 ## Rendering System Overview
 
-> **For complete details**: See `chapters/05_rendering.md`
-> **For frame lifecycle**: See `chapters/32_frame.md`
+> **For complete details**: See `Docs/chapters/05_rendering.md`
+> **For frame lifecycle**: See `Docs/chapters/32_frame.md`
 
 **Quick summary**:
 - Portal-based visibility culling (50-100 polygons rendered from 500-1000 total)
@@ -187,7 +187,7 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 
 ### Files Created
 
-**`porting_progress.md`** - Complete porting plan with:
+**`Docs/porting_progress.md`** - Complete porting plan with:
 - Detailed tasks and checkboxes for all 12 milestones
 - Testing criteria for each milestone
 - Code examples for platform abstractions
@@ -198,8 +198,8 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 ### Files to Reference
 
 **Marathon source**:
-- Location: `./marathon2/` and `./cseries.lib/` (this repository)
-- Key files: `marathon2/render.c`, `marathon2/scottish_textures.c`, `marathon2/map.c`
+- Location: `./marathon_src/marathon2/` and `./marathon_src/cseries.lib/` (this repository)
+- Key files: `marathon_src/marathon2/render.c`, `marathon_src/marathon2/scottish_textures.c`, `marathon_src/marathon2/map.c`
 - Mac-specific files: `*_macintosh.c` (11 files to replace)
 
 **Full Beans framework**:
@@ -212,7 +212,7 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 
 When resuming this project:
 
-1. **Read `porting_progress.md`** - Your complete roadmap
+1. **Read `Docs/porting_progress.md`** - Your complete roadmap
 2. **Start with Milestone 1** - Project setup
 3. **Follow the critical path**: M1→M2→M3→M4→M5→M6→M7→M8→M9
 4. **Quick validation points**:
@@ -322,7 +322,7 @@ uint32_t marathon_to_argb(struct rgb_color* c) {
 
 ### Marathon File Formats Summary
 
-> **For complete specifications**: See `chapters/10_file_formats.md`
+> **For complete specifications**: See `Docs/chapters/10_file_formats.md`
 
 Marathon uses three types of data files:
 
@@ -351,7 +351,7 @@ uint32_t swap32(uint32_t val) {
 
 ## Resource Forks Reference
 
-> **Complete documentation**: See `chapters/31_resource_forks.md`
+> **Complete documentation**: See `Docs/chapters/31_resource_forks.md`
 >
 > Includes:
 > - Detailed binary format specifications with diagrams
