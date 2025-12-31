@@ -31,6 +31,138 @@ The key insight: **you can only see a small portion of the level at any moment**
 
 This is the **visibility problem**, and Marathon solves it elegantly with **portal-based rendering**.
 
+### How Marathon Differs from Wolfenstein-Style Raycasting
+
+Marathon famously advertised "non-orthogonal walls"—arbitrary angles instead of the 90° grid that Wolfenstein 3D and Pathways Into Darkness required. This wasn't just a data format change; it required a fundamentally different rendering approach.
+
+**Wolfenstein 3D (1992): DDA Raycasting**
+
+Wolfenstein casts one ray per screen column, using the DDA (Digital Differential Analyzer) algorithm to step through a uniform grid until hitting a wall:
+
+```
+Wolfenstein's Grid-Based Raycasting:
+
+    ┌───┬───┬───┬───┬───┬───┐
+    │   │   │ █ │ █ │   │   │
+    ├───┼───┼───┼───┼───┼───┤
+    │   │   │ █ │ █ │   │   │     Ray steps through grid cells
+    ├───┼───┼●·→┼·→·│→··│   │     until it hits a wall (█)
+    │   │   │ @ │   │   │   │
+    ├───┼───┼───┼───┼───┼───┤     @ = player, ● = ray start
+    │   │   │   │   │   │   │     Only 90° walls possible!
+    └───┴───┴───┴───┴───┴───┘
+```
+
+- Cast 320 rays (one per column) per frame
+- DDA efficiently steps through grid intersections
+- Find exact ray-wall intersection point
+- **Limitation**: Walls must align to grid (orthogonal only)
+
+**Marathon (1994): Portal-Based Projection**
+
+Marathon doesn't cast rays to find wall intersections. Instead, it projects wall endpoints to screen space and clips them against portal boundaries:
+
+```
+Marathon's Portal-Based Approach:
+
+    ┌────────────────────────────┐
+    │    Polygon A          ╱    │
+    │                      ╱     │
+    │    @ ─────────Portal──→    │    Walls can be ANY angle!
+    │    Player            ╲     │
+    │                       ╲    │    No grid constraints.
+    │                   Polygon B│
+    └────────────────────────────┘
+
+1. Start in player's polygon
+2. For each edge: project endpoints to screen X
+3. If edge is portal AND visible: recurse into neighbor
+4. If edge is solid: texture map the wall span
+```
+
+**Key Differences:**
+
+| Aspect | Wolfenstein (DDA) | Marathon (Portal) |
+|--------|-------------------|-------------------|
+| **Per-frame work** | Cast ray per screen column | Project polygon endpoints |
+| **Wall intersection** | Calculate ray-wall hit point | No intersection—clip endpoints |
+| **Wall angles** | 90° only (grid-aligned) | Arbitrary angles |
+| **Data structure** | 2D grid of cells | Polygon connectivity graph |
+| **Complexity** | O(columns × grid_steps) | O(visible_polygons × edges) |
+
+**Why This Matters:**
+
+The cross product test Marathon uses (see Section 5.4) determines which polygon edge a ray *exits through*—not where it intersects. This is for building the visibility tree, not for rendering. Actual wall rendering uses endpoint projection and span-based texture mapping, more like a software rasterizer than a raycaster.
+
+```c
+// Wolfenstein: find WHERE ray hits wall
+intersection = ray_origin + t * ray_direction;  // solve for t
+
+// Marathon: project wall endpoints, clip to screen bounds
+screen_x1 = half_screen + (endpoint1.y * scale) / endpoint1.x;
+screen_x2 = half_screen + (endpoint2.y * scale) / endpoint2.x;
+// Then texture map columns from screen_x1 to screen_x2
+```
+
+**Wall Projection and Clipping Visualized:**
+
+```
+WORLD SPACE (top-down view)                 SCREEN SPACE (what you see)
+
+         Wall B                                    Screen
+        e2────e3                            ┌─────────────────────┐
+       ╱                                    │                     │
+      ╱         Wall A                      │ ┃         ┃         │
+     ╱       e0━━━━━━━e1                    │ ┃ Wall A  ┃         │
+    ╱       ╱                               │ ┃█████████┃         │
+   ╱       ╱                                │ ┃█████████┃         │
+  ╱       ╱   View                          │ ┃█████████┃         │
+ ╱       ╱   Frustum                        │ ┃         ┃         │
+        ╱                                   │ x1       x2         │
+       @ Player                             └─────────────────────┘
+
+Step 1: Transform endpoints to camera space (rotate by -player_angle)
+Step 2: Project each endpoint:  screen_x = center + (local_y × scale) / local_x
+Step 3: Wall A: e0→x1, e1→x2 — fully visible, draw entire wall
+        Wall B: e2 projects left of screen, e3 in view — clip to screen edge
+
+
+PORTAL CLIPPING:
+
+    World: Room A → Portal → Room B             Screen with portal clip window
+
+    ┌──────────┬───Portal───┬──────────┐    ┌─────────────────────────────┐
+    │          │ p0     p1  │          │    │      Portal bounds          │
+    │  Room A  │     ↓      │  Room B  │    │      ┃ p0    p1 ┃           │
+    │          │            │          │    │      ┃    ↓     ┃           │
+    │    @─────┼────────────┼─────     │    │ Room A  ┃ Room B ┃           │
+    │  Player  │            │          │    │ visible ┃visible ┃           │
+    └──────────┴────────────┴──────────┘    │      ┃█████████┃           │
+                                            │      ┃█ wall  █┃           │
+    Wall in Room B spans w0────────w1       │      ┃█████████┃           │
+                                            │   w0'┃ clipped ┃w1         │
+                                            └─────────────────────────────┘
+
+    Wall endpoints w0, w1 project to screen, but get CLIPPED to portal bounds.
+    Only the portion between p0 and p1 is rendered—the rest is occluded by Room A's walls.
+```
+
+> **Implementation Note:** The diagram above is simplified for teaching. Marathon's actual clipping is more sophisticated:
+>
+> 1. Each `clipping_window_data` stores both **world-space clip vectors** (`left`, `right`, `top`, `bottom`) and **screen-space bounds** (`x0`, `x1`, `y0`, `y1`)
+> 2. Geometric clipping happens in **world space** before projection, using functions like `xy_clip_horizontal_polygon()` (render.c:2372-2373)
+> 3. Clipped vertices receive flags (`_clip_left`, `_clip_right`, etc.)
+> 4. During screen projection, clipped vertices snap directly to screen bounds:
+>    ```c
+>    // render.c:2393-2394
+>    case _clip_left:  screen->x = window->x0; break;
+>    case _clip_right: screen->x = window->x1; break;
+>    ```
+>
+> This world-space clipping correctly handles perspective—a vertex clipped to a portal edge in 3D space maps exactly to the portal's screen edge.
+
+This architectural difference enabled Marathon's complex environments with overlapping spaces, sloped surfaces viewed through windows, and the iconic "5D space" tricks that mappers exploited.
+
 ---
 
 ## 5.2 Understanding Portal Rendering
@@ -1534,6 +1666,59 @@ Per scanline (e.g., y=200):
 Sprites (monsters, items, projectiles) are rendered with their containing polygon. Marathon tracks which polygon each object is in and renders it during that polygon's pass.
 
 Objects that span multiple polygons ("exterior objects") are handled specially—they're drawn with a combined clipping window from all polygons they intersect.
+
+### Overdraw and the Painter's Algorithm
+
+**Yes, Marathon has overdraw.** Without a Z-buffer (too expensive for 1994 hardware), Marathon uses the painter's algorithm: draw far surfaces first, then let nearer surfaces paint over them.
+
+**What gets overdrawn:**
+
+```
+Far polygon drawn first:       Near polygon overwrites:
+┌─────────────────────┐        ┌─────────────────────┐
+│ C C C C C C C C C C │   →    │ A A A A A C C C C C │
+│ C C C C C C C C C C │        │ A A A A A C C C C C │
+│ C C C C C C C C C C │        │ A A A A A C C C C C │
+└─────────────────────┘        └─────────────────────┘
+    Pixels wasted                 Some C pixels were
+    drawing area                  drawn then overwritten
+    behind A                      (overdraw)
+```
+
+**Render order within each polygon** (from `render_tree()` in render.c:2188-2337):
+
+1. **Ceiling** (if above viewer's eye height)
+2. **Walls/sides** (visible ones only, via `_side_is_visible` flag)
+3. **Floor** (if below viewer's eye height)
+4. **Exterior objects** (sprites spanning from other polygons)
+
+From Jason Jones' comments in render.c (October 1994):
+> "in order to correctly handle objects below the viewer projecting into higher polygons we need to sort objects inside nodes (to be drawn after their walls and ceilings but before their floors)"
+
+**What minimizes overdraw:**
+
+1. **Portal clipping windows** - Each polygon only renders within its screen-space bounds (`x0, x1, y0, y1` in `clipping_window_data`). A polygon seen through a narrow doorway only draws that narrow slice.
+
+2. **Visibility culling** - Only polygons reachable through visible portals are rendered at all. Typical frame: 50-100 polygons from 500-1000 total.
+
+3. **Surface culling** - Floors above the viewer and ceilings below the viewer are skipped entirely.
+
+4. **Side visibility flags** - Walls facing away from the viewer aren't drawn (`TEST_RENDER_FLAG(side_index, _side_is_visible)`).
+
+**Why no Z-buffer?**
+
+A software Z-buffer requires a depth comparison and conditional write per pixel:
+```c
+// Z-buffer approach (NOT used by Marathon)
+if (depth < zbuffer[pixel]) {
+    zbuffer[pixel] = depth;
+    framebuffer[pixel] = color;
+}
+```
+
+On a 25 MHz 68040, this comparison per pixel was too expensive. The painter's algorithm trades some overdraw for simpler per-pixel logic (unconditional write).
+
+> **Source:** `render.c:2182-2341` for `render_tree()`, `render.c:1-54` for Jason Jones' historical comments on render order challenges
 
 ### Render Tree Architecture
 

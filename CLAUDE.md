@@ -1,6 +1,6 @@
 # Claude Conversation Summary: Marathon 2 Source Code Analysis & Porting Plan
 
-**Date**: 2025-12-23 (Updated: 2025-12-29)
+**Date**: 2025-12-23 (Updated: 2025-12-31)
 **Context**: Analysis of Marathon 2: Durandal and Marathon Infinity source code, with focus on porting to modern platforms using the Full Beans framework
 
 ---
@@ -64,10 +64,11 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 ### What We Covered
 
 1. **Codebase Explanation** - Comprehensive analysis of Marathon 2's architecture
-2. **Rendering System Deep Dive** - Detailed explanation of the software 3D renderer
+2. **Rendering System Deep Dive** - Portal-based rendering vs Wolfenstein raycasting, projection math, clipping, overdraw
 3. **Porting Strategy** - Complete plan with 12 milestones for porting to Full Beans
 4. **Mac Memory Management** - Understanding handles and how to replace them with modern pointers
 5. **File Format Specifications** - Detailed documentation of Marathon's data file formats
+6. **Tutorial Documentation** - 32 chapters + 4 appendices in "Crafting Interpreters" style
 
 ---
 
@@ -115,6 +116,13 @@ This conversation explored the Marathon 2 source code (classic 1994 FPS by Bungi
 - Two texture mappers: affine for floors/ceilings, perspective-correct for walls
 - Pre-computed shading tables for lighting
 - Main file: `render.c` (3,879 lines) - 99% platform-independent!
+
+**Key topics covered in the rendering chapter**:
+- How Marathon differs from Wolfenstein's DDA raycasting (portal projection vs ray-wall intersection)
+- Wall endpoint projection and portal clipping (with diagrams)
+- Overdraw and the painter's algorithm (no Z-buffer)
+- Render order within polygons: ceiling → walls → floor → objects
+- Source-verified implementation details from `render.c`
 
 ---
 
