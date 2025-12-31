@@ -31,31 +31,20 @@ typedef long fixed;            // 32-bit fixed-point (16.16)
 typedef void *handle;          // Relocatable memory (legacy)
 ```
 
-### Type Size Reference
+### Type Mapping Reference (Marathon → stdint.h)
 
-| Type | Size | Range |
-|------|------|-------|
-| `byte` | 8 bits | 0-255 |
-| `word` | 16 bits | 0-65535 |
-| `boolean` | 8 bits | 0 or 1 |
-| `fixed` | 32 bits | ±32767.99998 |
-| `short` | 16 bits | ±32767 |
-| `long` | 32 bits | ±2147483647 |
+For porting, use `<stdint.h>` types for guaranteed sizes across platforms:
 
-### Modern Type Mapping (stdint.h)
-
-For porting, use `<stdint.h>` for guaranteed sizes:
-
-| Marathon Type | stdint.h Equivalent |
-|---------------|---------------------|
-| `byte` | `uint8_t` |
-| `word` | `uint16_t` |
-| `boolean` | `uint8_t` or `bool` |
-| `short` | `int16_t` |
-| `long` | `int32_t` |
-| `fixed` | `int32_t` |
-| `unsigned short` | `uint16_t` |
-| `unsigned long` | `uint32_t` |
+| Marathon Type | Bits | Signedness | stdint.h Equivalent | Range |
+|---------------|------|------------|---------------------|-------|
+| `byte` | 8 | unsigned | `uint8_t` | 0 to 255 |
+| `word` | 16 | unsigned | `uint16_t` | 0 to 65,535 |
+| `boolean` | 8 | unsigned | `uint8_t` or `bool` | 0 or 1 |
+| `short` | 16 | signed | `int16_t` | -32,768 to 32,767 |
+| `unsigned short` | 16 | unsigned | `uint16_t` | 0 to 65,535 |
+| `long` | 32 | signed | `int32_t` | -2,147,483,648 to 2,147,483,647 |
+| `unsigned long` | 32 | unsigned | `uint32_t` | 0 to 4,294,967,295 |
+| `fixed` | 32 | signed | `int32_t` | -32,768.0 to 32,767.99998 (16.16 fixed-point) |
 
 ```c
 // Modern type definitions

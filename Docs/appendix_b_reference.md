@@ -56,6 +56,23 @@
 
 ---
 
+## Type Mapping (Marathon → stdint.h)
+
+For porting to modern platforms. See Chapter 24 for full details.
+
+| Marathon Type | Bits | stdint.h | Signed? |
+|---------------|------|----------|---------|
+| `byte` | 8 | `uint8_t` | No |
+| `word` | 16 | `uint16_t` | No |
+| `boolean` | 8 | `uint8_t` | No |
+| `short` | 16 | `int16_t` | Yes |
+| `long` | 32 | `int32_t` | Yes |
+| `fixed` | 32 | `int32_t` | Yes |
+| `unsigned short` | 16 | `uint16_t` | No |
+| `unsigned long` | 32 | `uint32_t` | No |
+
+---
+
 ## Angles
 
 | Constant | Value | Meaning |
