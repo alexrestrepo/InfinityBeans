@@ -1,0 +1,234 @@
+# Chapter 3: Engine Overview
+
+## High-Level Architecture and Subsystem Interactions
+
+---
+
+## 3.1 Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────┐
+│              Shell / Main Loop (30 Hz)              │
+└──────────┬──────────────────────────┬───────────────┘
+           │                          │
+      ┌────▼────┐                ┌───▼────┐
+      │  Input  │                │Network │
+      │ System  │                │  Sync  │
+      └────┬────┘                └───┬────┘
+           │                         │
+           └────────┬────────────────┘
+                    │
+      ┌─────────────▼─────────────┐
+      │   World Update (1 tick)   │
+      │  • Lights                 │
+      │  • Media                  │
+      │  • Platforms              │
+      │  • Players                │
+      │  • Projectiles            │
+      │  • Monsters               │
+      │  • Effects                │
+      └─────────────┬─────────────┘
+                    │
+           ┌────────▼────────┐
+           │  Render Engine  │
+           │ (Portal-Based)  │
+           └─────────────────┘
+```
+
+---
+
+## 3.2 Subsystem Interaction Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              MAIN LOOP (shell.c)                                │
+│                           30 Hz fixed timestep                                   │
+└───────────────────────────────────┬─────────────────────────────────────────────┘
+                                    │
+        ┌───────────────────────────┼───────────────────────────┐
+        │                           │                           │
+        ▼                           ▼                           ▼
+┌───────────────┐           ┌───────────────┐           ┌───────────────┐
+│    INPUT      │           │   NETWORK     │           │    AUDIO      │
+│  vbl.c        │           │  network.c    │           │ game_sound.c  │
+│  action_flags │──────────▶│  sync actions │           │ 3D positioned │
+└───────────────┘           └───────┬───────┘           └───────▲───────┘
+                                    │                           │
+                                    ▼                           │
+┌───────────────────────────────────────────────────────────────┼─────────────────┐
+│                         WORLD UPDATE (marathon2.c)            │                 │
+│                       update_world() - one tick               │                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │ UPDATE ORDER (each tick):                                                │   │
+│  │  1. update_lights()      → lightsource.c                                 │   │
+│  │  2. update_medias()      → media.c (water/lava levels)                   │   │
+│  │  3. update_platforms()   → platforms.c (doors/elevators)                 │   │
+│  │  4. update_players()     → player.c + physics.c                          │   │
+│  │  5. move_projectiles()   → projectiles.c                                 │   │
+│  │  6. move_monsters()      → monsters.c + pathfinding.c                    │   │
+│  │  7. update_effects()     → effects.c (particles/explosions)              │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+└────────────────────────────────────┬────────────────────────────────────────────┘
+                                     │
+                                     ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           RENDERING (render.c)                                  │
+│  ┌─────────────┐    ┌──────────────┐    ┌─────────────────┐    ┌────────────┐  │
+│  │   Portal    │───▶│   Polygon    │───▶│    Texture      │───▶│  Screen    │  │
+│  │   Culling   │    │   Clipping   │    │    Mapping      │    │  Output    │  │
+│  │  (map.c)    │    │  (render.c)  │    │(scottish_tex.c) │    │ (screen.c) │  │
+│  └─────────────┘    └──────────────┘    └─────────────────┘    └────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3.3 Data Flow Diagram
+
+```
+                    ┌─────────────────────────────────────┐
+                    │          FILE SYSTEM                │
+                    │  ┌─────────┐ ┌─────────┐ ┌───────┐ │
+                    │  │Map WAD  │ │Shapes16 │ │Sounds │ │
+                    │  └────┬────┘ └────┬────┘ └───┬───┘ │
+                    └───────┼───────────┼──────────┼─────┘
+                            │           │          │
+                            ▼           ▼          ▼
+                    ┌───────────┐ ┌──────────┐ ┌─────────────┐
+                    │  wad.c    │ │ shapes.c │ │game_sound.c │
+                    │game_wad.c │ │          │ │             │
+                    └─────┬─────┘ └────┬─────┘ └──────┬──────┘
+                          │            │              │
+                          ▼            ▼              ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                          RUNTIME DATA STRUCTURES                            │
+│                                                                             │
+│  ┌──────────────┐  ┌───────────────┐  ┌─────────────┐  ┌────────────────┐ │
+│  │  map_polygons│  │ map_endpoints │  │  objects[]  │  │  players[]     │ │
+│  │  [1024 max]  │  │ [2048 max]    │  │  [384 max]  │  │  [8 max]       │ │
+│  └──────────────┘  └───────────────┘  └─────────────┘  └────────────────┘ │
+│                                                                             │
+│  ┌──────────────┐  ┌───────────────┐  ┌─────────────┐  ┌────────────────┐ │
+│  │  monsters[]  │  │ projectiles[] │  │  effects[]  │  │  platforms[]   │ │
+│  │  [220 max]   │  │ [32 max]      │  │  [64 max]   │  │  [64 max]      │ │
+│  └──────────────┘  └───────────────┘  └─────────────┘  └────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3.4 Subsystem Quick Reference
+
+| Subsystem | Primary Files | Purpose | Chapter |
+|-----------|---------------|---------|---------|
+| **World/Map** | map.c, world.c | Polygon geometry | [4](04_world.md) |
+| **Rendering** | render.c, scottish_textures.c | Portal culling, textures | [5](05_rendering.md) |
+| **Physics** | physics.c | Movement, collision | [6](06_physics.md) |
+| **Game Loop** | marathon2.c | 30 Hz update | [7](07_game_loop.md) |
+| **Entities** | monsters.c, weapons.c, projectiles.c | AI, combat | [8](08_entities.md) |
+| **Network** | network.c | Peer-to-peer sync | [9](09_networking.md) |
+| **Files** | wad.c, game_wad.c | WAD format | [10](10_file_formats.md) |
+| **Sound** | game_sound.c | 3D audio | [13](13_sound.md) |
+| **Items** | items.c | Pickups | [14](14_items.md) |
+| **Panels** | control_panels.c | Switches, terminals | [15](15_control_panels.md) |
+
+---
+
+## 3.5 Coordinate System
+
+Marathon uses a right-handed coordinate system with fixed-point values.
+
+### World Coordinates
+
+```
+                        Top-Down View (X-Y Plane)
+
+                              +Y (North)
+                                ↑
+                                │
+                                │
+                 ───────────────┼───────────────→ +X (East)
+                                │
+                                │
+                              -Y (South)
+
+                        +Z is UP (out of page)
+                        -Z is DOWN (into page)
+```
+
+### Unit System
+
+**World Units** (10 fractional bits):
+```c
+typedef short world_distance;  // 16-bit signed
+#define WORLD_ONE 1024         // 1.0 in world units
+```
+
+**Fixed-Point** (16 fractional bits):
+```c
+typedef long fixed;            // 32-bit signed
+#define FIXED_ONE 65536        // 1.0 in fixed-point
+```
+
+### Scale Reference
+
+| Measurement | World Units |
+|-------------|-------------|
+| Player height | ~819 (0.8 WU) |
+| Player radius | ~256 (0.25 WU) |
+| Door width | ~1024-2048 |
+| Typical room | ~4096-8192 |
+| Max step-up | ~341 (1/3 WU) |
+
+---
+
+## 3.6 Angle System
+
+```c
+typedef short angle;  // 16-bit, but only 9 bits used
+
+#define NUMBER_OF_ANGLES 512    // Full circle
+#define HALF_CIRCLE 256         // 180°
+#define QUARTER_CIRCLE 128      // 90°
+```
+
+**Visualization:**
+
+```
+              128 (North/+Y)
+                     ↑
+                     │
+       192 ──────────┼──────────→ 0 (East/+X)
+       (West)        │
+                     │
+              384 (South/-Y)
+
+Angles increase counter-clockwise
+```
+
+---
+
+## 3.7 Summary
+
+Marathon's engine is built on clear architectural principles:
+
+**Main Loop:**
+- Fixed 30 Hz timestep
+- Deterministic update order
+- Rendering decoupled from logic
+
+**Key Systems:**
+- World/Map: Polygon-based geometry
+- Rendering: Portal visibility culling
+- Physics: Fixed-point collision
+- Entities: State machines for AI
+- Network: Deterministic sync
+
+**Data Flow:**
+- Files loaded at level start
+- Runtime arrays for entities
+- All state deterministic
+
+---
+
+*Next: [Chapter 4: World Representation](04_world.md) - Polygons, lines, and map structure*
