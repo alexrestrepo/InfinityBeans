@@ -181,6 +181,37 @@ void full_fade(
 
 ## 22.6 Gamma Correction
 
+### What is Gamma Correction?
+
+CRT monitors (and modern displays emulating them) don't display brightness linearly. If you send a pixel value of 128 (50% of 255), the screen doesn't emit 50% brightness—it emits roughly 22% brightness due to the monitor's **gamma curve**.
+
+```
+Without gamma correction:
+
+Input Value:    0%  25%  50%  75%  100%
+Displayed:      0%   6%  22%  52%  100%
+
+The midtones are too dark! Images look muddy.
+```
+
+**Gamma correction** compensates by pre-adjusting colors so the final displayed result is correct:
+
+```
+With gamma correction (gamma ≈ 2.2):
+
+Input Value:    0%  25%  50%  75%  100%
+After correct:  0%  53%  73%  88%  100%   (raised curve)
+Displayed:      0%  25%  50%  75%  100%   (looks correct!)
+```
+
+### Why Marathon Needs It
+
+- **Consistent appearance** across different monitors
+- **Player preference** - Some prefer brighter/darker screens
+- **Visibility in dark areas** - Higher gamma reveals more detail in shadows
+
+### Implementation
+
 ```c
 enum {
     NUMBER_OF_GAMMA_LEVELS = 8,
@@ -197,22 +228,31 @@ void gamma_correct_color_table(
 ### Gamma Curve Visualization
 
 ```
-Gamma Levels (0-7):
+Output         Level 0 (darkest)         Level 7 (brightest)
+Brightness           │                          │
+    255 ┤            │    ╱                     │   ─────────
+        │            │   ╱                      │  ╱
+        │            │  ╱                       │ ╱
+    128 ┤            │ ╱                        │╱
+        │            │╱                         ╱
+        │           ╱│                        ╱ │
+      0 ┼──────────╱─┼──────────────────────╱───┼────────
+        0       128       255          0       128       255
+                Input                        Input
 
-Output     Level 0 (darkest)    Level 7 (brightest)
-Brightness        │                    │
-    255 ┤         │    ╱               │   ─────────
-        │         │   ╱                │  ╱
-        │         │  ╱                 │ ╱
-    128 ┤         │ ╱                  │╱
-        │         │╱                   ╱
-        │        ╱│                  ╱ │
-      0 ┼───────╱─┼────────────────╱───┼────────
-        0       128       255    0       128       255
-                Input                  Input
-
-Higher gamma = brighter midtones
+Higher gamma = brighter midtones (curves toward upper-left)
+Level 0: darkest, steep curve at top (crushes highlights)
+Level 7: brightest, shallow curve (lifts shadows)
 ```
+
+### Gamma Level Effects
+
+| Level | Effect | Use Case |
+|-------|--------|----------|
+| 0-1 | Very dark | High ambient light rooms |
+| 2 | Default | Normal conditions |
+| 3-4 | Brighter | Dark rooms, older monitors |
+| 5-7 | Very bright | Maximum visibility |
 
 ---
 

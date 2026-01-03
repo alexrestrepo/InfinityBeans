@@ -287,4 +287,4 @@ Marathon's automap system provides:
 
 ---
 
-*This concludes the Marathon 2 Source Code Tutorial series.*
+*Next: [Chapter 21: HUD and Interface](21_hud.md) - Heads-up display and status rendering*

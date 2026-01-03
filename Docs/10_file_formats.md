@@ -371,9 +371,41 @@ struct rgb_color_value {
 
 ## 10.5 Byte Order Considerations
 
-All Marathon data is **big-endian** (Mac byte order). On x86 systems, byte swapping is required.
+All Marathon data is **big-endian** (Mac byte order). On little-endian systems (x86, ARM), byte swapping is required.
 
-### Byte Swap Utilities
+### Detecting Byte Order
+
+At compile time, detect if byte swapping is needed:
+
+```c
+// Method 1: Use standard macros (POSIX)
+#include <endian.h>  // Linux
+// or <machine/endian.h> on macOS
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    #define MARATHON_NEEDS_SWAP 1
+#else
+    #define MARATHON_NEEDS_SWAP 0
+#endif
+
+// Method 2: Runtime detection (portable fallback)
+static inline int is_little_endian(void) {
+    uint16_t test = 1;
+    return *((uint8_t*)&test) == 1;
+}
+
+// Method 3: Compiler-specific (most reliable)
+#if defined(__LITTLE_ENDIAN__) || defined(_M_IX86) || defined(_M_X64) || \
+    defined(__x86_64__) || defined(__i386__) || defined(__aarch64__)
+    #define MARATHON_NEEDS_SWAP 1
+#else
+    #define MARATHON_NEEDS_SWAP 0
+#endif
+```
+
+### Byte Swap Options
+
+**Option A: Custom swap functions (portable, no dependencies):**
 
 ```c
 uint16_t swap16(uint16_t val) {
@@ -386,19 +418,63 @@ uint32_t swap32(uint32_t val) {
            ((val & 0xFF0000) >> 8) |
            ((val & 0xFF000000) >> 24);
 }
+```
+
+**Option B: Standard hton/ntoh functions (POSIX, recommended):**
+
+```c
+#include <arpa/inet.h>  // POSIX (Linux, macOS)
+// or <winsock2.h> on Windows
+
+// hton = Host TO Network (converts to big-endian)
+// ntoh = Network TO Host (converts from big-endian)
+
+// Since Marathon data IS big-endian (network order):
+header.version = ntohs(header.version);           // 16-bit: ntoh-short
+header.directory_offset = ntohl(header.directory_offset);  // 32-bit: ntoh-long
+
+// Note: htons/htonl and ntohs/ntohl are identical operations
+// (swapping is symmetric), but ntoh* is semantically correct here
+```
+
+**Option C: Compiler intrinsics (fastest):**
+
+```c
+// GCC/Clang
+#define swap16(x) __builtin_bswap16(x)
+#define swap32(x) __builtin_bswap32(x)
+
+// MSVC
+#include <stdlib.h>
+#define swap16(x) _byteswap_ushort(x)
+#define swap32(x) _byteswap_ulong(x)
+```
+
+### Conditional Swap Macros
+
+Wrap swapping so it's a no-op on big-endian systems:
+
+```c
+#if MARATHON_NEEDS_SWAP
+    #define BE16(x) swap16(x)
+    #define BE32(x) swap32(x)
+#else
+    #define BE16(x) (x)  // No swap needed on big-endian
+    #define BE32(x) (x)
+#endif
 
 // Usage when loading
-header.version = swap16(header.version);
-header.directory_offset = swap32(header.directory_offset);
+header.version = BE16(header.version);
+header.directory_offset = BE32(header.directory_offset);
 ```
 
 ### When to Swap
 
-| Field Size | Swap Function |
-|------------|---------------|
-| 1 byte (byte, char) | No swap needed |
-| 2 bytes (short, word) | `swap16()` |
-| 4 bytes (long, fixed) | `swap32()` |
+| Field Size | Swap Function | Examples |
+|------------|---------------|----------|
+| 1 byte (byte, char) | No swap needed | flags, pixel indices |
+| 2 bytes (short, word) | `BE16()` / `ntohs()` | version, count fields |
+| 4 bytes (long, fixed) | `BE32()` / `ntohl()` | offsets, fixed-point coords |
 
 ---
 

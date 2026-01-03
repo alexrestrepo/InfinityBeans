@@ -15,6 +15,49 @@ Direction measurement in Marathon's 512-unit circle (0-511). 0=East, 128=North, 
 ### Binary Angle (Brad)
 Marathon uses 9-bit angles (512 values per circle) for efficient lookup table indexing. Formula: `brad = degrees * 512 / 360`.
 
+**Why "Binary" Angles?**
+
+The circle is divided into a power-of-two number of steps, making angle math work with binary operations:
+
+```
+Traditional Degrees (360):          Binary Angles (512):
+┌────────────────────────┐         ┌────────────────────────┐
+│  360 = not power of 2  │         │  512 = 2⁹ (9 bits)     │
+│  Needs modulo: % 360   │         │  Bitwise mask: & 0x1FF │
+│  Slow division         │         │  Single CPU cycle      │
+└────────────────────────┘         └────────────────────────┘
+
+9-bit angle representation:
+┌───┬───┬───┬───┬───┬───┬───┬───┬───┐
+│ 8 │ 7 │ 6 │ 5 │ 4 │ 3 │ 2 │ 1 │ 0 │  ← Bit position
+└───┴───┴───┴───┴───┴───┴───┴───┴───┘
+│256│128│64 │32 │16 │ 8 │ 4 │ 2 │ 1 │  ← Bit value
+└───┴───┴───┴───┴───┴───┴───┴───┴───┘
+
+Cardinal directions in binary:
+  Direction    Degrees    Brad    Binary (9-bit)
+  ─────────    ───────    ────    ──────────────
+  East         0°         0       000000000
+  North        90°        128     010000000
+  West         180°       256     100000000
+  South        270°       384     110000000
+  Full circle  360°       512     (overflows to 0)
+```
+
+**Why this design?**
+- **Wrap-around is free**: 511 + 1 = 512, which masks to 0 (back to East)
+- **Table lookups are direct**: `sine_table[angle & 511]` - no conversion needed
+- **Quadrant detection**: Check bit 8 and bit 7 to determine quadrant instantly
+- **Half/quarter angles**: Right-shift divides angle (128 >> 1 = 64 = 45°)
+
+**Common in game development:**
+- Doom uses "BAM" (Binary Angle Measurement) with 32-bit angles (2³² steps)
+- Build engine (Duke Nukem 3D) uses 2048 angles (11-bit)
+- Many 3D engines use powers of 2 for angle resolution
+- Hardware trig units in some DSPs use binary angles
+
+**Tradeoff:** Binary angles don't map cleanly to degrees (512/360 ≈ 1.42), making debugging harder. Marathon provides `NORMALIZE_ANGLE()` macro for conversion.
+
 ### Clipping Window
 Rectangle defining visible area after portal culling. Each polygon in render tree has its own clip window, subtracting occluded regions.
 

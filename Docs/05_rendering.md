@@ -45,10 +45,10 @@ Wolfenstein's Grid-Based Raycasting:
     ┌───┬───┬───┬───┬───┬───┐
     │   │   │ █ │ █ │   │   │
     ├───┼───┼───┼───┼───┼───┤
-    │   │   │ █ │ █ │   │   │     Ray steps through grid cells
-    ├───┼───┼●·→┼·→·│→··│   │     until it hits a wall (█)
-    │   │   │ @ │   │   │   │
-    ├───┼───┼───┼───┼───┼───┤     @ = player, ● = ray start
+    │   │   │ █ │ █ │   │   │     Ray cast from player (@)
+    ├───┼───┼───┼─·─┼─··│   │     steps through grid cells
+    │   │   │ @ →→→→→→·→│···│     until it hits a wall (█)
+    ├───┼───┼───┼───┼───┼───┤
     │   │   │   │   │   │   │     Only 90° walls possible!
     └───┴───┴───┴───┴───┴───┘
 ```
@@ -63,20 +63,24 @@ Wolfenstein's Grid-Based Raycasting:
 Marathon doesn't cast rays to find wall intersections. Instead, it projects wall endpoints to screen space and clips them against portal boundaries:
 
 ```
-Marathon's Portal-Based Approach:
+Marathon's Portal-Based Approach (top-down view):
 
-    ┌────────────────────────────┐
-    │    Polygon A          ╱    │
-    │                      ╱     │
-    │    @ ─────────Portal──→    │    Walls can be ANY angle!
-    │    Player            ╲     │
-    │                       ╲    │    No grid constraints.
-    │                   Polygon B│
-    └────────────────────────────┘
+    ┌──────────────────╥──────────────────┐
+    │                  ║                  │
+    │    Polygon A     ║     Polygon B    │
+    │                  ║                  │
+    │    @ ────────────╫──────────►       │  @ = Player, looking right
+    │    (player)      ║                  │  ║ = Portal (shared edge)
+    │                  ║                  │
+    │                  ║                  │
+    │                  ║                  │
+    └──────────────────╨──────────────────┘
 
-1. Start in player's polygon
+    Walls can be ANY angle! No grid constraints.
+
+1. Start in player's polygon (A)
 2. For each edge: project endpoints to screen X
-3. If edge is portal AND visible: recurse into neighbor
+3. If edge is portal (║) AND visible: recurse into neighbor (B)
 4. If edge is solid: texture map the wall span
 ```
 
@@ -107,24 +111,37 @@ screen_x2 = half_screen + (endpoint2.y * scale) / endpoint2.x;
 **Wall Projection and Clipping Visualized:**
 
 ```
-WORLD SPACE (top-down view)                 SCREEN SPACE (what you see)
+WORLD SPACE (top-down view)                    SCREEN SPACE (what you see)
 
-         Wall B                                    Screen
-        e2────e3                            ┌─────────────────────┐
-       ╱                                    │                     │
-      ╱         Wall A                      │ ┃         ┃         │
-     ╱       e0━━━━━━━e1                    │ ┃ Wall A  ┃         │
-    ╱       ╱                               │ ┃█████████┃         │
-   ╱       ╱                                │ ┃█████████┃         │
-  ╱       ╱   View                          │ ┃█████████┃         │
- ╱       ╱   Frustum                        │ ┃         ┃         │
-        ╱                                   │ x1       x2         │
-       @ Player                             └─────────────────────┘
+  ═══════════════════════════════════           ┌─────────────────────┐
+  ║  e2──────────e3                 ║           │                     │
+  ║     Wall B (far)                ║           │   ┃ Wall A  ┃       │
+   ╲                               ╱            │  B┃█████████┃       │
+    ╲                             ╱             │ ┃█┃█████████┃       │
+     ╲    e0━━━━━━━━━━━e1        ╱              │ ┃█┃█████████┃       │
+      ╲      Wall A (near)      ╱               │ ┃█┃█████████┃       │
+       ╲                       ╱                │   ┃█████████┃       │
+        ╲                     ╱                 │   e0       e1       │
+         ╲                   ╱                  └─────────────────────┘
+          ╲   View Cone     ╱
+           ╲               ╱                  Wall B (e2) visible on left,
+            ╲             ╱                   partially occluded by Wall A.
+             ╲           ╱                    Wall A fully visible in center.
+              ╲         ╱
+               ╲       ╱
+                ╲     ╱
+                 ╲   ╱
+                  ╲ ╱
+                   @
+                Player
+                (Apex)
 
 Step 1: Transform endpoints to camera space (rotate by -player_angle)
 Step 2: Project each endpoint:  screen_x = center + (local_y × scale) / local_x
-Step 3: Wall A: e0→x1, e1→x2 — fully visible, draw entire wall
-        Wall B: e2 projects left of screen, e3 in view — clip to screen edge
+Step 3: Wall A (near): fully visible, projects to center of screen
+        Wall B (far): e2 visible on left, e3 occluded behind Wall A
+
+Painter's algorithm: Wall B drawn first, then Wall A overwrites the overlap.
 
 
 PORTAL CLIPPING:
@@ -185,17 +202,17 @@ You're standing in Room A, looking through a doorway into Room B:
         │                                         │
         │              ROOM A                     │
         │                                         │
-        │    @  ← You                             │
-        │    │                                    │
-        │    │ (your view)                        │
-        │    ▼                                    │
-        │         ╔═══════╗                       │
-        │         ║PORTAL ║ ← Doorway             │
-        │         ╚═══════╝                       │
-        │              │                          │
-        └──────────────┼──────────────────────────┘
-                       │
-                       ▼
+        │                 @  ← You                │
+        │                 │                       │
+        │                 │ (your view)           │
+        │                 ▼                       │
+        │         ╔═══════════════╗               │
+        │         ║    PORTAL     ║ ← Doorway     │
+        │         ╚═══════════════╝               │
+        │                 │                       │
+        └─────────────────┼───────────────────────┘
+                          │
+                          ▼
         ┌──────────────────────────────────────────┐
         │                                          │
         │               ROOM B                     │
@@ -371,7 +388,7 @@ void render_sector(World *world, int sector_id, ClipWindow window,
 
 **Marathon's approach:** Marathon uses a more sophisticated version with:
 - A tree structure (`node_data`) instead of direct recursion
-- Ray casting to determine visibility more precisely
+- Ray casting to build the visibility tree (NOT for rendering—rays determine which polygon edges to cross when tracing through portals, see Section 5.4)
 - Accumulated clipping windows that handle vertical clipping too
 
 > **Source:** `render.c:702` for `build_render_tree()`, `render.c:222-236` for `struct node_data`, `render.c:207-213` for `struct clipping_window_data`
@@ -562,15 +579,21 @@ Marathon's `build_render_tree()` works as follows:
 **Portal Visibility Test**:
 
 ```
-                        Screen
-                     ╔═════════╗
-          Left Ray  ╱           ╲  Right Ray
-                   ╱             ╲
-                  ╱               ╲
-                 ╱    View Cone    ╲
-                ╱                   ╲
-               ╱          @          ╲
-                       (Player)
+                   ═══════════════════════
+                   ║       Screen        ║
+                    ╲                   ╱
+                     ╲                 ╱
+                      ╲   View Cone   ╱
+                       ╲             ╱
+                        ╲           ╱
+          Left Ray ──────╲         ╱────── Right Ray
+                          ╲       ╱
+                           ╲     ╱
+                            ╲   ╱
+                             ╲ ╱
+                              @
+                           (Player)
+                            Apex
 
 1. Cast ray at left screen edge (counterclockwise bias*)
 2. Cast ray at right screen edge (clockwise bias*)
@@ -617,23 +640,27 @@ if (cross > 0) {
 **Visual intuition for the cross product test:**
 
 ```
-                    e1 (endpoint 1)
-                     *
-                    /|
-                   / |
-                  /  |    ← edge vector (e1 - e0)
-                 /   |
-                /    |
-               /     |
-              /      |
-         e0  *-------+-------* ray.x, ray.y
-         (endpoint 0)
+Which side of line e0→e1 is point P on?
 
-Test: cross = (ray.x - e0.x) × (e1.y - e0.y) - (ray.y - e0.y) × (e1.x - e0.x)
+                          e1
+                           *
+                          ╱
+                         ╱
+                        ╱
+          LEFT side    ╱    RIGHT side
+         (cross < 0)  ╱    (cross > 0)
+                     ╱
+                    ╱           * P
+                   ╱
+                  ╱
+                 *
+                e0
 
-If cross > 0: Ray is to the RIGHT of edge → exits through this edge
-If cross < 0: Ray is to the LEFT of edge → inside polygon
-If cross = 0: Ray is ON the edge (degenerate case)
+cross = (P.x - e0.x) × (e1.y - e0.y) - (P.y - e0.y) × (e1.x - e0.x)
+
+If cross > 0: P is on the RIGHT of line (looking from e0 toward e1)
+If cross < 0: P is on the LEFT of line
+If cross = 0: P is exactly ON the line
 ```
 
 The cross product gives us the signed area of the triangle formed by the edge and the ray point. Positive means the point is on the right side of the edge (when walking from e0 to e1), which in Marathon's counter-clockwise polygon winding means "outside" the polygon.
@@ -662,24 +689,28 @@ Before we can render anything, we need to understand how 3D points become 2D scr
 Think of the screen as a window you're looking through:
 
 ```
-Side view:
+Side view (X-Z plane, Y pointing into page):
 
-           Screen (what you see)
-              │
-              │
-    Eye ──────┼────────────────► World
-    (you)     │
-              │
+              +Z (up)
+               ↑
+               │    Screen
+               │      │
+    Eye ───────┼──────┼────────────────► +X (forward/depth)
+               │      │
+               │
+               ↓ -Z (down)
 
-Top view:
+Top view (X-Y plane, Z pointing up out of page):
 
-              ┌─────┐
-              │     │
-    Eye ──────┤     ├──────► World
-              │     │
-              └─────┘
-               Screen
-               (slice)
+              +Y (right)
+               ↑
+               │    ┌─────┐
+               │    │     │
+    Eye ───────┼────┤     ├──────► +X (forward/depth)
+               │    │     │
+               │    └─────┘
+               ↓     Screen
+              -Y (left)
 ```
 
 Points in the world project onto the screen based on their angle from the eye.
@@ -761,9 +792,9 @@ Marathon adds vertical look via `dtanpitch`. Here's how it works:
 Looking level (pitch = 0):
                                 Screen
     World Z                  ┌─────────┐
-       ↑                     │    ·    │ ← half_height (center)
-       │                     │         │
-   ────┼────  Z = eye_level  │    ·    │
+       ↑                     │         │
+       │                     │    ●────┼── half_height (screen center)
+   ────┼────  Z = eye_level  │         │
        │                     │         │
        │                     └─────────┘
        └─→ View direction    dtanpitch = 0
@@ -772,20 +803,20 @@ Looking up (pitch > 0):
                                 Screen
     World Z                  ┌─────────┐
        ↑  ╱                  │         │
-       │ ╱ pitch             │    ·    │ ← Shifted down by dtanpitch
-   ────┼────  Z = eye_level  │         │
-       │                     │    ·    │
+       │ ╱ pitch angle       │         │
+   ────┼────  Z = eye_level  │    ●────┼── center shifted DOWN
+       │                     │         │
        └─→ View direction    └─────────┘
-                             dtanpitch > 0 (positive shift)
+                             dtanpitch > 0 (shows more ceiling)
 
 Looking down (pitch < 0):
                                 Screen
     World Z                  ┌─────────┐
-       │                     │    ·    │
+       │                     │    ●────┼── center shifted UP
    ────┼────  Z = eye_level  │         │
-       │ ╲                   │    ·    │ ← Shifted up by dtanpitch
-       ↓  ╲ pitch            └─────────┘
-          └─→ View direction dtanpitch < 0 (negative shift)
+       │ ╲                   │         │
+       ↓  ╲ pitch angle      └─────────┘
+          └─→ View direction dtanpitch < 0 (shows more floor)
 ```
 
 **dtanpitch Calculation:**
@@ -854,6 +885,8 @@ fixed_t fixed_mul(fixed_t a, fixed_t b) {
 }
 ```
 
+> **For complete fixed-point details:** See **[Appendix D: Fixed-Point Math](appendix_d_fixedpoint.md)** for multiplication, division, overflow handling, and conversion functions.
+
 Marathon's trigonometry uses lookup tables instead of `sin()`/`cos()`:
 
 ```c
@@ -862,10 +895,15 @@ Marathon's trigonometry uses lookup tables instead of `sin()`/`cos()`:
 short cosine_table[512];
 short sine_table[512];
 
-// Marathon angles: 0-511 instead of 0-2π
+// Marathon angles: 0-511 instead of 0-2π (512 = full circle)
 // Lookup is just array access, no math needed
 short cos_value = cosine_table[angle & 511];
 ```
+
+**Why `& 511` works:** 512 is a power of two (2⁹), so `& 511` is equivalent to `% 512` but much faster. This bitwise trick only works with powers of two:
+- `511` in binary is `111111111` (nine 1s)
+- ANDing with this mask keeps only the lower 9 bits
+- Result is always in range [0, 511], wrapping automatically
 
 > **Source:** `world.h:118` for table declarations, `world.c:172-187` for table initialization, `world.h:21-28` for angle constants (NUMBER_OF_ANGLES=512)
 
@@ -887,16 +925,27 @@ The naive approach (affine mapping) linearly interpolates texture coordinates ac
 ```
 The problem with affine mapping on walls:
 
-Top-down view:                      What you see on screen:
+TOP-DOWN VIEW:                          FRONT VIEW (what you see):
 
-    far ─────┐                           FAR          NEAR
-             │ wall surface             (left)       (right)
-             │                            │            │
-    near ────┘                            ▼            ▼
-         ↑
-       player
+         far ─────┐                              FAR         NEAR
+                  │                             (left)      (right)
+                  │ wall                          │           │
+                  │ surface                       ▼           ▼
+         near ────┘                         ┌─────────────────────┐
+              ↑                             │░░│░░░│░░░░│████████│
+           player                           │░░│░░░│░░░░│████████│
+                                            │░░│░░░│░░░░│████████│  ← Wall height
+                                            │░░│░░░│░░░░│████████│    GROWS toward
+                                            │░░│░░░│░░░░│████████│    near side!
+                                            │░░│░░░│░░░░│████████│
+                                            └─────────────────────┘
+                                             ↑small        large↑
 
-AFFINE (wrong for walls):          PERSPECTIVE-CORRECT (right):
+Two perspective effects on walls:
+1. HORIZONTAL: Near parts span more screen pixels (texels stretched)
+2. VERTICAL: Near parts are taller on screen (wall appears to grow)
+
+AFFINE (wrong):                    PERSPECTIVE-CORRECT (right):
 ┌───┬───┬───┬───┐                  ┌─┬─┬──┬────────┐
 │ 1 │ 2 │ 3 │ 4 │                  │1│2│ 3│    4   │
 └───┴───┴───┴───┘                  └─┴─┴──┴────────┘
@@ -908,58 +957,47 @@ for unequal world distances        near parts stretched
 
 However, floors and ceilings are nearly perpendicular to your view direction, so affine distortion is minimal and hard to notice. Since affine is much faster (no per-pixel division), Marathon uses it for horizontal surfaces.
 
-### More Detail: Affine vs Perspective-Correct
+### The 1/z Trick for Perspective-Correct Mapping
+
+The key insight: while texture coordinates (u, v) don't interpolate linearly across screen space, **1/z does**.
 
 ```
-The problem: A wall receding into the distance. Near parts should show
-MORE texture detail (more texels per pixel), far parts show LESS.
+Why u and v don't interpolate linearly:
 
-Top-down view of wall:              What we see on screen:
-                                    (wall spans left-to-right)
-    far end ─────┐
-                 │                       FAR          NEAR
-                 │  wall surface        (left)       (right)
-                 │                         │            │
-    near end ────┘                         ▼            ▼
-         ↑
-       player
+World space:           Screen space:
 
+    A─────────B          A───────────B
+    │         │          │           │
+    │    @    │          │  u varies │
+    │ player  │          │  NON-     │
+    │         │          │  linearly │
 
-AFFINE mapping (linear interpolation - INCORRECT for walls):
+Point at world x=0.5 does NOT project to screen x=0.5!
+Perspective compresses the far side.
 
-    Texture source:     Screen result:
-    ┌──┬──┬──┬──┐       ┌───┬───┬───┬───┐
-    │ 1│ 2│ 3│ 4│  ───► │ 1 │ 2 │ 3 │ 4 │   Problem: Texture cells
-    └──┴──┴──┴──┘       └───┴───┴───┴───┘   are evenly spaced on screen,
-     (even 25% each)     25%  25%  25%  25%  but wall ISN'T evenly spaced
-                         ◄─far    near─►    in 3D! Far part should be
-                                            compressed, near part stretched.
+The solution - interpolate u/z and 1/z, then divide:
 
-    This causes a "swimming" or "warping" effect as you move,
-    because the texture slides incorrectly across the surface.
+    At each screen pixel:
+    ┌─────────────────────────────────────────────────┐
+    │  interpolated_u_over_z = lerp(u0/z0, u1/z1, t)  │
+    │  interpolated_one_over_z = lerp(1/z0, 1/z1, t)  │
+    │                                                 │
+    │  actual_u = interpolated_u_over_z              │
+    │           / interpolated_one_over_z             │
+    └─────────────────────────────────────────────────┘
 
-
-PERSPECTIVE-CORRECT mapping (Marathon's wall approach):
-
-    Texture source:     Screen result:
-    ┌──┬──┬──┬──┐       ┌─┬─┬──┬────────┐
-    │ 1│ 2│ 3│ 4│  ───► │1│2│ 3│    4   │   Correct: Far texels (1,2)
-    └──┴──┴──┴──┘       └─┴─┴──┴────────┘   are compressed (far = small),
-     (even 25% each)     5% 10% 20%  65%    near texels (4) are stretched
-                         ◄─far    near─►    (near = large on screen).
-
-    The 1/z correction ensures texture coordinates account for
-    depth, so the texture appears "painted on" the 3D surface.
-
-
-Why Marathon uses affine for FLOORS (it's OK there):
-  - Floors are nearly perpendicular to view direction
-  - Depth variation across a floor scanline is small
-  - Distortion is minimal and hard to notice
-  - Affine is MUCH faster (no divide per pixel)
+This division per pixel is expensive—that's why Marathon only
+uses it for walls, not floors/ceilings.
 ```
 
 ### Let's Build: A Simple Texture Mapper
+
+> **Important: Power-of-Two Textures**
+>
+> All Marathon textures must be power-of-two dimensions (64×64, 128×128, etc.). This constraint enables fast texture coordinate wrapping using bitwise AND instead of expensive modulo:
+> - `u & (WIDTH - 1)` is equivalent to `u % WIDTH`
+> - Only works when WIDTH is a power of two (e.g., 128 - 1 = 127 = `01111111` in binary)
+> - Same trick used for angle table lookups (`angle & 511`)
 
 **Pseudocode for affine texture mapping:**
 
@@ -2030,9 +2068,164 @@ _big_landscaped_transfer // Screen-space texture (skybox)
 - `_xfer_wobble` - Perspective distortion effect
 - `_xfer_pulsate` - Breathing/pulsing scale effect
 
+**How Texture Scrolling Works:**
+
+The slide transfer modes (`_xfer_horizontal_slide`, `_xfer_fast_horizontal_slide`, etc.) animate textures by adding a time-based offset to the texture origin:
+
+```c
+// Each tick, the texture origin shifts:
+texture_origin.x += scroll_speed;  // Horizontal slide
+texture_origin.y += scroll_speed;  // Vertical slide
+
+// The offset wraps using the power-of-two trick:
+tex_u = (base_u + texture_origin.x) & (TEXTURE_WIDTH - 1);
+```
+
+This creates flowing water, conveyor belts, and other animated surface effects without needing animated texture frames.
+
 Transfer modes are applied during texture mapping by selecting different shading tables or pixel-writing routines.
 
 > **Source:** `render.c:3390-3500` for transfer mode handling, `scottish_textures.h:15-30` for transfer mode enum
+
+### Landscape Rendering (Sky/Outdoor Areas)
+
+Marathon's landscape rendering creates the illusion of outdoor environments and distant scenery. Unlike normal textures that are mapped to world geometry, **landscape textures are anchored in screen space**—they don't move with perspective as you walk around, only as you rotate your view.
+
+**How Landscape Differs from Normal Textures:**
+
+```
+NORMAL TEXTURE MAPPING:                  LANDSCAPE TEXTURE MAPPING:
+
+World space → Screen space               Screen space directly
+
+  Wall moves closer                        Sky stays fixed in place
+  as you walk toward it                    only rotates as you turn
+
+     ┌─────┐  →  ┌───────────┐            ┌─────────────────────────┐
+     │wall │     │  wall     │            │         SKY             │
+     │     │     │           │            │                         │
+     └─────┘     └───────────┘            └─────────────────────────┘
+     (far)         (near)                  (same regardless of position)
+
+Texture scales with distance              Texture size is constant
+```
+
+**The `_big_landscaped_transfer` Mode:**
+
+When a polygon has the `_xfer_landscape` transfer mode, it uses screen-space texture mapping:
+
+```c
+// From scottish_textures.h:23
+_big_landscaped_transfer  // "does not distort texture (texture is anchored in screen-space)"
+```
+
+**Landscape Texture Coordinate Calculation:**
+
+The key insight is that landscape textures map screen coordinates directly to texture coordinates, with the player's yaw angle controlling horizontal offset:
+
+```c
+// From scottish_textures.c:1139-1166 (_prelandscape_horizontal_polygon_lines)
+
+// Horizontal position based on player's yaw angle
+first_pixel = view->yaw << (landscape_width_bits + LANDSCAPE_REPEAT_BITS + FIXED_FRACTIONAL_BITS - ANGULAR_BITS);
+
+// Each screen pixel advances by this amount in texture space
+pixel_delta = (view->half_cone << (1 + landscape_width_bits + ...)) / view->standard_screen_width;
+
+// For each scanline:
+data->source_x = (first_pixel + x0 * pixel_delta) << landscape_free_bits;
+data->source_dx = pixel_delta << landscape_free_bits;
+
+// Vertical position based on screen Y (centered at horizon)
+data->source_y = texture_height - PIN(y0 * pixel_delta + texture_height/2, 0, texture_height-1) - 1;
+```
+
+**Visual Explanation:**
+
+```
+                        Player looking at landscape
+
+Screen Y    Texture V
+   0  ┌─────────────────────────────┐  texture_height (top of sky)
+      │                             │
+  120 │         SKY TEXTURE         │  texture_height/2 (horizon)
+      │                             │
+  240 │                             │  0 (bottom of sky texture)
+      ├─────────────────────────────┤
+  280 │       (ground below)        │
+  480 └─────────────────────────────┘
+
+      ←───── Screen X ─────────────→
+            ↓ maps to ↓
+      ←─── Texture U (based on yaw) ───→
+
+As player ROTATES (yaw changes):
+  - Texture scrolls horizontally (sky rotates)
+  - first_pixel changes based on view->yaw
+
+As player MOVES (position changes):
+  - Texture does NOT move (sky stays fixed)
+  - Only world geometry changes
+```
+
+**When Landscape Mode is Used:**
+
+1. **Line flag**: Lines can be marked with `LANDSCAPE_LINE_BIT` (map.h:393)
+2. **Side transfer mode**: Sides can have `_xfer_landscape` transfer mode
+3. **Polygon transfer mode**: Floor/ceiling can use landscape mode
+
+```c
+// From map.c:932-973 - check if a line's side uses landscape mode
+boolean line_is_landscaped(short polygon_index, short line_index, world_distance z)
+{
+    // Checks side type and transfer mode at the given height
+    // Returns TRUE if the appropriate texture uses _xfer_landscape
+}
+```
+
+**Landscape Texture Dimensions:**
+
+Landscape textures are typically 512 or 1024 pixels wide (matching Marathon's 512-entry angle table for smooth rotation):
+
+```c
+// From scottish_textures.c:1136
+short landscape_width_bits = polygon->texture->height == 1024 ? 10 : 9;
+```
+
+The width must be power-of-two for the bitwise wrap-around trick:
+```c
+// Texture lookup with automatic wrap
+pixel = read[source_x >> landscape_texture_width_downshift];
+// where landscape_texture_width_downshift = 32 - landscape_width_bits
+```
+
+**Rendering Pipeline for Landscapes:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Landscape Rendering Flow                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Polygon has _xfer_landscape transfer mode                   │
+│     ↓                                                           │
+│  2. render.c converts to _big_landscaped_transfer (line 3490)   │
+│     ↓                                                           │
+│  3. texture_horizontal_polygon() dispatches to landscape path   │
+│     ↓                                                           │
+│  4. _prelandscape_horizontal_polygon_lines() precalculates:     │
+│     - source_x from player yaw + screen x                       │
+│     - source_dx as constant pixel delta                         │
+│     - source_y from screen y (centered at horizon)              │
+│     ↓                                                           │
+│  5. _landscape_horizontal_polygon_lines8/16/32() renders:       │
+│     - Reads texture row at source_y                             │
+│     - For each screen pixel: texture[source_x >> downshift]     │
+│     - source_x += source_dx                                     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+> **Source:** `scottish_textures.c:1124-1173` for `_prelandscape_horizontal_polygon_lines()`, `low_level_textures.c:143-210` for `LANDSCAPE_HORIZONTAL_POLYGON_LINES()` inner loop
 
 ### Source Reference
 

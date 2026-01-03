@@ -122,27 +122,45 @@ Marathon uses a full mesh topology where every player connects to every other pl
 ### Network Topology
 
 ```
-4-Player Game (Full Mesh):
+4-Player Game (Full Mesh - every player connects to every other):
 
-    Player 1                    Player 2
-       ●─────────────────────────●
-       │╲                       ╱│
-       │ ╲                     ╱ │
-       │  ╲                   ╱  │
-       │   ╲                 ╱   │
-       │    ╲               ╱    │
-       │     ╲             ╱     │
-       │      ╲           ╱      │
-       │       ╲         ╱       │
-       │        ╲       ╱        │
-       │         ╲     ╱         │
-       ●───────────●───────────●
-    Player 4                    Player 3
+          Player 1 ●──────────────────────────● Player 2
+                   │╲                        ╱│
+                   │ ╲                      ╱ │
+                   │  ╲                    ╱  │
+                   │   ╲                  ╱   │
+                   │    ╲                ╱    │
+                   │     ╲              ╱     │
+                   │      ╲            ╱      │
+                   │       ╲          ╱       │
+                   │        ╲        ╱        │
+                   │         ╲      ╱         │
+                   │          ╲    ╱          │
+                   │           ╲  ╱           │
+                   │            ╳             │  ← All paths cross (X-shape)
+                   │           ╱  ╲           │
+                   │          ╱    ╲          │
+                   │         ╱      ╲         │
+                   │        ╱        ╲        │
+                   │       ╱          ╲       │
+                   │      ╱            ╲      │
+                   │     ╱              ╲     │
+                   │    ╱                ╲    │
+                   │   ╱                  ╲   │
+                   │  ╱                    ╲  │
+                   │ ╱                      ╲ │
+                   │╱                        ╲│
+          Player 4 ●──────────────────────────● Player 3
 
-Each player broadcasts to all others
-No central server
+Connection Count:
+  P1 ↔ P2, P1 ↔ P3, P1 ↔ P4  (3 connections from P1)
+  P2 ↔ P3, P2 ↔ P4            (2 new connections from P2)
+  P3 ↔ P4                      (1 new connection from P3)
+  Total: 6 bidirectional connections = n(n-1)/2 for n=4 players
+
+Each player broadcasts to all others (no central server)
 All peers are equal
-Maximum 8 players (n² connections)
+Maximum 8 players → 28 connections
 ```
 
 ### Why Peer-to-Peer?

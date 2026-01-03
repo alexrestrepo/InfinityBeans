@@ -480,6 +480,8 @@ Opcode interpretation:
 
 Handles endianness conversion between big-endian (Mac) and little-endian (x86):
 
+> **See also:** [Chapter 10.5: Byte Order Considerations](10_file_formats.md#105-byte-order-considerations) provides expanded coverage including `hton`/`ntoh` functions, compile-time detection, and conditional swap macros.
+
 ### Swap Macros
 
 ```c

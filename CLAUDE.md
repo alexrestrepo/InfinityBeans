@@ -1,6 +1,6 @@
 # Claude Conversation Summary: Marathon 2 Source Code Analysis & Porting Plan
 
-**Date**: 2025-12-23 (Updated: 2025-12-31)
+**Date**: 2025-12-23 (Updated: 2026-01-03)
 **Context**: Analysis of Marathon 2: Durandal and Marathon Infinity source code, with focus on porting to modern platforms using the Full Beans framework
 
 ---

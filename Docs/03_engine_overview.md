@@ -9,6 +9,7 @@
 ```
 ┌─────────────────────────────────────────────────────┐
 │              Shell / Main Loop (30 Hz)              │
+│            (1 tick = 1/30th sec = 33.33ms)          │
 └──────────┬──────────────────────────┬───────────────┘
            │                          │
       ┌────▼────┐                ┌───▼────┐
@@ -19,7 +20,8 @@
            └────────┬────────────────┘
                     │
       ┌─────────────▼─────────────┐
-      │   World Update (1 tick)   │
+      │     World Update          │
+      │  (all systems, per tick)  │
       │  • Lights                 │
       │  • Media                  │
       │  • Platforms              │
@@ -35,6 +37,8 @@
            └─────────────────┘
 ```
 
+> **Timing note:** The world update runs in a loop N times per frame, where N = elapsed ticks since last update. If 1/30th sec elapsed → runs once. If 1/15th sec elapsed (slow frame) → runs twice to catch up. This ensures deterministic 30 Hz simulation regardless of frame rate. See [Chapter 7.6](07_game_loop.md#76-tick-accumulation-and-catch-up) for the catch-up mechanism.
+
 ---
 
 ## 3.2 Subsystem Interaction Diagram
@@ -42,7 +46,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                              MAIN LOOP (shell.c)                                │
-│                           30 Hz fixed timestep                                  │
+│                           Called each frame                                     │
 └───────────────────────────────────┬─────────────────────────────────────────────┘
                                     │
         ┌───────────────────────────┼───────────────────────────┐
@@ -57,9 +61,9 @@
                                     ▼                           │
 ┌───────────────────────────────────────────────────────────────┼─────────────────┐
 │                         WORLD UPDATE (marathon2.c)            │                 │
-│                       update_world() - one tick               │                 │
+│                   update_world() - loops N times              │                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐    │
-│  │ UPDATE ORDER (each tick):                                               │    │
+│  │ UPDATE ORDER (repeated N times, once per elapsed tick):                 │    │
 │  │  1. update_lights()      → lightsource.c                                │    │
 │  │  2. update_medias()      → media.c (water/lava levels)                  │    │
 │  │  3. update_platforms()   → platforms.c (doors/elevators)                │    │
@@ -80,6 +84,8 @@
 │  └─────────────┘    └──────────────┘    └─────────────────┘    └────────────┘   │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+> **How the loop works:** `update_world()` calculates N = ticks elapsed since last call, then runs the update sequence N times. This is the catch-up mechanism from [Chapter 7.6](07_game_loop.md#76-tick-accumulation-and-catch-up). In the source: `for (i=0; i<time_elapsed; ++i) { update_lights(); ... }` (`marathon2.c:105-132`).
 
 ---
 

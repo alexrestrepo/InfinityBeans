@@ -31,6 +31,8 @@ Marathon uses several key strategies to achieve playable performance on limited 
 
 The single most important optimization is rendering only what's visible.
 
+> **See also:** [Chapter 5: Rendering System](05_rendering.md#52-understanding-the-portal-renderer) provides detailed portal culling algorithms with diagrams and source references.
+
 ### Visibility Statistics
 
 ```
@@ -79,6 +81,8 @@ With portal culling:
 ## 11.3 Fixed-Point Mathematics
 
 All calculations use integer math with implicit fractional bits.
+
+> **See also:** [Chapter 6: Physics](06_physics.md#62-understanding-fixed-point-math) covers fixed-point in physics context. [Appendix D: Fixed-Point Conversion](appendix_d_fixedpoint.md) provides complete reference including conversion functions and common pitfalls.
 
 ### Why Not Floating-Point?
 
@@ -137,6 +141,8 @@ fixed result = (a << 16) / b;  // Gain 16 bits first
 
 Sine and cosine lookups avoid expensive calculations.
 
+> **See also:** [Chapter 6: Physics](06_physics.md#63-lets-build-a-simple-physics-system) explains how trig tables are used for coordinate transforms with `TRIG_SHIFT`.
+
 ### Trig Tables
 
 ```c
@@ -145,14 +151,43 @@ fixed sine_table[NUMBER_OF_ANGLES];
 fixed cosine_table[NUMBER_OF_ANGLES];
 ```
 
+### Understanding TRIG_MAGNITUDE
+
+From `world.h:18-19`:
+```c
+#define TRIG_SHIFT 10
+#define TRIG_MAGNITUDE (1 << TRIG_SHIFT)  // = 1024
+```
+
+**Why 1024?** Trig functions return values in range [-1.0, +1.0]. Marathon stores these as **scaled integers** using `TRIG_MAGNITUDE = 1024` as the scale factor:
+
+```
+Floating-point:   sin(45°) = 0.707...
+Scaled integer:   sin(45°) × 1024 = 724
+
+Stored in table:  sine_table[64] = 724  (since 45° = 64/512 × 360°)
+```
+
+**Why not use FIXED_ONE (65536)?** Trig tables are stored as `short` integers (16-bit signed, range -32768 to +32767). Using `FIXED_ONE = 65536` would overflow. Using `TRIG_MAGNITUDE = 1024` keeps values in range [-1024, +1024], safely within 16 bits while providing ~0.1% precision.
+
+**When multiplying**, the result is scaled by 1024, so `>> TRIG_SHIFT` normalizes:
+```c
+// From physics.c - coordinate transform
+new_x = (velocity * cosine_table[angle]) >> TRIG_SHIFT;
+//      [world units × 1024] >> 10 = world units
+```
+
+> **Source:** `world.h:18-19` for definitions, `world.c:181-182` for table initialization
+
 ### Initialization
 
+From `world.c:181-182`:
 ```c
 void build_trig_tables(void) {
     for (int i = 0; i < NUMBER_OF_ANGLES; i++) {
-        double angle = (i * 2 * PI) / NUMBER_OF_ANGLES;
-        sine_table[i] = (fixed)(sin(angle) * TRIG_MAGNITUDE);
-        cosine_table[i] = (fixed)(cos(angle) * TRIG_MAGNITUDE);
+        double theta = (i * 2 * PI) / NUMBER_OF_ANGLES;
+        cosine_table[i] = (short)((double)TRIG_MAGNITUDE * cos(theta) + 0.5);
+        sine_table[i] = (short)((double)TRIG_MAGNITUDE * sin(theta) + 0.5);
     }
 }
 ```
@@ -175,6 +210,8 @@ fixed sin_facing = sine_table[ANGLE_TO_INDEX(angle)];
 ## 11.5 Pre-Computed Shading Tables
 
 Lighting calculations happen at load time, not render time.
+
+> **See also:** [Chapter 5: Rendering System](05_rendering.md#53-shading-tables) explains how shading tables integrate with the rendering pipeline.
 
 ### Shading Table Structure
 
@@ -331,6 +368,45 @@ Marathon uses conditional compilation to select assembly or C implementations:
 #endif
 ```
 
+### Understanding VERTICAL_TEXTURE_DOWNSHIFT
+
+From `scottish_textures.c:122`:
+```c
+#define VERTICAL_TEXTURE_FREE_BITS FIXED_FRACTIONAL_BITS       // = 16
+#define VERTICAL_TEXTURE_WIDTH_BITS 7                          // 128 pixel textures
+#define VERTICAL_TEXTURE_DOWNSHIFT (32 - VERTICAL_TEXTURE_WIDTH_BITS)  // = 25
+```
+
+**What it does:** Extracts the texture coordinate from a 32-bit fixed-point value.
+
+```
+32-bit texture_y breakdown (for 128-pixel textures):
+
+Bit: 31  30  29  28  27  26  25  24  23  22 ... 0
+     └───────────────────────┘  └──────────────────┘
+        7 bits: texture index      25 bits: fraction
+        (0-127 pixel position)     (sub-pixel precision)
+
+texture_y >> 25 extracts the top 7 bits → texture array index [0-127]
+```
+
+**Why this design?**
+- `texture_y` accumulates fractional position with full 32-bit precision
+- Adding `texture_dy` each pixel gives smooth interpolation
+- The right-shift extracts only the integer part for array indexing
+- Supports different texture sizes by changing `VERTICAL_TEXTURE_WIDTH_BITS`
+
+**Example:**
+```c
+texture_y = 0x40000000;  // Binary: 0100 0000 ... (bit 30 set)
+texture_y >> 25 = 32;    // Index into middle of 128-pixel texture
+
+texture_y += texture_dy; // Advance by fractional amount
+texture_y >> 25 = 33;    // May or may not change, depending on dy
+```
+
+> **Source:** `scottish_textures.c:119-122` for definitions
+
 ### Inner Loop Analysis
 
 The texture mapper inner loop executes millions of times per frame:
@@ -393,6 +469,8 @@ Then use the arrays for fast scanline filling
 ## 11.8 Staggered AI Updates
 
 Monster AI is distributed across frames to prevent frame spikes.
+
+> **See also:** [Chapter 8: Entity Systems](08_entities.md#84-ai-load-distribution) provides complete documentation of the round-robin AI scheduling system with source references.
 
 ### The Problem
 

@@ -93,7 +93,11 @@ Before seeing Marathon's actual code, let's build a simplified version to unders
 ### Step 1: Define the Basic Structures
 
 ```c
-// Simplified world representation
+// Simplified world representation (using Marathon's actual constants)
+#define MAXIMUM_VERTICES_PER_POLYGON 8
+#define MAXIMUM_ENDPOINTS_PER_MAP    8192
+#define MAXIMUM_LINES_PER_MAP        4096
+#define MAXIMUM_POLYGONS_PER_MAP     1024
 
 // A 2D point (vertex)
 typedef struct {
@@ -112,18 +116,18 @@ typedef struct {
 // A convex polygon (room)
 typedef struct {
     int vertex_count;
-    int vertices[8];      // Indices into points array
-    int lines[8];         // Indices into lines array
-    int neighbors[8];     // Adjacent polygon for each line (-1 if wall)
+    int vertices[MAXIMUM_VERTICES_PER_POLYGON];   // Indices into points array
+    int lines[MAXIMUM_VERTICES_PER_POLYGON];      // Indices into lines array
+    int neighbors[MAXIMUM_VERTICES_PER_POLYGON];  // Adjacent polygon for each line (-1 if wall)
     int floor_height;     // Z coordinate of floor
     int ceiling_height;   // Z coordinate of ceiling
 } Polygon;
 
 // The complete world
 typedef struct {
-    Point2D points[MAX_POINTS];
-    Line lines[MAX_LINES];
-    Polygon polygons[MAX_POLYGONS];
+    Point2D points[MAXIMUM_ENDPOINTS_PER_MAP];
+    Line lines[MAXIMUM_LINES_PER_MAP];
+    Polygon polygons[MAXIMUM_POLYGONS_PER_MAP];
     int point_count, line_count, polygon_count;
 } World;
 ```
@@ -134,6 +138,8 @@ A key operation is determining which polygon contains a point:
 
 ```c
 // Check if point P is inside polygon (2D test)
+// Uses the ray casting algorithm: cast a ray rightward from the point
+// and count how many polygon edges it crosses. Odd = inside, even = outside.
 bool point_in_polygon(World* world, int polygon_index, int px, int py) {
     Polygon* poly = &world->polygons[polygon_index];
     int crossings = 0;
@@ -142,19 +148,26 @@ bool point_in_polygon(World* world, int polygon_index, int px, int py) {
         Point2D* v1 = &world->points[poly->vertices[i]];
         Point2D* v2 = &world->points[poly->vertices[(i + 1) % poly->vertex_count]];
 
-        // Ray casting algorithm: count how many edges cross a ray
-        // going from (px, py) to the right
+        // Ray casting: check if a horizontal ray from (px, py) going right
+        // intersects this edge. Only count edges that cross the ray's Y level.
         if ((v1->y <= py && v2->y > py) || (v2->y <= py && v1->y > py)) {
+            // Calculate X coordinate where edge crosses the ray's Y level
             float x_cross = v1->x + (float)(py - v1->y) / (v2->y - v1->y) * (v2->x - v1->x);
             if (px < x_cross) {
-                crossings++;
+                crossings++;  // Ray crosses this edge
             }
         }
     }
 
-    return (crossings % 2) == 1;  // Odd = inside
+    return (crossings % 2) == 1;  // Odd crossings = inside polygon
 }
+```
 
+> **Ray Casting Explained:** The algorithm imagines casting an infinite ray from the test point toward +X. For a convex polygon, if you're inside, you'll cross exactly one edge exiting. For concave polygons, you might cross multiple edges, but the parity (odd/even) still tells you inside vs outside. This is O(n) where n = vertex count.
+>
+> Marathon uses a similar cross-product approach for visibility testing—see [Chapter 5.4](05_rendering.md#54-clipping-to-the-view-frustum) for how this extends to the 3D rendering system.
+
+```c
 // Find which polygon contains a point
 int find_polygon_containing_point(World* world, int x, int y) {
     for (int i = 0; i < world->polygon_count; i++) {
@@ -186,6 +199,8 @@ int find_adjacent_polygon(World* world, int current_polygon, int line_index) {
 // This is O(1) - no searching needed!
 ```
 
+> **When is connectivity populated?** The `polygon_front` and `polygon_back` fields (Marathon uses `clockwise_polygon_owner` and `counterclockwise_polygon_owner`) are **baked into the map file** by the level editor. When a map is loaded, `load_lines()` in `game_wad.c` simply copies this data directly from the file into memory. The connectivity graph is pre-computed at edit time, not runtime. See [Section 4.8](#48-map-loading-and-the-polygon-graph) for details.
+
 **Marathon's approach:** This is essentially what Marathon does, but with more sophisticated tracking of clockwise vs counterclockwise ownership to handle line direction consistently.
 
 ---
@@ -204,7 +219,13 @@ struct world_point2d {  // 4 bytes
 };
 ```
 
-This compact structure represents positions in Marathon's 2D world space. `world_distance` is just a `short` (16-bit), giving Marathon a coordinate range of ±32,767 world units.
+This compact structure represents positions in Marathon's 2D world space. `world_distance` is a `short` (16-bit) but it's NOT a plain integer—it's **6.10 fixed-point** (6 integer bits, 10 fractional bits). This gives Marathon ~1/1024 unit precision for positions.
+
+> **Coordinate System Details:**
+> - **Fixed-point format:** `world_distance` uses 10 fractional bits (`WORLD_FRACTIONAL_BITS = 10`), so `WORLD_ONE = 1024` represents 1.0 world units. See [Appendix D](appendix_d_fixed_point.md) for fixed-point math details.
+> - **Range:** With 6 integer bits (signed), coordinates span roughly ±32 world units from origin—but maps typically stay positive and use a fraction of this range.
+> - **Origin:** The origin (0, 0) is arbitrary—placed wherever the map designer chose. There's no enforced center.
+> - **Physics uses higher precision:** During physics calculations, positions are converted to 32-bit `fixed` (16.16 format) for greater precision, then converted back to `world_distance` for storage.
 
 ### Endpoints (Vertices)
 
@@ -280,27 +301,27 @@ Understanding polygon ownership (which side of a line faces which polygon):
                     │             │
                     │  Polygon A  │
                     │             │
-              e3 ── e4 ═══════════ e2 ── e5
-                    │  (Line L)   │
+                   e3 ═══════════ e2   ← Line L (shared edge)
+                    │             │
                     │  Polygon B  │
                     │             │
-                   e6 ─────────── e7
+                   e4 ─────────── e5
 
-        Line L connects endpoints e4 and e2. Both polygons A and B
+        Line L connects endpoints e3 and e2. Both polygons A and B
         reference Line L in their edge lists, but in OPPOSITE directions:
 
         Walking around Polygon A CLOCKWISE:
-             e0 → e1 → e2 → e4 → e0
+             e0 → e1 → e2 → e3 → e0
                         ↓
-                   When traversing this edge,
-                   Line L goes from e2 to e4
+                   When traversing Line L,
+                   we go from e2 to e3
                    ∴ Polygon A is the CLOCKWISE owner
 
         Walking around Polygon B CLOCKWISE:
-             e4 → e2 → e5 → e7 → e6 → e3 → e4
+             e3 → e2 → e5 → e4 → e3
               ↓
-         When traversing this edge,
-         Line L goes from e4 to e2 (opposite direction!)
+         When traversing Line L,
+         we go from e3 to e2 (opposite direction!)
          ∴ Polygon B is the COUNTERCLOCKWISE owner
 
         The KEY insight: The same physical line is traversed in
@@ -367,27 +388,31 @@ LEVEL 4: POLYGONS (Rooms)
         Polygons are the final level, storing:
         - vertex_count = 4
         - endpoint_indexes[] = {e0, e1, e2, e3}
-        - line_indexes[] = {Line0, Line1, Line2, Line3}
+        - line_indexes[] = {L0, L1, L2, L3}
         - adjacent_polygon_indexes[] = {PolyB, PolyC, NONE, PolyD}
         - floor_height = 0
         - ceiling_height = 1024
 
-        Complete polygon example:
+        Complete polygon example (showing Polygon A and its neighbors):
 
-             e0 ──────Line 0────── e1
-             │                      │
-             │                      │
-          Line 3   Polygon A     Line 1
-             │    (ceiling=1024)    │
-             │    (floor=0)         │
-             │                      │
-             e3 ──────Line 2────── e2
+                              Polygon B
+                         ┌─────────────────┐
+                         │                 │
+             ────────────e0 ──────L0────── e1────────────
+                         │                 │
+                         │                 │
+             Polygon D  L3   Polygon A    L1   Polygon C
+                         │  (ceiling=1024) │
+                         │  (floor=0)      │
+                         │                 │
+                        e3 ══════L2═══════ e2
+                              (solid wall)
 
-        Adjacent polygon lookup:
-        - Along Line 0: Polygon B
-        - Along Line 1: Polygon C
-        - Along Line 2: NONE (solid wall, no neighbor)
-        - Along Line 3: Polygon D
+        Adjacent polygon lookup for Polygon A:
+        - Along L0: Polygon B (north)
+        - Along L1: Polygon C (east)
+        - Along L2: NONE (solid wall, no neighbor)
+        - Along L3: Polygon D (west)
 ```
 
 **Adjacent Polygon Lookup** - O(1):
@@ -522,7 +547,7 @@ struct polygon_data {
 
 > **Source:** `map.h:571` for `struct polygon_data`, `map.h:534-555` for polygon types
 
-### Complete Example: A 4-Polygon Level
+### Complete Example: A 2-Polygon Level
 
 ```
 Real-world example showing all data structures together:
@@ -531,44 +556,44 @@ Real-world example showing all data structures together:
          │                  │
          │                  │
         L3    Polygon 0    L1
-         │   (room center)  │
+         │   (main room)    │
          │                  │
          │                  │
-         e3 ──────L2────── e2
+         e3 ══════L2══════ e2   ← Portal (shared edge)
               ╱        ╲
              ╱          ╲
-           L4            L5
-           ╱              ╲
+           L4  Polygon 1  L5
+           ╱   (alcove)    ╲
          e4 ───── L6 ───── e5
 
 Data in memory:
 
 Endpoints array (6 total):
-  [0]: {x=512, y=512, ...}     // Top-left
-  [1]: {x=1024, y=512, ...}    // Top-right
-  [2]: {x=1024, y=1024, ...}   // Right
-  [3]: {x=512, y=1024, ...}    // Bottom-left of main room
-  [4]: {x=256, y=1280, ...}    // Far left
-  [5]: {x=768, y=1280, ...}    // Far right
+  [0] (e0): {x=512, y=512, ...}     // Top-left
+  [1] (e1): {x=1024, y=512, ...}    // Top-right
+  [2] (e2): {x=1024, y=1024, ...}   // Right of portal
+  [3] (e3): {x=512, y=1024, ...}    // Left of portal
+  [4] (e4): {x=256, y=1280, ...}    // Far left
+  [5] (e5): {x=768, y=1280, ...}    // Far right
 
 Lines array (7 total):
-  [0]: {endpoints={0,1}, cw_owner=0, ccw_owner=-1}  // Top (solid)
-  [1]: {endpoints={1,2}, cw_owner=0, ccw_owner=-1}  // Right (solid)
-  [2]: {endpoints={2,3}, cw_owner=0, ccw_owner=1}   // Portal to poly 1
-  [3]: {endpoints={3,0}, cw_owner=0, ccw_owner=-1}  // Left (solid)
-  [4]: {endpoints={3,4}, cw_owner=1, ccw_owner=-1}  // Extension left
-  [5]: {endpoints={2,5}, cw_owner=1, ccw_owner=-1}  // Extension right
-  [6]: {endpoints={4,5}, cw_owner=1, ccw_owner=-1}  // Far edge (solid)
+  [0] (L0): {endpoints={0,1}, cw_owner=0, ccw_owner=-1}  // Top (solid)
+  [1] (L1): {endpoints={1,2}, cw_owner=0, ccw_owner=-1}  // Right (solid)
+  [2] (L2): {endpoints={2,3}, cw_owner=0, ccw_owner=1}   // Portal to poly 1
+  [3] (L3): {endpoints={3,0}, cw_owner=0, ccw_owner=-1}  // Left (solid)
+  [4] (L4): {endpoints={3,4}, cw_owner=1, ccw_owner=-1}  // Alcove left
+  [5] (L5): {endpoints={2,5}, cw_owner=1, ccw_owner=-1}  // Alcove right
+  [6] (L6): {endpoints={4,5}, cw_owner=1, ccw_owner=-1}  // Far edge (solid)
 
-Polygons array:
-  [0]: {vertex_count=4, endpoints={0,1,2,3}, lines={0,1,2,3},
+Polygons array (2 total):
+  [0]: {vertex_count=4, endpoints={e0,e1,e2,e3}, lines={L0,L1,L2,L3},
         adjacent={-1,-1,1,-1}, floor=0, ceiling=1024}  // Main room
-  [1]: {vertex_count=4, endpoints={3,2,5,4}, lines={2,5,6,4},
-        adjacent={0,-1,-1,-1}, floor=0, ceiling=1024}  // Southern room
+  [1]: {vertex_count=4, endpoints={e3,e2,e5,e4}, lines={L2,L5,L6,L4},
+        adjacent={0,-1,-1,-1}, floor=0, ceiling=1024}  // Southern alcove
 
 Traversal example - player walks from Polygon 0 to Polygon 1:
-  1. Player in Polygon 0 crosses Line 2
-  2. Line 2 has: clockwise_owner=0, counterclockwise_owner=1
+  1. Player in Polygon 0 crosses Line L2
+  2. L2 has: clockwise_owner=0, counterclockwise_owner=1
   3. Since we came from polygon 0 (CW), we enter polygon 1 (CCW)
   4. Now player is in Polygon 1
 
@@ -793,7 +818,103 @@ This system ensures:
 
 ---
 
-## 4.7 Summary
+## 4.7 Map Loading and the Polygon Graph
+
+The connectivity between polygons isn't computed at runtime—it's **baked into the map file** by the level editor. Here's how maps are loaded and the polygon graph is populated.
+
+### Map File Structure
+
+Marathon maps use a custom WAD format (not Doom's format—see [Chapter 10](10_file_formats.md)). Each level contains "chunks" of data:
+
+```
+Map file chunks loaded in order:
+  1. PNTS - Endpoint positions (world_point2d for each vertex)
+  2. LINS - Line definitions (includes clockwise/counterclockwise owners)
+  3. SIDS - Side data (textures, control panels)
+  4. POLY - Polygon definitions (includes adjacent_polygon_indexes[])
+  5. LITE - Light sources
+  6. PLAT - Platform definitions
+  7. MEDI - Media (liquid) definitions
+  8. ... (objects, sounds, terminals, etc.)
+```
+
+### Loading Process
+
+The loading functions in `game_wad.c` simply copy the pre-computed data:
+
+```c
+// From game_wad.c - loading is a direct copy, no graph construction!
+
+void load_points(saved_map_pt *points, short count) {
+    for (int i = 0; i < count; i++) {
+        map_endpoints[i].vertex = points[i];  // Just copy the position
+    }
+    dynamic_world->endpoint_count = count;
+}
+
+void load_lines(saved_line *lines, short count) {
+    for (int i = 0; i < count; i++) {
+        map_lines[i] = lines[i];  // clockwise/counterclockwise owners already set!
+    }
+    dynamic_world->line_count = count;
+}
+
+void load_polygons(saved_poly *polys, short count) {
+    for (int i = 0; i < count; i++) {
+        map_polygons[i] = polys[i];  // adjacent_polygon_indexes[] already set!
+    }
+    dynamic_world->polygon_count = count;
+}
+```
+
+**Key insight:** The `clockwise_polygon_owner`, `counterclockwise_polygon_owner`, and `adjacent_polygon_indexes[]` fields are all pre-computed by the level editor (Forge). The game engine never builds this graph—it just uses it.
+
+### Post-Load Processing
+
+After the raw data is loaded, `recalculate_map_counts()` in `map_constructors.c` computes derived values:
+
+```c
+// From map_constructors.c - runs after map load
+
+void recalculate_map_counts(void) {
+    // For each line, compute:
+    // - Length (from endpoint positions)
+    // - highest_adjacent_floor, lowest_adjacent_ceiling
+    // - Line flags (solid, transparent, elevation, etc.)
+
+    // For each endpoint, compute:
+    // - highest_adjacent_floor_height
+    // - lowest_adjacent_ceiling_height
+    // - supporting_polygon_index
+
+    // For each polygon, compute:
+    // - Area (for random point selection)
+    // - First object in polygon (linked list head)
+}
+```
+
+### Why Pre-Compute Connectivity?
+
+1. **Level editor knows the topology** - When the designer draws polygons, the editor knows which edges are shared
+2. **Runtime efficiency** - No graph traversal algorithms needed at load time
+3. **Determinism** - The connectivity is fixed, ensuring consistent behavior
+4. **Validation** - The editor can check for invalid geometry (overlapping polygons, disconnected areas)
+
+### Map Editing (How the Graph is Created)
+
+The level editor (Forge) builds the connectivity graph as the designer works:
+
+1. **Place endpoints** - Designer clicks to create vertices
+2. **Draw lines** - Connecting endpoints creates edges
+3. **Define polygons** - Selecting lines in clockwise order creates rooms
+4. **Editor computes ownership** - For each line, determine which polygon(s) own it based on the order vertices were specified
+5. **Save to file** - All connectivity data is written to the map file
+
+> **For porting:** You don't need to implement graph construction. Just load the pre-computed data from map files. See [Chapter 10](10_file_formats.md) for file format details.
+
+---
+
+## 4.8 Summary
 
 Marathon represents its world as a graph of connected polygons, enabling:
 

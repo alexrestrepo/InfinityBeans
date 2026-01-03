@@ -67,25 +67,102 @@ Result: Same inputs → same outputs
 
 ### Decoupling Update and Render
 
-```
-The key insight: Game logic and rendering run at DIFFERENT rates
+The key insight is that game logic and rendering are **not** synchronized 1:1. Game logic always runs at exactly 30 Hz, but rendering can run faster (or slower) than 30 FPS.
 
-Game Logic:     ┌─────┐     ┌─────┐     ┌─────┐     ┌─────┐
-                │Tick │     │Tick │     │Tick │     │Tick │
-                │  0  │     │  1  │     │  2  │     │  3  │
-                └──┬──┘     └──┬──┘     └──┬──┘     └──┬──┘
-                   │           │           │           │
-Time:    0ms     33ms        66ms       100ms      133ms
-                   │           │           │           │
-Rendering:     ┌───┴───┐   ┌──┴──┐   ┌──┴──┐   ┌──┴──┐
-(60 FPS)       │Frame 0│   │Fr 1 │   │Fr 2 │   │Fr 3 │...
-               │       │   │     │   │     │   │     │
-               └───────┘   └─────┘   └─────┘   └─────┘
-                 16ms        16ms      16ms      16ms
+**How it works (from `interface.c:536-541` and `marathon2.c:73-149`):**
 
-Rendering can happen faster than game updates!
-Multiple renders can show the same game state
+```c
+// Main loop calls update_world() which returns number of ticks elapsed
+ticks_elapsed = update_world();  // Can return 0, 1, 2, or more!
+if (ticks_elapsed > 0) {
+    render_screen(ticks_elapsed);  // Only render if game state changed
+}
 ```
+
+Inside `update_world()`, a **for loop** runs as many game ticks as needed:
+
+```c
+// From marathon2.c:105-132
+time_elapsed = lowest_time;  // How many ticks we can advance
+for (i = 0; i < time_elapsed; ++i)
+{
+    update_lights();
+    update_medias();
+    update_platforms();
+    update_control_panels();
+    update_players();        // Process action_flags for this tick
+    move_projectiles();
+    move_monsters();
+    update_effects();
+    // ... more updates ...
+
+    dynamic_world->tick_count += 1;
+}
+```
+
+**Visual: Fast Machine (60 FPS display, 30 Hz game logic)**
+
+```
+Real Time:   0ms      16ms      33ms      50ms      66ms      83ms     100ms
+             │        │         │         │         │         │         │
+Game Logic:  │        │   ┌─────┴─────┐   │   ┌─────┴─────┐   │   ┌─────┴─────┐
+(30 Hz)      │        │   │  Tick 1   │   │   │  Tick 2   │   │   │  Tick 3   │
+             │        │   └───────────┘   │   └───────────┘   │   └───────────┘
+             │        │                   │                   │                │
+Render:      │┌──────┐│┌──────┐     ┌────┐│┌──────┐     ┌────┐│┌──────┐     ┌────┐
+(60 FPS)     ││Frame │││Frame │     │Frm │││Frame │     │Frm │││Frame │     │Frm │
+             ││  0   │││  1   │     │ 2  │││  3   │     │ 4  │││  5   │     │ 6  │
+             │└──────┘│└──────┘     └────┘│└──────┘     └────┘│└──────┘     └────┘
+             │ 0 ticks│ 0 ticks   1 tick  │ 0 ticks   1 tick  │ 0 ticks   1 tick
+             │ elapsed│ elapsed   elapsed │ elapsed   elapsed │ elapsed   elapsed
+
+             Frame 0-1: No tick ready yet, render same state (ticks_elapsed=0)
+             Frame 2: Tick 1 ready, update then render
+             Frame 3-4: No new tick, render same state
+             Frame 5: Tick 2 ready, update then render
+```
+
+**Visual: Slow Machine (15 FPS display, game must catch up)**
+
+```
+Real Time:   0ms              66ms             133ms            200ms
+             │                │                │                │
+             │   Frame took   │   Frame took   │   Frame took   │
+             │   66ms (slow!) │   66ms         │   66ms         │
+             │                │                │                │
+Game Logic:  │  ┌─────────────┴─────────────┐  │                │
+(catch up!)  │  │ ┌───────┐ ┌───────┐       │  │                │
+             │  │ │Tick 1 │ │Tick 2 │       │  │                │
+             │  │ └───────┘ └───────┘       │  │                │
+             │  │   Run 2 ticks to catch up │  │                │
+             │  └───────────────────────────┘  │                │
+             │                ↓                │                │
+Render:      │┌───────────────────────────────┐│                │
+             ││            Frame 0            ││                │
+             │└───────────────────────────────┘│                │
+             │                                 │                │
+                                              ↓
+                                ┌───────────────────────────────┐
+                                │ ┌───────┐ ┌───────┐           │
+                                │ │Tick 3 │ │Tick 4 │           │
+                                │ └───────┘ └───────┘           │
+                                │   Run 2 more ticks            │
+                                └───────────┬───────────────────┘
+                                            ↓
+                                ┌───────────────────────────────┐
+                                │            Frame 1            │
+                                └───────────────────────────────┘
+
+Each frame: update_world() runs multiple ticks in a loop to catch up,
+            THEN render_screen() draws the final state once.
+```
+
+This decoupling ensures:
+- **Determinism**: Game always advances in fixed 33.33ms ticks regardless of frame rate
+- **Smoothness**: Fast machines can render at 60+ FPS showing the same game state
+- **Resilience**: Slow machines catch up by running multiple ticks before rendering
+
+> **Source:** `interface.c:536-541` for main loop, `marathon2.c:105-132` for tick loop
 
 ---
 
@@ -318,56 +395,92 @@ Bandwidth comparison (4 players, 30 ticks/sec):
 ### The 32-bit Action Flags Layout
 
 ```c
-// Extracting encoded values from action flags
-#define GET_ABSOLUTE_YAW(flags)       ((flags >> 7) & 0x7F)
-#define GET_ABSOLUTE_PITCH(flags)     ((flags >> 14) & 0x1F)
-#define GET_ABSOLUTE_POSITION(flags)  ((flags >> 22) & 0x7F)
+// From player.h:53-66 - Extracting encoded values from action flags
+#define GET_ABSOLUTE_YAW(i)      (((i) >> 1) & 0x7F)   // 7 bits at position 1
+#define GET_ABSOLUTE_PITCH(i)    (((i) >> 9) & 0x1F)   // 5 bits at position 9
+#define GET_ABSOLUTE_POSITION(i) (((i) >> 15) & 0x7F)  // 7 bits at position 15
 ```
 
-**Individual Action Bits:**
+**Individual Action Bits (from `player.h:68-106`):**
 
 ```c
-// Boolean flags encoded in lower bits
-_turning_left, _turning_right
-_looking_left, _looking_right
-_looking_up, _looking_down, _looking_center
-_moving_forward, _moving_backward
-_sidestepping_left, _sidestepping_right
-_run_dont_walk
-_left_trigger_state, _right_trigger_state
-_action_trigger_state
-_cycle_weapons_forward, _cycle_weapons_backward
-_toggle_map, _swim
+// Bits 0-7: Yaw control
+_absolute_yaw_mode_bit,    // 0 - enables absolute yaw mode
+_turning_left_bit,         // 1 - OR absolute_yaw bit 0
+_turning_right_bit,        // 2 - OR absolute_yaw bit 1
+_sidestep_dont_turn_bit,   // 3 - OR absolute_yaw bit 2
+_looking_left_bit,         // 4 - OR absolute_yaw bit 3
+_looking_right_bit,        // 5 - OR absolute_yaw bit 4
+_absolute_yaw_bit0,        // 6 - OR absolute_yaw bit 5
+_absolute_yaw_bit1,        // 7 - OR absolute_yaw bit 6
+
+// Bits 8-13: Pitch control
+_absolute_pitch_mode_bit,  // 8 - enables absolute pitch mode
+_looking_up_bit,           // 9 - OR absolute_pitch bit 0
+_looking_down_bit,         // 10 - OR absolute_pitch bit 1
+_looking_center_bit,       // 11 - OR absolute_pitch bit 2
+_absolute_pitch_bit0,      // 12 - OR absolute_pitch bit 3
+_absolute_pitch_bit1,      // 13 - OR absolute_pitch bit 4
+
+// Bits 14-21: Position control
+_absolute_position_mode_bit, // 14 - enables absolute position mode
+_moving_forward_bit,         // 15 - OR absolute_position bit 0
+_moving_backward_bit,        // 16 - OR absolute_position bit 1
+_run_dont_walk_bit,          // 17 - OR absolute_position bit 2
+_look_dont_turn_bit,         // 18 - OR absolute_position bit 3
+_absolute_position_bit0,     // 19 - OR absolute_position bit 4
+_absolute_position_bit1,     // 20 - OR absolute_position bit 5
+_absolute_position_bit2,     // 21 - OR absolute_position bit 6
+
+// Bits 22-31: Actions
+_sidestepping_left_bit,      // 22
+_sidestepping_right_bit,     // 23
+_left_trigger_state_bit,     // 24
+_right_trigger_state_bit,    // 25
+_action_trigger_state_bit,   // 26
+_cycle_weapons_forward_bit,  // 27
+_cycle_weapons_backward_bit, // 28
+_toggle_map_bit,             // 29
+_microphone_button_bit,      // 30
+_swim_bit                    // 31
 ```
 
 ### Bit Layout Diagram
 
 ```
-32-bit Action Flags:
+32-bit Action Flags (from player.h:68-106):
 
-Bits 0-6:   Absolute yaw (7 bits)        → 128 angles
-Bits 7-13:  Reserved/flags (7 bits)
-Bits 14-18: Absolute pitch (5 bits)      → 32 angles
-Bits 19-21: Reserved/flags (3 bits)
-Bits 22-28: Absolute position (7 bits)   → Position encoding
-Bits 29-31: Movement flags (3 bits)
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
+│31│30│29│28│27│26│25│24│23│22│21│20│19│18│17│16│15│14│13│12│11│10│ 9│ 8│ 7│ 6│ 5│ 4│ 3│ 2│ 1│ 0│
+├──┴──┴──┴──┴──┴──┴──┴──┴──┴──┼──┴──┴──┴──┴──┴──┴──┼──┼──┴──┴──┴──┴──┼──┼──┴──┴──┴──┴──┴──┴──┼──┤
+│sw│mi│mp│←w│→w│ac│r │l │→s│←s│p6│p5│p4│p3│p2│p1│p0│pM│t4│t3│t2│t1│t0│tM│y6│y5│y4│y3│y2│y1│y0│yM│
+└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
+ │                          │  │                 │  │              │  │                       │
+ │        Actions           │  │ Position (7b)   │  │ Pitch (5b)   │  │     Yaw (7 bits)      │
+ │     (10 bits)            │  │ or move flags   │  │ or look flgs │  │   or turn/look flags  │
+ └──────────────────────────┘  └────────┬────────┘  └──────┬───────┘  └───────────┬───────────┘
+                                        │                  │                      │
+                                       pM=14              tM=8                   yM=0
+                                    (mode bit)         (mode bit)             (mode bit)
 
-┌─────────────────────────────────────────────────────────────┐
-│ 31 30 29 │ 28 27 26 25 24 23 22 │ 21 20 19 │ 18 17 16 15 14 │
-├──────────┼─────────────────────┼──────────┼────────────────┤
-│ Movement │   Absolute Position  │ Reserved │ Absolute Pitch │
-│  flags   │      (7 bits)        │ (3 bits) │   (5 bits)     │
-└──────────┴─────────────────────┴──────────┴────────────────┘
+Legend:
+  yM = absolute_yaw_mode (bit 0)       y0-y6 = yaw value OR turn/look flags
+  tM = absolute_pitch_mode (bit 8)     t0-t4 = pitch value OR look up/down/center
+  pM = absolute_position_mode (bit 14) p0-p6 = position value OR forward/backward/run
+  ←s/→s = sidestep left/right          l/r = left/right trigger
+  ac = action trigger                  ←w/→w = cycle weapons backward/forward
+  mp = toggle map                      mi = microphone
+  sw = swim
 
-┌─────────────────────────────────────────────────────────────┐
-│ 13 12 11 10 9 8 7 │ 6 5 4 3 2 1 0 │
-├───────────────────┼───────────────┤
-│  Reserved/Flags   │ Absolute Yaw  │
-│    (7 bits)       │   (7 bits)    │
-└───────────────────┴───────────────┘
+Mode bits select interpretation:
+  When yM=1: bits 1-7 are 7-bit absolute yaw angle
+  When yM=0: bits 1-7 are individual turn/look boolean flags
+  (Same pattern for pitch and position)
 
 Result: Full 6-DOF input in just 32 bits!
 ```
+
+> **Source:** `player.h:53-66` for GET macros, `player.h:68-106` for bit enum
 
 ### Converting Input to Action Flags
 
@@ -375,14 +488,14 @@ Result: Full 6-DOF input in just 32 bits!
 uint32_t encode_action_flags(platform_input_state* input) {
     uint32_t flags = 0;
 
-    // Movement booleans
+    // Movement booleans (when NOT using absolute position mode)
     if (input->forward)         flags |= _moving_forward;
     if (input->backward)        flags |= _moving_backward;
     if (input->strafe_left)     flags |= _sidestepping_left;
     if (input->strafe_right)    flags |= _sidestepping_right;
     if (input->run)             flags |= _run_dont_walk;
 
-    // Look direction booleans
+    // Look direction booleans (when NOT using absolute yaw/pitch mode)
     if (input->turn_left)       flags |= _turning_left;
     if (input->turn_right)      flags |= _turning_right;
     if (input->look_up)         flags |= _looking_up;
@@ -393,9 +506,16 @@ uint32_t encode_action_flags(platform_input_state* input) {
     if (input->fire_secondary)  flags |= _right_trigger_state;
     if (input->action)          flags |= _action_trigger_state;
 
-    // Encode absolute angles (for mouse look)
-    flags |= (input->yaw & 0x7F) << 0;      // 7-bit yaw
-    flags |= (input->pitch & 0x1F) << 14;   // 5-bit pitch
+    // Encode absolute angles (for mouse look) - sets mode bit + value
+    // Uses SET_ABSOLUTE_YAW/PITCH/POSITION macros from player.h
+    if (input->use_absolute_yaw) {
+        flags |= _absolute_yaw_mode;                    // Set mode bit 0
+        flags |= (input->yaw & 0x7F) << 1;              // 7-bit yaw at bits 1-7
+    }
+    if (input->use_absolute_pitch) {
+        flags |= _absolute_pitch_mode;                  // Set mode bit 8
+        flags |= (input->pitch & 0x1F) << 9;            // 5-bit pitch at bits 9-13
+    }
 
     return flags;
 }

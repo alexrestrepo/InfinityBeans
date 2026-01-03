@@ -296,6 +296,36 @@ sine = sine_table[direction >> FIXED_FRACTIONAL_BITS];
 new_position.x += (velocity * cosine - perpendicular_velocity * sine) >> TRIG_SHIFT;
 new_position.y += (velocity * sine + perpendicular_velocity * cosine) >> TRIG_SHIFT;
 new_position.z += external_velocity.k;
+```
+
+**Why TRIG_SHIFT, not FIXED_FRACTIONAL_BITS?**
+
+Marathon uses **two different fixed-point scales**:
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| `FIXED_FRACTIONAL_BITS` | 16 | General fixed-point (16.16 format, `FIXED_ONE = 65536`) |
+| `TRIG_SHIFT` | 10 | Trig table scale (`TRIG_MAGNITUDE = 1024`) |
+
+The trig tables store sine/cosine values as `short` integers (16-bit), scaled by `TRIG_MAGNITUDE = 1024`:
+
+```c
+// From world.c:181-182
+cosine_table[i] = (short)((double)TRIG_MAGNITUDE * cos(theta) + 0.5);
+sine_table[i] = (short)((double)TRIG_MAGNITUDE * sin(theta) + 0.5);
+// Result: values in range [-1024, +1024]
+```
+
+When you multiply `velocity × cosine_table[θ]`:
+- `velocity` is in world units
+- `cosine_table[θ]` is scaled by 1024
+- Result is scaled by 1024, so `>> TRIG_SHIFT` normalizes it back to world units
+
+This 10-bit scale (`TRIG_SHIFT = 10`) intentionally matches `WORLD_FRACTIONAL_BITS = 10`, keeping world coordinate calculations efficient with `short` arithmetic.
+
+> **Source:** `world.h:18-19` for `TRIG_SHIFT` and `TRIG_MAGNITUDE`, `world.c:181-182` for table initialization
+
+```c
 
 // Add external forces (knockback, water current)
 new_position.x += external_velocity.i;
@@ -543,30 +573,93 @@ If inside: Project P onto nearest edge to push out
 
 ### Multi-Pass Clipping Algorithm
 
+Marathon's `keep_line_segment_out_of_walls()` uses a state machine with multiple passes to handle complex collision scenarios:
+
+```c
+// From map.c:1196-1205
+enum /* keep out states */
+{
+    _first_line_pass,
+    _second_line_pass,
+    _second_line_pass_made_contact,
+    _aborted,
+    _point_pass
+};
 ```
-Initial player movement:
 
-    Start                           Goal
-      @──────────────────────────────>*
+**Visual Example:**
+
+```
+Player moving into a corner formed by Line A (horizontal) and Line B (vertical):
+
+                Line B
                   │
-                Wall
+    Start         │
+      @───────────┼─────────>* Goal
+                  │         (inside corner!)
+    ──────────────┘
+         Line A
 
-Pass 1: Find all lines that could collide
-    Lines detected: [Line 5, Line 7, Line 12]
+Pass 1: Find all lines whose exclusion zones the path crosses
+    ┌──────────────────────────────────────────────────────┐
+    │ Iterate all nearby lines                             │
+    │ Test: does movement segment intersect exclusion zone?│
+    │ Record hits in bitmap: line_collision_bitmap         │
+    │                                                      │
+    │ Result: Line A hit (bit set), Line B NOT hit yet     │
+    │ Clip position to stay outside Line A                 │
+    └──────────────────────────────────────────────────────┘
 
-Pass 2: Re-clip using only lines from Pass 1
-    Verify collisions are consistent
-    If new line appears → Corner trap! Abort movement
+                Line B
+                  │
+    Start         │    New position after Pass 1
+      @           │    * ← clipped to stay outside Line A
+                  │    │
+    ──────────────┘    │
+         Line A        ↓
+                   But now INSIDE Line B's exclusion zone!
 
-Pass 3: Clip against endpoint circles
+Pass 2: Re-check ONLY lines hit in Pass 1
+    ┌──────────────────────────────────────────────────────┐
+    │ For each line in line_collision_bitmap:              │
+    │   If still colliding → clip again                    │
+    │   If NEW line detected (not in bitmap) → ABORT!      │
+    │                                                      │
+    │ Line A: in bitmap, re-clip if needed                 │
+    │ Line B: NOT in bitmap but now colliding → CORNER TRAP│
+    └──────────────────────────────────────────────────────┘
+
+Pass 3 (Point Pass): Clip against endpoint circles
     Endpoints act as rounded corners
     Distance test: dist(player, endpoint) < (player_radius + wall_separation)
 
-Final position:
-      @───────────>*
-                  │  (Clipped to stay outside wall)
-                Wall
+Result: Movement aborted, player stays at original position
 ```
+
+**Why the corner trap exists:**
+
+When Pass 1 clips the player away from one wall, it might push them into the exclusion zone of a different wall. Pass 2 detects this by checking if any collision occurs with a line that **wasn't in the original collision bitmap**:
+
+```c
+// From map.c:1275-1286
+case _second_line_pass:
+    if (line_collision_bitmap & (1 << i))
+    {
+        // We hit this line before - clip against it
+        closest_point_on_line(&zone->e0, &zone->e1, p1, p1);
+        state = _second_line_pass_made_contact;
+    }
+    else
+    {
+        // NEW line! We got pushed into a corner - abort
+        state = _aborted;
+    }
+    break;
+```
+
+This prevents the player from "tunneling" through corners where two walls meet.
+
+> **Source:** `map.c:1196-1355` for `keep_line_segment_out_of_walls()`
 
 ### Height Validation (3D Collision)
 
@@ -742,6 +835,8 @@ translate_point3d(&new_location, speed, facing, elevation);
 
 // Wander (accuracy spray)
 if (horizontal_wander) {
+    // (random() & 1) tests the least significant bit: 50% chance of 0 or 1
+    // This is a fast coin-flip: bit is 1 → wander right, bit is 0 → wander left
     translate_point3d(&new_location,
                      (random() & 1) ? WANDER_MAGNITUDE : -WANDER_MAGNITUDE,
                      NORMALIZE_ANGLE(facing + QUARTER_CIRCLE), 0);
@@ -774,13 +869,13 @@ Frame 5:
           @
 
 Frame 10:
-                    *  Falling (velocity.z negative)
-                   ╱
-                  ╱   gravity accumulated
-                 ╱
-                ╱
-         ──────────────  ← Floor
-         Impact!
+                         Falling (velocity.z negative)
+                ╲
+                 ╲  gravity accumulated
+                  ╲
+                   ╲
+         ──────────────*  ← Floor
+                   Impact!
 
 Physics each tick:
     velocity.z -= GRAVITATIONAL_ACCELERATION
@@ -881,15 +976,15 @@ Side view of projectile crossing portal:
                      │     │
     Projectile       Portal
        ──>           │     │
-                     │     │
-  Floor A ──────────┐└─────┴───── Floor B
+                     │     ├───── Floor B (higher)
+  Floor A ───────────┘     │
                      Too low!
 
 Test at intersection point:
     if (z > adjacent_floor && z < adjacent_ceiling):
         → Can pass through portal
     else:
-        → Hit floor or ceiling of portal
+        → Hit floor or ceiling of portal (projectile z < Floor B)
 ```
 
 ### Bounce Physics (Grenades)

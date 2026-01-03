@@ -132,21 +132,23 @@ void calculate_view_cone(struct world_view *view) {
 ### FOV Comparison
 
 ```
-Normal FOV (80°):                    Extravision FOV (130°):
+Normal FOV (80°):                          Extravision FOV (130°):
 
-       ╱│╲                                  ╱│╲
-      ╱ │ ╲                              ╱  │  ╲
-     ╱  │  ╲                           ╱   │   ╲
-    ╱   │   ╲                        ╱    │    ╲
-   ╱    │    ╲                     ╱     │     ╲
-  ╱     │     ╲                  ╱      │      ╲
- ╱      │      ╲               ╱       │       ╲
-╱───────┼───────╲            ╱────────┼────────╲
-   40°  │  40°                  65°   │   65°
-        ▲                             ▲
-      Player                        Player
+        ╱│╲                                     ╱───│───╲
+       ╱ │ ╲                                  ╱     │     ╲
+      ╱  │  ╲                               ╱      │      ╲
+     ╱   │   ╲                            ╱       │       ╲
+    ╱    │    ╲                         ╱        │        ╲
+   ╱     │     ╲                      ╱         │         ╲
+  ╱      │      ╲                   ╱          │          ╲
+ ╱       │       ╲                ╱           │           ╲
+╱────────┼────────╲             ╱────────────┼────────────╲
+    40°  │  40°                      65°     │     65°
+         ▲                                   ▲
+       Player                              Player
 
-More peripheral vision, objects appear smaller
+         Narrower view                       Much wider peripheral vision
+      Objects appear larger               Objects appear smaller/compressed
 ```
 
 ---
@@ -185,31 +187,36 @@ void update_player_elevation(struct player_data *player, long action_flags) {
 
 ```
 Looking Up (positive pitch):
-                    ───────────────
-                   ╱               ╲
-                  ╱     CEILING     ╲
-                 ╱                   ╲
-                ╱                     ╲
-               ╱                       ╲
-              ╱                         ╲
-             ╱___________________________╲
+         ╲___________________________╱   ← Far edge of ceiling (small)
+          ╲                         ╱
+           ╲      CEILING          ╱
+            ╲                     ╱
+             ╲                   ╱
+              ╲                 ╱
+               ╲_______________╱         ← Near edge (large, horizon)
+
 
 Normal View (zero pitch):
-             ╱───────────────────────────╲
-            ╱           WALL              ╲
-           ╱─────────────────────────────╲
-          ╱           FLOOR               ╲
-         ╱_________________________________╲
+             ╱───────────────────╲       ← Far ceiling (small)
+            ╱                     ╲
+           ╱       WALL            ╲
+          ╱─────────────────────────╲    ← Horizon
+          ╲                         ╱
+           ╲       FLOOR           ╱
+            ╲_____________________╱      ← Far floor (small)
+
 
 Looking Down (negative pitch):
-         ┌─────────────────────────────────┐
-         │           CEILING               │
-         ├─────────────────────────────────┤
-         │                                 │
-         │           FLOOR                 │
-         │                                 │
-         └─────────────────────────────────┘
+               ╱───────────────╲         ← Near edge (large, horizon)
+              ╱                 ╲
+             ╱                   ╲
+            ╱       FLOOR        ╲
+           ╱                       ╲
+          ╱                         ╲
+         ╱___________________________╲   ← Far edge of floor (small)
 ```
+
+**Perspective Rule:** The part of the surface closer to you appears **larger** on screen. When looking up, the ceiling directly overhead is close (large); the ceiling near the horizon is far (small). When looking down, the floor directly below is close (large); the floor near the horizon is far (small).
 
 ---
 

@@ -143,7 +143,7 @@ This separation allows a monster to remain "locked" on a target even while perfo
 #### Action State Flow Diagram
 
 ```
-COMBAT FLOW (from monsters.h:129-142):
+COMBAT FLOW (from monsters.c:363-447):
 
                             ┌───────────────┐
       ┌────────────────────►│  _stationary  │◄─────────────────────┐
@@ -151,30 +151,54 @@ COMBAT FLOW (from monsters.h:129-142):
       │                             │                              │
       │                    See target / Path found                 │
       │                             ▼                              │
-      │                     ┌───────────────┐         No path      │
-      │    ┌───────────────►│   _moving     │─────────────────────►│
-      │    │                └───────┬───────┘                      │
-      │    │                        │                              │
-      │    │              In attack range?                         │
-      │    │            ┌───────────┴───────────┐                  │
-      │    │    Melee range              Ranged distance           │
-      │    │            ▼                       ▼                  │
-      │    │   ┌─────────────────┐     ┌─────────────────┐         │
-      │    │   │ _attacking_close│     │ _attacking_far  │         │
-      │    │   └────────┬────────┘     └────────┬────────┘         │
-      │    │            └───────────┬───────────┘                  │
-      │    │                Attack complete                        │
-      │    │                        ▼                              │
-      │    │           ┌───────────────────────────┐               │
-      │    └───────────│ _waiting_to_attack_again  │───────────────┘
-      │                └───────────────────────────┘
-      │                       Cooldown done
-      │
- Hit by damage
-      ▼
-┌───────────────┐
-│  _being_hit   │──────► (back to _moving after stun recovery)
-└───────────────┘
+      │                     ┌───────────────┐         No path /    │
+      │    ┌───────────────►│   _moving     │────────►Target lost──┘
+      │    │                └───────┬───────┘
+      │    │                        │
+      │    │              In attack range?
+      │    │            ┌───────────┴───────────┐
+      │    │    Melee range              Ranged distance
+      │    │            ▼                       ▼
+      │    │   ┌─────────────────┐     ┌─────────────────┐
+      │    │   │ _attacking_close│     │ _attacking_far  │
+      │    │   └────────┬────────┘     └────────┬────────┘
+      │    │            └───────────┬───────────┘
+      │    │                Attack complete
+      │    │                        ▼
+      │    │           ┌───────────────────────────┐
+      │    └───────────│ _waiting_to_attack_again  │
+      │                └─────────────┬─────────────┘
+      │                      Cooldown done / No path
+      │                              │
+      │                              ▼
+      │                      ┌───────────────┐
+      └──────────────────────│  _stationary  │ (if path fails)
+                             └───────────────┘
+
+DAMAGE INTERRUPT (from monsters.c:1327, triggers from ANY combat state):
+
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                     ANY STATE                                       │
+    │  (_stationary, _moving, _attacking_close, _attacking_far,           │
+    │   _waiting_to_attack_again)                                         │
+    └───────────────────────────┬─────────────────────────────────────────┘
+                                │
+                    Damage received (non-lethal)
+                    set_monster_action(target_index, _monster_is_being_hit)
+                                │
+                                ▼
+                       ┌───────────────┐
+                       │  _being_hit   │
+                       │  (stun anim)  │
+                       └───────┬───────┘
+                               │
+               Animation complete (monsters.c:412-420)
+               monster_needs_path() + set_monster_action(_monster_is_moving)
+                               │
+                               ▼
+                       ┌───────────────┐
+                       │   _moving     │
+                       └───────────────┘
 
 
 DEATH STATES (triggered by lethal damage from any state):
@@ -212,44 +236,61 @@ enum /* monster modes */
 };
 ```
 
-**Mode Transition Diagram:**
+**Mode Transition Diagram (from monsters.c:318-336, 1011-1042, 1901-1903):**
 
 ```
                               Target acquired
+                         (change_monster_target() at line 2257)
                                     │
                                     ▼
                         ┌───────────────────┐
-          ┌────────────►│  _monster_locked  │◄─────────────┐
-          │             └─────────┬─────────┘              │
-          │                       │                        │
-          │               Target moved to                  │
-          │               another polygon                  │
-          │                       │                        │
-    Target visible               ▼                    Target visible
-    again              ┌─────────────────────┐        again
-          │            │ _monster_losing_lock│             │
-          │            └─────────┬───────────┘             │
-          │                      │                         │
-          │              Changed polygons                  │
-          │              > intelligence times              │
-          │                      │                         │
-          │                      ▼                         │
-          │            ┌─────────────────────┐             │
-          └────────────│  _monster_lost_lock │─────────────┘
-                       └─────────┬───────────┘
-                                 │
-                         No target found
-                         after search
-                                 │
-                                 ▼
-                       ┌─────────────────────┐
-                       │  _monster_unlocked  │
-                       └─────────────────────┘
+                        │  _monster_locked  │◄─────────────────────────────────┐
+                        │    (has target    │                                  │
+                        │    in sight)      │                                  │
+                        └─────────┬─────────┘                                  │
+                                  │                                            │
+                          Target not visible                                   │
+                          (line 1028-1036)                                     │
+                                  │                                            │
+                                  ▼                                            │
+                      ┌─────────────────────┐   Target visible again           │
+                      │ _monster_losing_lock│───(line 1013 or 331-334)─────────┤
+                      │  (searching for     │                                  │
+                      │   last known pos)   │                                  │
+                      └─────────┬───────────┘                                  │
+                                │                                              │
+                        Target not visible AND                                 │
+                        changes_until_lock_lost >= intelligence                │
+                        (line 1035-1036)                                       │
+                                │                                              │
+                                ▼                                              │
+                      ┌─────────────────────┐   Target visible again           │
+                      │  _monster_lost_lock │───(line 331-334)─────────────────┘
+                      │  (heading to last   │
+                      │   path endpoint)    │
+                      └─────────┬───────────┘
+                                │
+                        Path exhausted
+                        (line 1901-1903)
+                                │
+                                ▼
+                      ┌─────────────────────┐
+                      │  _monster_unlocked  │────► Search for new target
+                      │    (no target)      │      (find_closest_appropriate_target)
+                      └─────────────────────┘
 
-Intelligence determines lock persistence:
+
+Intelligence determines lock persistence (changes_until_lock_lost threshold):
   _intelligence_low = 2     polygon changes before losing lock
   _intelligence_average = 3 polygon changes before losing lock
   _intelligence_high = 8    polygon changes before losing lock
+
+Note: Difficulty modifies effective intelligence (line 1020-1026):
+  _wuss_level:          intelligence >> 2  (÷4)
+  _easy_level:          intelligence >> 1  (÷2)
+  _normal_level:        intelligence       (unchanged)
+  _major_damage_level:  intelligence × 2
+  _total_carnage_level: intelligence × 4
 ```
 
 ### Monster Classes and Factions
@@ -341,6 +382,83 @@ short get_monster_attitude(short monster_index, short target_index) {
 | `_monster_waits_with_clear_shot` | 0x80000 | Holds position if has clear shot |
 | `_monster_is_tiny` | 0x100000 | 0.25× normal height |
 | `_monster_attacks_immediately` | 0x200000 | No delay before first attack |
+
+### Berserk Mode (from monsters.c:1328, 2037-2042, 2305, 2327)
+
+Monsters with the `_monster_is_berserker` flag (0x1000) enter a frenzied state when critically wounded.
+
+**Trigger Condition:**
+```c
+// From monsters.c:1328
+if ((definition->flags & _monster_is_berserker) &&
+    monster->vitality < (definition->vitality >> 2))  // Below 25% health
+{
+    SET_MONSTER_BERSERK_STATUS(monster, TRUE);
+}
+```
+
+**Berserk Effects:**
+
+| Effect | Normal | Berserk | Source |
+|--------|--------|---------|--------|
+| **Attitude** | Friends = friendly | **Everyone = hostile** | monsters.c:2037-2042 |
+| **Movement Speed** | 100% | **150%** | monsters.c:2305 |
+| **Attack Cooldown** | +1 tick/frame | **+3 ticks/frame** | monsters.c:2327 |
+
+**Key Behavior Change - Attacks Friends:**
+```c
+// From monsters.c:2037-2042
+short get_monster_attitude(short monster_index, short target_index) {
+    // Berserk monsters are hostile toward EVERYTHING
+    if (TYPE_IS_ENEMY(definition, target_type) ||
+        MONSTER_IS_BERSERK(monster) ||  // <-- Berserk overrides normal allegiances!
+        ...)
+    {
+        attitude = _hostile;
+    }
+    // ...
+}
+```
+
+When berserk, a monster will attack:
+- Its former allies (other monsters of the same faction)
+- Players (even if normally allied, like crew members)
+- Any nearby entity, friend or foe
+
+**Movement Speed Bonus:**
+```c
+// From monsters.c:2305
+if (MONSTER_IS_BERSERK(monster)) {
+    distance_moved += (distance_moved >> 1);  // Add 50%
+}
+```
+
+**Attack Speed Bonus:**
+```c
+// From monsters.c:2327
+monster->ticks_since_attack += MONSTER_IS_BERSERK(monster) ? 3 : 1;
+// Berserk monsters accumulate attack cooldown 3x faster
+// This means they can attack 3x as frequently
+```
+
+**Monsters with Berserk Capability:**
+
+| Monster Type | Monster IDs | Notes |
+|--------------|-------------|-------|
+| Major Hunter | 9 | Elite hunters |
+| Major Enforcer | 11 | Elite enforcers |
+| Minor Cyborg | 18 | All cyborgs |
+| Major Cyborg | 19 | All cyborgs |
+| All Yeti variants | 28-30 | Yeti, Sewage Yeti, Lava Yeti |
+| All Tick variants | 25-27 | Tick, Boom Tick, Kamikaze Tick |
+
+**Gameplay Implications:**
+- Wounded berserker enemies become significantly more dangerous
+- Their increased speed and attack rate makes them harder to fight
+- They may attack their own allies, potentially helping the player
+- Berserk state is permanent once triggered (never clears during monster's lifetime)
+
+> **Source:** `monster_definitions.h:95` for flag definition, `monsters.c:1328` for trigger, `monsters.c:2037-2042` for attitude override, `monsters.c:2305` for speed bonus, `monsters.c:2327` for attack speed
 
 ### Monster Speed Table
 
