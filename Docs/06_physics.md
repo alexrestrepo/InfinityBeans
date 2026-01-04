@@ -4,6 +4,15 @@
 
 > **For Porting:** `physics.c` and `world.c` are fully portable! No Mac dependencies. The collision detection uses pure fixed-point math against polygon geometry. Keep all code as-is.
 
+> **Developer Diary:** From `world.c:1-23` (1992-1994), the arctangent function was notoriously troublesome:
+>
+> *"Thursday, January 21, 1993: fixed arctangent function."*
+> *"Saturday, January 23, 1993: fixed arctangent, hopefully for the last time."*
+> *"Wednesday, January 27, 1993: final fix to arctangent, we swear. recall lim(arctan(x)) as x approaches π/2 or 3π/4 is ±∞... because we didn't realize this, arctan failed in the case where x was very close to but slightly below π/2. i think we've seen the last monster suddenly 'panic' and bolt directly into a wall."*
+> *"Sunday, July 25, 1993: the arctan of 0/0 is now (arbitrarily) π/2 because we're sick of assert(y) failing."*
+>
+> — Source: `world.c:1-23`
+
 ---
 
 ## 6.1 What Problem Are We Solving?

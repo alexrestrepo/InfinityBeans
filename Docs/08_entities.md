@@ -4,6 +4,15 @@
 
 > **For Porting:** All entity code is fully portable! `monsters.c`, `projectiles.c`, `weapons.c`, `items.c`, `effects.c`, and `scenery.c` have no Mac dependencies. The definition headers (`*_definitions.h`) contain static data tables that compile anywhere.
 
+> **Developer Diary:** From `monsters.c:1-17` (1992-1995):
+>
+> *"Friday, May 27, 1994: split into MONSTERS.C, PROJECTILES.C and EFFECTS.C; unified active_monster and monster array."*
+> *"Friday, September 30, 1994 (Jason): started adding comments again. damage_monsters_in_radius() is less forgiving in z now."*
+> *"Monday, December 5, 1994 (Jason): rebellion environment function (all _clients hate all _pfhor)."*
+> *"Monday, July 10, 1995 (Jason): rewrite for marathon2 done. my bobs won't listen to your fucking whining."*
+>
+> — Source: `monsters.c:1-17`
+
 ---
 
 ## 8.1 What Problem Are We Solving?

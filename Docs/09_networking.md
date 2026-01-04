@@ -4,6 +4,12 @@
 
 > **For Porting:** For single-player, stub out all networking (return from functions early). For multiplayer, replace `network_ddp.c` and `network_adsp.c` with modern sockets/UDP. The core sync logic in `network.c` and `network_games.c` is portable—it just needs a transport layer.
 
+> **Developer Note:** From `physics.c:9-17` (May 1994), explaining the networking design decision:
+>
+> *"there are two viable methods of running a synchronized network game. the first is doom's, where each player shares with each other player only his control information for that tick (this imposes a maximum frame rate, as the state-of-the-world will be advanced at the same time on all machines). the second is the continuous lag-tolerant model where each player shares absolute information with each other player as often as possible and local machines do their best at guessing what everyone else in the game is doing until they get better information. whichever choice is made will change the physics drastically. we're going to take the latter approach, and cache the KeyMap at interrupt time to be batch-processed later at frame time."*
+>
+> — Source: `physics.c:9-17`
+
 ---
 
 ## 9.1 What Problem Are We Solving?

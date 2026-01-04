@@ -448,37 +448,81 @@ _swim_bit                    // 31
 ### Bit Layout Diagram
 
 ```
-32-bit Action Flags (from player.h:68-106):
+ACTION FLAGS (32 bits total) - from player.h:68-106
+════════════════════════════════════════════════════════════════════
 
-┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐
-│31│30│29│28│27│26│25│24│23│22│21│20│19│18│17│16│15│14│13│12│11│10│ 9│ 8│ 7│ 6│ 5│ 4│ 3│ 2│ 1│ 0│
-├──┴──┴──┴──┴──┴──┴──┴──┴──┴──┼──┴──┴──┴──┴──┴──┴──┼──┼──┴──┴──┴──┴──┼──┼──┴──┴──┴──┴──┴──┴──┼──┤
-│sw│mi│mp│←w│→w│ac│r │l │→s│←s│p6│p5│p4│p3│p2│p1│p0│pM│t4│t3│t2│t1│t0│tM│y6│y5│y4│y3│y2│y1│y0│yM│
-└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
- │                          │  │                 │  │              │  │                       │
- │        Actions           │  │ Position (7b)   │  │ Pitch (5b)   │  │     Yaw (7 bits)      │
- │     (10 bits)            │  │ or move flags   │  │ or look flgs │  │   or turn/look flags  │
- └──────────────────────────┘  └────────┬────────┘  └──────┬───────┘  └───────────┬───────────┘
-                                        │                  │                      │
-                                       pM=14              tM=8                   yM=0
-                                    (mode bit)         (mode bit)             (mode bit)
+UPPER 10 BITS (22-31): Discrete Action Buttons
+┌─────────────────────────────────────────────────────────────────┐
+│ Bit │ Name                    │ Purpose                        │
+├─────┼─────────────────────────┼────────────────────────────────┤
+│ 31  │ _swim                   │ Swimming up                    │
+│ 30  │ _microphone_button      │ Voice chat (network)           │
+│ 29  │ _toggle_map             │ Open/close automap             │
+│ 28  │ _cycle_weapons_backward │ Previous weapon                │
+│ 27  │ _cycle_weapons_forward  │ Next weapon                    │
+│ 26  │ _action_trigger_state   │ Use/activate                   │
+│ 25  │ _right_trigger_state    │ Secondary fire                 │
+│ 24  │ _left_trigger_state     │ Primary fire                   │
+│ 23  │ _sidestepping_right     │ Strafe right                   │
+│ 22  │ _sidestepping_left      │ Strafe left                    │
+└─────┴─────────────────────────┴────────────────────────────────┘
 
-Legend:
-  yM = absolute_yaw_mode (bit 0)       y0-y6 = yaw value OR turn/look flags
-  tM = absolute_pitch_mode (bit 8)     t0-t4 = pitch value OR look up/down/center
-  pM = absolute_position_mode (bit 14) p0-p6 = position value OR forward/backward/run
-  ←s/→s = sidestep left/right          l/r = left/right trigger
-  ac = action trigger                  ←w/→w = cycle weapons backward/forward
-  mp = toggle map                      mi = microphone
-  sw = swim
+POSITION FIELD (bits 14-21): Movement
+┌─────────────────────────────────────────────────────────────────┐
+│ Bit 14: _absolute_position_mode                                 │
+│                                                                 │
+│   Mode=0 (Boolean flags):        Mode=1 (Absolute value):      │
+│   ┌─────────────────────────┐    ┌─────────────────────────┐   │
+│   │ 21: (unused)            │    │ 15-21: 7-bit position   │   │
+│   │ 20: _looking_right      │    │        value (0-127)    │   │
+│   │ 19: _looking_left       │    │                         │   │
+│   │ 18: _looking_center     │    │ Encodes analog stick    │   │
+│   │ 17: _run_dont_walk      │    │ or precise movement     │   │
+│   │ 16: _moving_backward    │    │                         │   │
+│   │ 15: _moving_forward     │    │                         │   │
+│   └─────────────────────────┘    └─────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
 
-Mode bits select interpretation:
-  When yM=1: bits 1-7 are 7-bit absolute yaw angle
-  When yM=0: bits 1-7 are individual turn/look boolean flags
-  (Same pattern for pitch and position)
+PITCH FIELD (bits 8-13): Vertical Look
+┌─────────────────────────────────────────────────────────────────┐
+│ Bit 8: _absolute_pitch_mode                                     │
+│                                                                 │
+│   Mode=0 (Boolean flags):        Mode=1 (Absolute value):      │
+│   ┌─────────────────────────┐    ┌─────────────────────────┐   │
+│   │ 13: (unused)            │    │ 9-13: 5-bit pitch angle │   │
+│   │ 12: (unused)            │    │       (0-31)            │   │
+│   │ 11: _looking_center     │    │                         │   │
+│   │ 10: _looking_down       │    │ Encodes mouse look      │   │
+│   │  9: _looking_up         │    │ vertical angle          │   │
+│   └─────────────────────────┘    └─────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
 
-Result: Full 6-DOF input in just 32 bits!
+YAW FIELD (bits 0-7): Horizontal Look/Turn
+┌─────────────────────────────────────────────────────────────────┐
+│ Bit 0: _absolute_yaw_mode                                       │
+│                                                                 │
+│   Mode=0 (Boolean flags):        Mode=1 (Absolute value):      │
+│   ┌─────────────────────────┐    ┌─────────────────────────┐   │
+│   │ 7: _looking_right       │    │ 1-7: 7-bit yaw delta    │   │
+│   │ 6: _looking_left        │    │      (0-127)            │   │
+│   │ 5: (unused)             │    │                         │   │
+│   │ 4: (unused)             │    │ Encodes mouse look      │   │
+│   │ 3: (unused)             │    │ horizontal angle        │   │
+│   │ 2: (unused)             │    │                         │   │
+│   │ 1: _turning_right       │    │                         │   │
+│   │ (bit 1 in flag mode)    │    │                         │   │
+│   └─────────────────────────┘    └─────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+
+Result: Full 6-DOF input (3 axes movement + 3 axes rotation) in 32 bits!
 ```
+
+> **Design Note:** The dual-mode bit fields (yaw/pitch/position) are clever
+> engineering for 1995. Keyboard players use boolean flags (8 directions),
+> while mouse players get 7-bit analog precision. The mode bit at the field's
+> LSB selects which interpretation to use. This allowed Marathon to support
+> both input methods with a unified network protocol—critical for mixed-input
+> multiplayer games.
 
 > **Source:** `player.h:53-66` for GET macros, `player.h:68-106` for bit enum
 

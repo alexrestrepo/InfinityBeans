@@ -227,6 +227,13 @@ This compact structure represents positions in Marathon's 2D world space. `world
 > - **Origin:** The origin (0, 0) is arbitrary—placed wherever the map designer chose. There's no enforced center.
 > - **Physics uses higher precision:** During physics calculations, positions are converted to 32-bit `fixed` (16.16 format) for greater precision, then converted back to `world_distance` for storage.
 
+> **Design Note:** Why `WORLD_ONE = 1024`? This power-of-two value was chosen for several reasons:
+> 1. **Efficient division** - Dividing by 1024 is a simple bit shift (`>> 10`)
+> 2. **Human scale** - Player height is ~819 units (~0.8 world units), so 1 world unit ≈ 7 feet / 2.1 meters
+> 3. **Sub-unit precision** - 10 fractional bits give 1/1024 ≈ 0.001 unit precision, enough for smooth movement
+> 4. **Fits in 16 bits** - With 6 integer bits, coordinates can represent ±32 units—sufficient for any room size
+> 5. **Easy fractions** - 1024 divides evenly by 2, 4, 8, 16, 32, 64, 128, 256, 512 for common ratios
+
 ### Endpoints (Vertices)
 
 Marathon stores vertices as **endpoints** with additional metadata for rendering optimization:

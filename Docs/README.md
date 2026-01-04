@@ -94,6 +94,8 @@ This directory contains tutorial-style documentation for the Marathon 2/Infinity
 | B | [**Quick Reference**](appendix_b_reference.md) | ✅ Complete | Common values, formulas, limits |
 | C | [**Source File Index**](appendix_c_files.md) | ✅ Complete | File-by-file reference |
 | D | [**Fixed-Point Conversion**](appendix_d_fixedpoint.md) | ✅ Complete | Working with Marathon's number format |
+| E | [**M2 vs Infinity**](appendix_e_m2_vs_infinity.md) | ✅ Complete | Source code differences between versions |
+| F | [**Map Creation Constraints**](appendix_f_forge.md) | ✅ Complete | Forge/editor reference, polygon rules |
 
 ---
 
@@ -146,9 +148,10 @@ Different readers have different goals. Here are recommended reading paths:
 
 **Content creation path:**
 1. **[Chapter 10: File Formats](10_file_formats.md)** - Map and shape formats
-2. **[Chapter 19: Shape Animation](19_shapes.md)** - Sprite and animation system
-3. **[Chapter 28: Terminals](28_terminals.md)** - Story content markup
-4. **[Chapter 13: Sound](13_sound.md)** - Audio system
+2. **[Appendix F: Map Creation Constraints](appendix_f_forge.md)** - Polygon rules, limits, editor reference
+3. **[Chapter 19: Shape Animation](19_shapes.md)** - Sprite and animation system
+4. **[Chapter 28: Terminals](28_terminals.md)** - Story content markup
+5. **[Chapter 13: Sound](13_sound.md)** - Audio system
 
 ### 📚 "I want to read everything"
 

@@ -10,6 +10,16 @@
 >
 > **Terminology note:** This chapter uses `world_pixels`, `screen`, `destination`, and `framebuffer` interchangeably for the render target buffer. See **[Appendix A: Glossary → Graphics Buffer Terminology](appendix_a_glossary.md#graphics-buffer-terminology)** for detailed clarification of these terms.
 
+> **Developer Diary:** The `render.c` file header contains Jason Jones' development notes from September 1994–June 1995. Selected excerpts:
+>
+> *"Tuesday, September 13, 1994 2:54:56 AM: no fair!—it's still monday, really. with the aid of some graphical debugging the clipping all works now"*
+>
+> *"Friday, September 16, 1994 4:06:17 AM: walls, floors and ceilings texture, wobble, etc. contemplating objects... maybe this will work after all."*
+>
+> *"Monday, January 23, 1995 6:53:26 AM: the way to fix the render object sorting problem is to ignore overlap and sort everything by depth, regardless. imagine: two, far, non-overlapping objects; by the old algorithm their drawing order is irrelevant. when a closer object which overlaps both of them is sorted, it only attempts to lie in front of the closest of the two (leaving the farthest one in an uncertain position)."*
+>
+> — Source: `render.c:1-54`
+
 ---
 
 ## 5.1 What Problem Are We Solving?
