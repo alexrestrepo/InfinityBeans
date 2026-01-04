@@ -364,6 +364,8 @@ All physics updates happen within the same tick, then rendering occurs. This ens
 - **Deterministic replay** - Recorded games play back identically
 - **No visual glitches** - Rendering sees consistent world state
 
+![Game Loop Architecture](diagrams/game_loop.svg)
+
 ---
 
 ## 7.5 Action Flags (Input Encoding)

@@ -21,6 +21,7 @@ Combat and environmental interactions need visual feedback:
 
 ## 26.2 Effect Types
 
+From `effects.h:8-88`:
 ```c
 enum /* effect types */ {
     // Weapon explosions

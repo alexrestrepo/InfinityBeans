@@ -257,6 +257,8 @@ Player 4: [Input] [Wait] [Sim] [Render] [Input] [Wait] [Sim]...
 All machines stay synchronized at tick boundaries
 ```
 
+![Network Action Queue System](diagrams/network_action_queue.svg)
+
 ---
 
 ## 9.5 Lag Tolerance and Queue Buffering

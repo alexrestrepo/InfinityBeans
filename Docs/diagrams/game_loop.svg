@@ -122,10 +122,10 @@
     </g>
   </g>
 
-  <!-- Loop back arrow -->
-  <path d="M 800,380 L 830,380 L 830,160 L 50,160 L 50,120" stroke="#475569" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
-  <polygon points="50,115 45,125 55,125" fill="#475569"/>
-  <text x="830" y="270" font-family="system-ui, sans-serif" font-size="10" fill="#475569" transform="rotate(90, 830, 270)">next tick</text>
+  <!-- Loop back arrow (routed outside content) -->
+  <path d="M 800,350 L 870,350 L 870,55 L 30,55 L 30,115" stroke="#475569" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+  <polygon points="30,120 25,110 35,110" fill="#475569"/>
+  <text x="875" y="200" font-family="system-ui, sans-serif" font-size="10" fill="#475569" writing-mode="vertical-rl">next tick</text>
 
   <!-- Key insight boxes -->
   <g transform="translate(50, 400)">

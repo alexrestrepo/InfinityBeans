@@ -2,7 +2,10 @@
 
 ## Story Content, Checkpoints, and Level Transitions
 
-> **For Porting:** Terminal logic in `computer_interface.c` is portable. Replace Mac text rendering with your font system. The preprocessed terminal format is cross-platform.
+> **Source files**: `computer_interface.c`, `computer_interface.h`
+> **Related chapters**: [Chapter 15: Control Panels](15_control_panels.md), [Chapter 10: File Formats](10_file_formats.md)
+
+> **For Porting:** Terminal logic in `computer_interface.c` is mostly portable (2364 lines). Replace Mac text rendering (QuickDraw) with your font system. The preprocessed terminal format is cross-platform.
 
 ---
 
@@ -17,94 +20,273 @@ Marathon tells its story through in-game computer terminals that:
 
 ---
 
-## 28.2 Terminal Scripting Language
+## 28.2 Terminal Scripting Language (`computer_interface.h:6-56`)
 
-Terminals are authored using a markup language:
-
-### Group Commands
-
-| Command | Purpose | Parameter |
-|---------|---------|-----------|
-| `#LOGON XXXX` | Login screen | Shape ID for graphic |
-| `#LOGOFF` | Logout screen | None |
-| `#UNFINISHED` | Show if mission incomplete | None |
-| `#SUCCESS` | Show if mission complete | None |
-| `#FAILURE` | Show if mission failed | None |
-| `#INFORMATION` | General text info | None |
-| `#CHECKPOINT XX` | Show map checkpoint | Goal ID |
-| `#PICT XXXX` | Display image | PICT resource ID |
-| `#SOUND XXXX` | Play sound effect | Sound ID |
-| `#MOVIE XXXX` | Play QuickTime movie | Movie ID |
-| `#TRACK XXXX` | Play music track | Track ID |
-| `#INTERLEVEL TELEPORT XXX` | Go to another level | Level number |
-| `#INTRALEVEL TELEPORT XXX` | Teleport within level | Polygon index |
-| `#STATIC XX` | Display static effect | Duration ticks |
-| `#TAG XX` | Activate tagged objects | Tag number |
-| `#END` | End current group | None |
-
-### Text Formatting
-
-| Code | Effect |
-|------|--------|
-| `$B` | Bold ON |
-| `$b` | Bold OFF |
-| `$I` | Italic ON |
-| `$i` | Italic OFF |
-| `$U` | Underline ON |
-| `$u` | Underline OFF |
-| `$$` | Literal `$` character |
-
----
-
-## 28.3 Example Terminal Script
-
-```
-#LOGON 1234
-Welcome to Terminal 47.
-#END
-
-#UNFINISHED
-$BObjective:$b Find the primary reactor.
-
-The pfhor have overrun this section. Proceed with
-$Iextreme$i caution.
-#CHECKPOINT 3
-#END
-
-#SUCCESS
-$BWell done.$b The reactor is secured.
-
-Proceed to the extraction point.
-#INTERLEVEL TELEPORT 5
-#END
-```
-
----
-
-## 28.4 Preprocessed Terminal Format
-
-Terminal scripts are compiled into efficient binary format:
-
-### Header Structure
+The header documents the terminal markup language:
 
 ```c
-struct static_preprocessed_terminal_data {
-    short total_length;       // Total bytes of terminal data
-    short flags;              // _text_is_encoded_flag (0x0001)
-    short lines_per_page;     // Lines visible per screen
-    short grouping_count;     // Number of terminal_groupings
-    short font_changes_count; // Number of text_face_data entries
+/*
+    New paradigm:
+    Groups each start with one of the following groups:
+     #UNFINISHED, #SUCCESS, #FAILURE
+
+    First is shown the
+    #LOGON XXXXX
+
+    Then there are any number of groups with:
+    #INFORMATION, #CHECKPOINT, #SOUND, #MOVIE, #TRACK
+
+    And a final:
+    #INTERLEVEL TELEPORT, #INTRALEVEL TELEPORT
+
+    Each group ends with:
+    #END
+
+    Groupings:
+    #logon XXXX- login message (XXXX is shape for login screen)
+    #unfinished- unfinished message
+    #success- success message
+    #failure- failure message
+    #information- information
+    #briefing XX- briefing, then load XX
+    #checkpoint XX- Checkpoint xx (associated with goal)
+    #sound XXXX- play sound XXXX
+    #movie XXXX- play movie XXXX (from Movie file)
+    #track XXXX- play soundtrack XXXX (from Music file)
+    #interlevel teleport XXX- go to level XXX
+    #intralevel teleport XXX- go to polygon XXX
+    #pict XXXX- display the pict resource XXXX
+
+    Special embedded keys:
+    $B- Bold on
+    $b- bold off
+    $I- Italic on
+    $i- italic off
+    $U- underline on
+    $u- underline off
+    $- anything else is passed through unchanged
+*/
+```
+
+---
+
+## 28.3 Display Constants (`computer_interface.c:38-42`)
+
+```c
+#define LABEL_INSET 3
+#define LOG_DURATION_BEFORE_TIMEOUT (2*TICKS_PER_SECOND)
+#define BORDER_HEIGHT 18
+#define BORDER_INSET 9
+#define FUDGE_FACTOR 1
+```
+
+---
+
+## 28.4 Terminal States (`computer_interface.c:44-52`)
+
+```c
+enum {
+    _reading_terminal,
+    _no_terminal_state,
+    NUMBER_OF_TERMINAL_STATES
+};
+
+enum {
+    _terminal_is_dirty= 0x01
 };
 ```
 
-### Binary Layout
+### Dirty Flag Macros (`computer_interface.c:78-79`)
+
+```c
+#define TERMINAL_IS_DIRTY(term) ((term)->flags & _terminal_is_dirty)
+#define SET_TERMINAL_IS_DIRTY(term, v) ((v)? ((term)->flags |= _terminal_is_dirty) : ((term)->flags &= ~_terminal_is_dirty))
+```
+
+---
+
+## 28.5 Terminal Input Actions (`computer_interface.c:54-61`)
+
+```c
+enum {
+    _any_abort_key_mask= _action_trigger_state,
+    _terminal_up_arrow= _moving_forward,
+    _terminal_down_arrow= _moving_backward,
+    _terminal_page_down= _turning_right,
+    _terminal_page_up= _turning_left,
+    _terminal_next_state= _left_trigger_state
+};
+```
+
+### Key Mappings (`computer_interface.c:171-183`)
+
+```c
+static struct terminal_key terminal_keys[]= {
+    {0x7e, 0, 0, _terminal_page_up},  // arrow up
+    {0x7d, 0, 0, _terminal_page_down},// arrow down
+    {0x74, 0, 0, _terminal_page_up},   // page up
+    {0x79, 0, 0, _terminal_page_down}, // page down
+    {0x30, 0, 0, _terminal_next_state}, // tab
+    {0x4c, 0, 0, _terminal_next_state}, // enter
+    {0x24, 0, 0, _terminal_next_state}, // return
+    {0x31, 0, 0, _terminal_next_state}, // space
+    {0x3a, 0, 0, _terminal_next_state}, // command
+    {0x35, 0, 0, _any_abort_key_mask}  // escape
+};
+#define NUMBER_OF_TERMINAL_KEYS (sizeof(terminal_keys)/sizeof(struct terminal_key))
+```
+
+---
+
+## 28.6 Group Type Enumeration (`computer_interface.c:88-108`)
+
+```c
+enum {
+    _logon_group,
+    _unfinished_group,
+    _success_group,
+    _failure_group,
+    _information_group,
+    _end_group,
+    _interlevel_teleport_group, // permutation is level to go to
+    _intralevel_teleport_group, // permutation is polygon to go to.
+    _checkpoint_group, // permutation is the goal to show
+    _sound_group, // permutation is the sound id to play
+    _movie_group, // permutation is the movie id to play
+    _track_group, // permutation is the track to play
+    _pict_group, // permutation is the pict to display
+    _logoff_group,
+    _camera_group, //  permutation is the object index
+    _static_group, // permutation is the duration of static.
+    _tag_group, // permutation is the tag to activate
+
+    NUMBER_OF_GROUP_TYPES
+};
+```
+
+---
+
+## 28.7 Text Face Flags (`computer_interface.c:110-116`)
+
+```c
+enum // flags to indicate text styles for paragraphs
+{
+    _plain_text      = 0x00,
+    _bold_text       = 0x01,
+    _italic_text     = 0x02,
+    _underline_text  = 0x04
+};
+```
+
+---
+
+## 28.8 Terminal Grouping Flags (`computer_interface.c:118-121`)
+
+```c
+enum { /* terminal grouping flags */
+    _draw_object_on_right= 0x01,  // for drawing checkpoints, picts, movies.
+    _center_object= 0x02
+};
+```
+
+---
+
+## 28.9 Preprocessed Terminal Header (`computer_interface.h:59-65`)
+
+```c
+struct static_preprocessed_terminal_data {
+    short total_length;
+    short flags;
+    short lines_per_page; /* Added for internationalization/sync problems */
+    short grouping_count;
+    short font_changes_count;
+};
+```
+
+### Encoding Flag (`computer_interface.c:84-86`)
+
+```c
+enum {
+    _text_is_encoded_flag= 0x0001
+};
+```
+
+---
+
+## 28.10 Terminal Groupings Structure (`computer_interface.c:123-130`)
+
+```c
+struct terminal_groupings {
+    short flags; /* varies.. */
+    short type; /* _information_text, _checkpoint_text, _briefing_text, _movie, _sound_bite, _soundtrack */
+    short permutation; /* checkpoint id for chkpt, level id for _briefing, movie id for movie, sound id for sound, soundtrack id for soundtrack */
+    short start_index;
+    short length;
+    short maximum_line_count;
+};
+```
+
+---
+
+## 28.11 Text Face Data Structure (`computer_interface.c:132-136`)
+
+```c
+struct text_face_data {
+    short index;
+    short face;
+    short color;
+};
+```
+
+---
+
+## 28.12 Player Terminal Data (`computer_interface.c:138-149`)
+
+```c
+struct player_terminal_data
+{
+    short flags;
+    short phase;
+    short state;
+    short current_group;
+    short level_completion_state;
+    short current_line;
+    short maximum_line;
+    short terminal_id;
+    long last_action_flag;
+};
+```
+
+---
+
+## 28.13 View Terminal Data (`computer_interface.h:67-70`)
+
+```c
+struct view_terminal_data {
+    short top, left, bottom, right;
+    short vertical_offset;
+};
+```
+
+---
+
+## 28.14 Global Terminal Data (`computer_interface.c:164-165`, `computer_interface.h:72-73`)
+
+```c
+byte *map_terminal_data;
+long map_terminal_data_length;
+```
+
+---
+
+## 28.15 Binary Layout
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  static_preprocessed_terminal_data (10 bytes)                    │
 ├─────────────────────────────────────────────────────────────────┤
 │  terminal_groupings[grouping_count] (12 bytes each)              │
-│    ├─ Group 0: type, permutation, start_index, length           │
+│    ├─ Group 0: flags, type, permutation, start_index, length    │
 │    ├─ Group 1: ...                                               │
 │    └─ Group N: ...                                               │
 ├─────────────────────────────────────────────────────────────────┤
@@ -118,131 +300,304 @@ struct static_preprocessed_terminal_data {
 
 ---
 
-## 28.5 Terminal Grouping Structure
+## 28.16 Terminal API (`computer_interface.h:76-93`)
 
 ```c
-struct terminal_groupings {
-    short flags;               // _draw_object_on_right, _center_object
-    short type;                // Group type enum
-    short permutation;         // Type-specific parameter
-    short start_index;         // Offset into text array
-    short length;              // Text length for this group
-    short maximum_line_count;  // Lines in this group
-};
+void initialize_terminal_manager(void);
+void initialize_player_terminal_info(short player_index);
+void enter_computer_interface(short player_index, short text_number, short completion_flag);
+void _render_computer_interface(struct view_terminal_data *data);
+void update_player_for_terminal_mode(short player_index);
+void update_player_keys_for_terminal(short player_index, long action_flags);
+long build_terminal_action_flags(char *keymap);
+void dirty_terminal_view(short player_index);
+void abort_terminal_mode(short player_index);
+
+boolean player_in_terminal_mode(short player_index);
+
+void *get_terminal_data_for_save_game(void);
+long calculate_terminal_data_length(void);
+
+/* This returns the text.. */
+void *get_terminal_information_array(void);
+long calculate_terminal_information_length(void);
 ```
 
-### Group Types
+---
+
+## 28.17 Enter Computer Interface (`computer_interface.c:292-326`)
 
 ```c
-enum /* group types */ {
-    _logon_group,               // 0 - Login screen
-    _unfinished_group,          // 1 - Mission incomplete
-    _success_group,             // 2 - Mission complete
-    _failure_group,             // 3 - Mission failed
-    _information_group,         // 4 - General info
-    _end_group,                 // 5 - End marker
-    _interlevel_teleport_group, // 6 - Level transition
-    _intralevel_teleport_group, // 7 - In-level teleport
-    _checkpoint_group,          // 8 - Map checkpoint
-    _sound_group,               // 9 - Play sound
-    _movie_group,               // 10 - Play movie
-    _track_group,               // 11 - Play music
-    _pict_group,                // 12 - Display image
-    _logoff_group,              // 13 - Logout screen
-    _camera_group,              // 14 - Camera view
-    _static_group,              // 15 - TV static
-    _tag_group                  // 16 - Activate tags
-};
+void enter_computer_interface(
+    short player_index,
+    short text_number,
+    short completion_flag)
+{
+    struct player_terminal_data *terminal= get_player_terminal_data(player_index);
+    struct player_data *player= get_player_data(player_index);
+    struct static_preprocessed_terminal_data *terminal_text= get_indexed_terminal_data(text_number);
+
+    if(dynamic_world->player_count==1)
+    {
+        short lines_per_page;
+
+        /* Reset the lines per page to the actual value for whatever fucked up font that they have */
+        lines_per_page= calculate_lines_per_page();
+        if(lines_per_page != terminal_text->lines_per_page)
+        {
+            terminal_text->lines_per_page= lines_per_page;
+        }
+    }
+
+    /* Tell everyone that this player is in the computer interface.. */
+    terminal->state= _reading_terminal;
+    terminal->phase= NONE;
+    terminal->current_group= NONE;
+    terminal->level_completion_state= completion_flag;
+    terminal->current_line= 0;
+    terminal->maximum_line= 1; // any click or keypress will get us out.
+    terminal->terminal_id= text_number;
+    terminal->last_action_flag= -1l; /* Eat the first key */
+
+    /* And select the first one. */
+    next_terminal_group(player_index, terminal_text);
+}
 ```
 
 ---
 
-## 28.6 Text Face Data
+## 28.18 Get Indexed Terminal Data (`computer_interface.c:1093-1112`)
 
 ```c
-struct text_face_data {
-    short index;   // Character position where style changes
-    short face;    // Style flags
-    short color;   // Text color index
-};
+static struct static_preprocessed_terminal_data *get_indexed_terminal_data(
+    short id)
+{
+    struct static_preprocessed_terminal_data *data;
+    long offset= 0l;
+    short index= id;
 
-enum /* face flags */ {
-    _plain_text     = 0x00,
-    _bold_text      = 0x01,
-    _italic_text    = 0x02,
-    _underline_text = 0x04
-};
-```
+    data= (struct static_preprocessed_terminal_data *) (map_terminal_data);
+    while(index>0) {
+        vassert(offset<map_terminal_data_length, csprintf(temporary, "Unable to get data for terminal: %d", id));
+        offset+= data->total_length;
+        data= (struct static_preprocessed_terminal_data *) (map_terminal_data+offset);
+        index--;
+    }
 
-### Style Processing Example
+    /* Note that this will only decode the text once. */
+    decode_text(data);
 
-```
-Source: "This is $Bbold$b text"
-
-After preprocessing:
-  text = "This is bold text"
-
-  text_face_data[0] = { index: 0,  face: _plain_text, color: 0 }
-  text_face_data[1] = { index: 8,  face: _bold_text,  color: 0 }
-  text_face_data[2] = { index: 12, face: _plain_text, color: 0 }
+    return data;
+}
 ```
 
 ---
 
-## 28.7 Terminal State Machine
+## 28.19 Data Accessor Functions (`computer_interface.c:2311-2351`)
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│              TERMINAL STATE MACHINE                              │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   Player activates    enter_computer_    Terminal state          │
-│   control panel  ──►  interface()    ──► machine starts          │
-│                                                                  │
-│   _reading_terminal ──► Groups processed sequentially            │
-│         │                                                        │
-│         ▼                                                        │
-│   ┌──────────┐   ┌──────────┐   ┌──────────┐                    │
-│   │  LOGON   │──►│ CONTENT  │──►│  LOGOFF  │                    │
-│   │  Screen  │   │ (groups) │   │ /Teleport│                    │
-│   └──────────┘   └──────────┘   └──────────┘                    │
-│                                                                  │
-│   _no_terminal_state ──► Player exits terminal mode              │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 28.8 Player Terminal Data
+### Get Indexed Grouping (`computer_interface.c:2311-2323`)
 
 ```c
-struct player_terminal_data {
-    short flags;                   // _terminal_is_dirty
-    short phase;                   // Animation/timing phase
-    short state;                   // _reading_terminal or _no_terminal_state
-    short current_group;           // Which group being displayed
-    short level_completion_state;  // For choosing success/failure
-    short current_line;            // Scroll position
-    short maximum_line;            // Total lines in current group
-    short terminal_id;             // Terminal being accessed
-    long last_action_flag;         // For debouncing input
-};
+static struct terminal_groupings *get_indexed_grouping(
+    struct static_preprocessed_terminal_data *data,
+    short index)
+{
+    byte *start;
+
+    assert(index>=0 && index<data->grouping_count);
+    start= (byte *) data;
+    start += sizeof(struct static_preprocessed_terminal_data) +
+        index*sizeof(struct terminal_groupings);
+
+    return (struct terminal_groupings *) start;
+}
+```
+
+### Get Indexed Font Changes (`computer_interface.c:2325-2337`)
+
+```c
+static struct text_face_data *get_indexed_font_changes(
+    struct static_preprocessed_terminal_data *data,
+    short index)
+{
+    byte *start;
+
+    assert(index>=0 && index<data->font_changes_count);
+    start= (byte *) data;
+    start += sizeof(struct static_preprocessed_terminal_data) +
+        data->grouping_count*sizeof(struct terminal_groupings)+
+        index*sizeof(struct text_face_data);
+
+    return (struct text_face_data *) start;
+}
+```
+
+### Get Text Base (`computer_interface.c:2340-2351`)
+
+```c
+static char *get_text_base(
+    struct static_preprocessed_terminal_data *data)
+{
+    byte *start;
+
+    start= (byte *) data;
+    start += sizeof(struct static_preprocessed_terminal_data) +
+        data->grouping_count*sizeof(struct terminal_groupings)+
+        data->font_changes_count*sizeof(struct text_face_data);
+
+    return (char *) start;
+}
 ```
 
 ---
 
-## 28.9 Terminal Navigation
+## 28.20 Text Encoding/Decoding (`computer_interface.c:1119-1166`)
 
-| Key | Action Flag | Effect |
-|-----|-------------|--------|
-| Up / Page Up | `_terminal_page_up` | Scroll up |
-| Down / Page Down | `_terminal_page_down` | Scroll down |
-| Tab / Enter / Space | `_terminal_next_state` | Next group |
-| Escape | `_any_abort_key_mask` | Exit terminal |
+Terminal text can be XOR-encoded for copy protection:
+
+### Decode Text (`computer_interface.c:1119-1129`)
+
+```c
+static void decode_text(
+    struct static_preprocessed_terminal_data *terminal_text)
+{
+    if(terminal_text->flags & _text_is_encoded_flag)
+    {
+        encode_text(terminal_text);
+
+        terminal_text->flags &= ~_text_is_encoded_flag;
+    }
+}
+```
+
+### Encode Text (`computer_interface.c:1135-1166`)
+
+```c
+static void encode_text(
+    struct static_preprocessed_terminal_data *terminal_text)
+{
+    char *text_base= get_text_base(terminal_text);
+    short index;
+    long length;
+    long *long_offset;
+    char *byte_offset;
+
+    length= terminal_text->total_length-
+        (sizeof(struct static_preprocessed_terminal_data) +
+        terminal_text->grouping_count*sizeof(struct terminal_groupings)+
+        terminal_text->font_changes_count*sizeof(struct text_face_data));
+
+    long_offset= (long *) text_base;
+    for(index= 0; index<length/sizeof(long); ++index)
+    {
+        (*long_offset) ^= 0xfeed;
+        long_offset++;
+    }
+
+    /* And get the last bytes */
+    byte_offset= (char *) long_offset;
+    for(index= 0; index<length%sizeof(long); ++index)
+    {
+        (*byte_offset) ^= 0xfe;
+        byte_offset++;
+    }
+
+    terminal_text->flags |= _text_is_encoded_flag;
+}
+```
 
 ---
 
-## 28.10 Terminal Display
+## 28.21 Level Completion State (`computer_interface.c:1376-1410`)
+
+```c
+static void next_terminal_group(
+    short player_index,
+    struct static_preprocessed_terminal_data *terminal_text)
+{
+    struct player_terminal_data *terminal_data= get_player_terminal_data(player_index);
+
+    if(terminal_data->current_group==NONE)
+    {
+        switch(terminal_data->level_completion_state)
+        {
+            case _level_unfinished:
+                terminal_data->current_group= find_group_type(terminal_text, _unfinished_group);
+                break;
+
+            case _level_finished:
+                terminal_data->current_group= find_group_type(terminal_text, _success_group);
+                if(terminal_data->current_group==terminal_text->grouping_count)
+                {
+                    /* Fallback. */
+                    terminal_data->current_group= find_group_type(terminal_text, _unfinished_group);
+                }
+                break;
+
+            case _level_failed:
+                terminal_data->current_group= find_group_type(terminal_text, _failure_group);
+                if(terminal_data->current_group==terminal_text->grouping_count)
+                {
+                    /* Fallback. */
+                    terminal_data->current_group= find_group_type(terminal_text, _unfinished_group);
+                }
+                break;
+        }
+        /* ... */
+    }
+}
+```
+
+### Completion Flow
+
+```
+Player activates terminal ──► Check mission goals
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+              Goals incomplete    Goals complete    Goals failed
+                    │                 │                 │
+                    ▼                 ▼                 ▼
+              #UNFINISHED         #SUCCESS          #FAILURE
+              groups shown        groups shown      groups shown
+```
+
+---
+
+## 28.22 Teleportation Functions (`computer_interface.c:932-951`)
+
+### Interlevel Teleport (`computer_interface.c:932-941`)
+
+```c
+static void teleport_to_level(
+    short level_number)
+{
+    /* It doesn't matter which player we get. */
+    struct player_data *player= get_player_data(0);
+
+    assert(level_number != 0);
+    player->teleporting_destination= -level_number;
+    player->delay_before_teleport= TICKS_PER_SECOND/2; // delay before we teleport.
+}
+```
+
+### Intralevel Teleport (`computer_interface.c:943-951`)
+
+```c
+static void teleport_to_polygon(
+    short player_index,
+    short polygon_index)
+{
+    struct player_data *player= get_player_data(player_index);
+
+    player->teleporting_destination= polygon_index;
+    assert(!player->delay_before_teleport);
+}
+```
+
+---
+
+## 28.23 Terminal Display
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -269,229 +624,54 @@ struct player_terminal_data {
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Display Constants
+---
+
+## 28.24 Maximum Face Changes (`computer_interface.c:82`)
 
 ```c
-#define BORDER_HEIGHT 18
-#define BORDER_INSET 9
-#define LABEL_INSET 3
-#define LOG_DURATION_BEFORE_TIMEOUT (2*TICKS_PER_SECOND)
-#define MAXIMUM_FACE_CHANGES_PER_TEXT_GROUPING 128
+/* Maximum face changes per text grouping.. */
+#define MAXIMUM_FACE_CHANGES_PER_TEXT_GROUPING (128)
 ```
 
 ---
 
-## 28.11 Level Completion Detection
-
-```c
-// Completion flag determines which groups to show:
-// 0 = _unfinished_group
-// 1 = _success_group
-// 2 = _failure_group
-
-void enter_computer_interface(
-    short player_index,
-    short text_number,
-    short completion_flag)
-{
-    // completion_flag determines narrative branch
-}
-```
-
-### Completion Flow
-
-```
-Player activates terminal ──► Check mission goals
-                                      │
-                    ┌─────────────────┼─────────────────┐
-                    ▼                 ▼                 ▼
-              Goals incomplete    Goals complete    Goals failed
-                    │                 │                 │
-                    ▼                 ▼                 ▼
-              #UNFINISHED         #SUCCESS          #FAILURE
-              groups shown        groups shown      groups shown
-```
-
----
-
-## 28.12 Terminal API
-
-```c
-// Initialize terminal system
-void initialize_terminal_manager(void);
-
-// Initialize player's terminal state
-void initialize_player_terminal_info(short player_index);
-
-// Enter terminal mode
-void enter_computer_interface(short player_index, short text_number,
-                              short completion_flag);
-
-// Render terminal display
-void _render_computer_interface(struct view_terminal_data *data);
-
-// Update player in terminal mode
-void update_player_for_terminal_mode(short player_index);
-
-// Process terminal input
-void update_player_keys_for_terminal(short player_index, long action_flags);
-
-// Check if player is in terminal
-boolean player_in_terminal_mode(short player_index);
-
-// Exit terminal
-void abort_terminal_mode(short player_index);
-
-// Mark display as needing redraw
-void dirty_terminal_view(short player_index);
-```
-
----
-
-## 28.13 Terminal Parsing Implementation
-
-The actual parsing code in `computer_interface.c` demonstrates how terminal data is accessed:
-
-### Getting Terminal Data (computer_interface.c:~400)
-
-```c
-// Extract preprocessed terminal from map data
-static struct static_preprocessed_terminal_data *get_indexed_terminal_data(
-    short terminal_id)
-{
-    struct static_preprocessed_terminal_data *terminal = NULL;
-
-    if (map_terminal_data) {
-        // Walk through terminal entries to find requested ID
-        byte *data = map_terminal_data;
-        short count = 0;
-
-        while (count <= terminal_id && data < map_terminal_data + map_terminal_data_length) {
-            terminal = (struct static_preprocessed_terminal_data *)data;
-            if (count == terminal_id) break;
-            data += terminal->total_length;
-            count++;
-        }
-    }
-    return terminal;
-}
-```
-
-### Extracting Groups from Terminal Data
-
-```c
-// Get array of groupings from preprocessed terminal
-struct terminal_groupings *get_terminal_groupings(
-    struct static_preprocessed_terminal_data *terminal)
-{
-    // Groupings start immediately after header
-    return (struct terminal_groupings *)(((byte *)terminal) +
-           sizeof(struct static_preprocessed_terminal_data));
-}
-
-// Get text face changes array
-struct text_face_data *get_terminal_text_faces(
-    struct static_preprocessed_terminal_data *terminal)
-{
-    // Face data follows groupings
-    return (struct text_face_data *)(((byte *)terminal) +
-           sizeof(struct static_preprocessed_terminal_data) +
-           terminal->grouping_count * sizeof(struct terminal_groupings));
-}
-
-// Get raw text buffer
-char *get_terminal_text(
-    struct static_preprocessed_terminal_data *terminal)
-{
-    // Text follows face data
-    return (char *)(((byte *)terminal) +
-           sizeof(struct static_preprocessed_terminal_data) +
-           terminal->grouping_count * sizeof(struct terminal_groupings) +
-           terminal->font_changes_count * sizeof(struct text_face_data));
-}
-```
-
-### Group Processing Loop
-
-```c
-// Process terminal groups based on completion state (computer_interface.c:~520)
-static short find_group_type(
-    struct static_preprocessed_terminal_data *terminal,
-    short group_type,
-    short completion_flag)
-{
-    struct terminal_groupings *groups = get_terminal_groupings(terminal);
-
-    for (short i = 0; i < terminal->grouping_count; i++) {
-        if (groups[i].type == group_type) {
-            // For conditional groups, check completion state
-            switch (group_type) {
-                case _unfinished_group:
-                    if (completion_flag == 0) return i;
-                    break;
-                case _success_group:
-                    if (completion_flag == 1) return i;
-                    break;
-                case _failure_group:
-                    if (completion_flag == 2) return i;
-                    break;
-                default:
-                    return i;  // Non-conditional group
-            }
-        }
-    }
-    return NONE;
-}
-```
-
-### Text Decoding (if encoded)
-
-```c
-// Terminal text may be XOR-encoded for copy protection
-#define TERMINAL_DECODE_KEY 0xFE  // XOR key
-
-static void decode_terminal_text(char *text, short length) {
-    for (short i = 0; i < length; i++) {
-        text[i] ^= TERMINAL_DECODE_KEY;
-    }
-}
-
-// Check and decode in enter_computer_interface()
-if (terminal->flags & _text_is_encoded_flag) {
-    char *text = get_terminal_text(terminal);
-    decode_terminal_text(text, terminal->total_length - header_and_groupings_size);
-    terminal->flags &= ~_text_is_encoded_flag;  // Mark as decoded
-}
-```
-
----
-
-## 28.14 See Also
-
-- **[Chapter 15: Control Panels](15_control_panels.md)** - How terminals are activated via switches
-- **[Chapter 10: File Formats](10_file_formats.md)** - WAD tag storage for terminal data
-- **[Chapter 7: Game Loop](07_game_loop.md)** - Terminal mode integration with game state
-
----
-
-## 28.15 Summary
+## 28.25 Summary
 
 Marathon's terminal system provides:
 
-- **Markup language** for authoring story content
-- **Conditional groups** based on mission state
-- **Text formatting** with bold, italic, underline
-- **Multimedia support** (images, sounds, movies)
-- **Teleportation** commands for level flow
-- **Checkpoint maps** showing objectives
+- **17 group types** for varied content (`computer_interface.c:88-108`)
+- **Markup language** documented in header (`computer_interface.h:6-56`)
+- **Conditional groups** based on mission state (`computer_interface.c:1376-1410`)
+- **Text formatting** with bold, italic, underline (`computer_interface.c:110-116`)
+- **XOR text encoding** for copy protection (`computer_interface.c:1135-1166`)
+- **Teleportation** commands for level flow (`computer_interface.c:932-951`)
+
+### Key Constants
+
+| Constant | Value | Source |
+|----------|-------|--------|
+| `BORDER_HEIGHT` | 18 | `computer_interface.c:40` |
+| `BORDER_INSET` | 9 | `computer_interface.c:41` |
+| `LOG_DURATION_BEFORE_TIMEOUT` | 60 ticks | `computer_interface.c:39` |
+| `MAXIMUM_FACE_CHANGES_PER_TEXT_GROUPING` | 128 | `computer_interface.c:82` |
+| `NUMBER_OF_GROUP_TYPES` | 17 | `computer_interface.c:107` |
+| XOR key (long) | 0xfeed | `computer_interface.c:1153` |
+| XOR key (byte) | 0xfe | `computer_interface.c:1161` |
 
 ### Key Source Files
 
 | File | Purpose |
 |------|---------|
-| `computer_interface.c` | Terminal logic |
-| `computer_interface.h` | Terminal structures |
-| `terminal_definitions.h` | Terminal data (if separate) |
+| `computer_interface.c` | Terminal logic (2364 lines) |
+| `computer_interface.h` | Structures and prototypes (105 lines) |
+
+---
+
+## 28.26 See Also
+
+- [Chapter 15: Control Panels](15_control_panels.md) — How terminals are activated via switches
+- [Chapter 10: File Formats](10_file_formats.md) — WAD tag storage for terminal data
+- [Chapter 7: Game Loop](07_game_loop.md) — Terminal mode integration with game state
 
 ---
 

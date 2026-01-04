@@ -20,8 +20,9 @@ The camera system must:
 
 ## 23.2 View Structure
 
+From `render.h:49-94`:
 ```c
-struct world_view {
+struct view_data {
     // Position
     world_point3d origin;           // Camera position in world
     short origin_polygon_index;     // Which polygon camera is in
@@ -56,6 +57,8 @@ struct world_view {
 ---
 
 ## 23.3 View Bobbing
+
+View bobbing uses the step_amplitude calculated in `physics.c:868` based on player velocity, and applies it in `physics.c:515-520`:
 
 ### Bob Calculation
 

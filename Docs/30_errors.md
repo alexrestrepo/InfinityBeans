@@ -19,12 +19,12 @@ Games need robust error handling and user feedback:
 
 ## 30.2 Error Type System
 
-Marathon categorizes errors into two types:
+Marathon categorizes errors into two types. From `game_errors.h:8-16`:
 
 ```c
 enum /* error types */ {
-    systemError,    // OS-level errors (file I/O, memory)
-    gameError,      // Game logic errors
+    systemError,    // OS-level errors (file I/O, memory) (line 9)
+    gameError,      // Game logic errors (line 10)
     NUMBER_OF_TYPES // 2
 };
 

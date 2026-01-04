@@ -164,16 +164,18 @@ Marathon uses a right-handed coordinate system with fixed-point values.
 
 ### Unit System
 
+From `world.h:30-41`:
+
 **World Units** (10 fractional bits):
 ```c
-typedef short world_distance;  // 16-bit signed
-#define WORLD_ONE 1024         // 1.0 in world units
+typedef short world_distance;  // 16-bit signed (line 41)
+#define WORLD_ONE 1024         // 1.0 in world units (line 31)
 ```
 
 **Fixed-Point** (16 fractional bits):
 ```c
-typedef long fixed;            // 32-bit signed
-#define FIXED_ONE 65536        // 1.0 in fixed-point
+typedef long fixed;            // 32-bit signed (cseries.h:122)
+#define FIXED_ONE 65536        // 1.0 in fixed-point (cseries.h:110)
 ```
 
 ### Scale Reference
@@ -190,12 +192,13 @@ typedef long fixed;            // 32-bit signed
 
 ## 3.6 Angle System
 
+From `world.h:22-28`:
 ```c
 typedef short angle;  // 16-bit, but only 9 bits used
 
-#define NUMBER_OF_ANGLES 512    // Full circle
-#define HALF_CIRCLE 256         // 180°
-#define QUARTER_CIRCLE 128      // 90°
+#define NUMBER_OF_ANGLES 512    // Full circle (line 22)
+#define HALF_CIRCLE 256         // 180° (line 25)
+#define QUARTER_CIRCLE 128      // 90° (line 24)
 ```
 
 **Visualization:**

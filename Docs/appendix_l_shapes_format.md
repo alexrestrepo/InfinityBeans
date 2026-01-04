@@ -31,6 +31,8 @@ Shapes File Structure:
 └────────────────────────────────────────┘
 ```
 
+![Shape Collection Structure](diagrams/shape_collection.svg)
+
 **File type constant** (`tags.h:21`):
 ```c
 #define SHAPES_FILE_TYPE 'shp∞'

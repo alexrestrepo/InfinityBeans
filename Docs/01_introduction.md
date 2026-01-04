@@ -113,9 +113,10 @@ Marathon's engine is built on several fundamental principles that run throughout
 
 ### Fixed-Point Math Everywhere
 
+From `cseries.lib/cseries.h:110-122`:
 ```c
 typedef long fixed;  // 16.16 fixed-point
-#define FIXED_ONE (1<<16)  // 65536 = 1.0
+#define FIXED_ONE ((fixed)(1<<FIXED_FRACTIONAL_BITS))  // 65536 = 1.0
 ```
 
 No floating-point operations—crucial for:
@@ -125,6 +126,7 @@ No floating-point operations—crucial for:
 
 ### Fixed 30 Hz Timestep
 
+From `map.h:13`:
 ```c
 #define TICKS_PER_SECOND 30
 ```

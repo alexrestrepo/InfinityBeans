@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
   <!-- Background -->
-  <rect width="900" height="650" fill="#f8fafc"/>
+  <rect width="900" height="700" fill="#f8fafc"/>
 
   <!-- Title -->
   <text x="450" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Marathon WAD File Structure</text>
@@ -109,7 +109,7 @@
   </g>
 
   <!-- Important notes -->
-  <g transform="translate(50, 530)">
+  <g transform="translate(50, 590)">
     <rect x="0" y="0" width="400" height="80" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
     <text x="200" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#991b1b">Big-Endian Warning</text>
     <text x="15" y="42" font-family="system-ui, sans-serif" font-size="10" fill="#991b1b">All multi-byte values are big-endian (Mac format)</text>
@@ -117,7 +117,7 @@
     <text x="15" y="74" font-family="monospace" font-size="9" fill="#991b1b">swap16(), swap32() before use</text>
   </g>
 
-  <g transform="translate(470, 530)">
+  <g transform="translate(470, 590)">
     <rect x="0" y="0" width="380" height="80" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
     <text x="190" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#166534">Platform Independent</text>
     <text x="15" y="42" font-family="system-ui, sans-serif" font-size="10" fill="#166534">Standard binary file (data fork only)</text>
@@ -126,5 +126,5 @@
   </g>
 
   <!-- Source reference -->
-  <text x="450" y="640" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: wad.h, wad.c — struct wad_header, struct directory_entry</text>
+  <text x="450" y="690" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: wad.h, wad.c — struct wad_header, struct directory_entry</text>
 </svg>

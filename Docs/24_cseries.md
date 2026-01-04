@@ -20,15 +20,16 @@ Marathon needs a foundation layer providing:
 
 ## 24.2 Core Types
 
+From `cseries.lib/cseries.h:93-122`:
 ```c
 // Basic types with guaranteed sizes
-typedef unsigned short word;   // 16 bits
-typedef unsigned char byte;    // 8 bits
-typedef byte boolean;          // TRUE/FALSE
+typedef unsigned short word;   // 16 bits (line 94)
+typedef unsigned char byte;    // 8 bits (line 93)
+typedef byte boolean;          // TRUE/FALSE (line 95)
 
-typedef long fixed;            // 32-bit fixed-point (16.16)
+typedef long fixed;            // 32-bit fixed-point (16.16) (line 122)
 
-typedef void *handle;          // Relocatable memory (legacy)
+typedef void *handle;          // Relocatable memory (legacy) (line 130)
 ```
 
 ### Type Mapping Reference (Marathon → stdint.h)

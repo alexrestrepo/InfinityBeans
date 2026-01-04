@@ -19,6 +19,7 @@ Levels need visual detail beyond walls and floors:
 
 ## 27.2 Scenery Flags
 
+From `scenery_definitions.h:10-14`:
 ```c
 enum /* scenery flags */ {
     _scenery_is_solid         = 0x0001,  // Blocks movement
@@ -31,6 +32,7 @@ enum /* scenery flags */ {
 
 ## 27.3 Scenery Definition Structure
 
+From `scenery_definitions.h:17-27`:
 ```c
 struct scenery_definition {
     word flags;                    // Behavior flags

@@ -234,6 +234,8 @@ This compact structure represents positions in Marathon's 2D world space. `world
 > 4. **Fits in 16 bits** - With 6 integer bits, coordinates can represent ±32 units—sufficient for any room size
 > 5. **Easy fractions** - 1024 divides evenly by 2, 4, 8, 16, 32, 64, 128, 256, 512 for common ratios
 
+![Marathon Coordinate Systems](diagrams/coordinate_systems.svg)
+
 ### Endpoints (Vertices)
 
 Marathon stores vertices as **endpoints** with additional metadata for rendering optimization:
@@ -335,6 +337,8 @@ Understanding polygon ownership (which side of a line faces which polygon):
         OPPOSITE directions by adjacent polygons. This determines
         which polygon is the clockwise vs counterclockwise owner.
 ```
+
+![Map Topology and Connectivity](diagrams/map_topology.svg)
 
 ### Detailed Connectivity: All Four Levels Together
 

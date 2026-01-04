@@ -86,6 +86,13 @@ This directory contains tutorial-style documentation for the Marathon 2/Infinity
 | 31 | [**Resource Forks Guide**](31_resource_forks.md) | ✅ Complete | Mac file format handling |
 | 32 | [**Life of a Frame**](32_frame.md) | ✅ Complete | Complete frame lifecycle walkthrough |
 
+### Level Systems (Chapters 33-34)
+
+| # | Chapter | Status | Description |
+|---|---------|--------|-------------|
+| 33 | [**Platforms and Doors**](33_platforms.md) | ✅ Complete | Moving geometry, state machine, flags |
+| 34 | [**Dynamic Lighting**](34_lighting.md) | ✅ Complete | Light animation, shading, tag control |
+
 ### Appendices
 
 | # | Appendix | Status | Description |
@@ -96,6 +103,14 @@ This directory contains tutorial-style documentation for the Marathon 2/Infinity
 | D | [**Fixed-Point Conversion**](appendix_d_fixedpoint.md) | ✅ Complete | Working with Marathon's number format |
 | E | [**M2 vs Infinity**](appendix_e_m2_vs_infinity.md) | ✅ Complete | Source code differences between versions |
 | F | [**Map Creation Constraints**](appendix_f_forge.md) | ✅ Complete | Forge/editor reference, polygon rules |
+| G | [**Physics File Format**](appendix_g_physics_file.md) | ✅ Complete | Physics model patching format |
+| H | [**Film/Replay File Format**](appendix_h_film_format.md) | ✅ Complete | Recording and playback format |
+| I | [**Quick Reference Cheat Sheet**](appendix_i_cheatsheet.md) | ✅ Complete | Single-page reference card |
+| J | [**Modding Cookbook**](appendix_j_cookbook.md) | ✅ Complete | Step-by-step mod recipes |
+| K | [**Save Game File Format**](appendix_k_savegame_format.md) | ✅ Complete | Save file structure |
+| L | [**Shapes File Format**](appendix_l_shapes_format.md) | ✅ Complete | Sprite collection format |
+| M | [**Debug Build Features**](appendix_m_debug_features.md) | ✅ Complete | DEBUG mode, assertions, dprintf |
+| N | [**Network Protocol**](appendix_n_network_protocol.md) | ✅ Complete | Byte-level packet formats |
 
 ---
 
@@ -125,7 +140,10 @@ Different readers have different goals. Here are recommended reading paths:
 3. **[Chapter 31: Resource Forks](31_resource_forks.md)** - What files need special handling
 4. **[Chapter 5: Rendering](05_rendering.md)** - The core rendering pipeline
 5. **[Appendix D: Fixed-Point](appendix_d_fixedpoint.md)** - Number format conversion
-6. **[porting_progress.md](porting_progress.md)** - Milestone-by-milestone guide
+6. **[Appendix L: Shapes File Format](appendix_l_shapes_format.md)** - Sprite collection parsing
+7. **[Appendix G: Physics File Format](appendix_g_physics_file.md)** - Physics model format
+8. **[Appendix K: Save Game File Format](appendix_k_savegame_format.md)** - Save file structure
+9. **[porting_progress.md](porting_progress.md)** - Milestone-by-milestone guide
 
 ### 🔧 "I want to understand how a 1990s game engine works"
 
@@ -152,12 +170,14 @@ Different readers have different goals. Here are recommended reading paths:
 3. **[Chapter 19: Shape Animation](19_shapes.md)** - Sprite and animation system
 4. **[Chapter 28: Terminals](28_terminals.md)** - Story content markup
 5. **[Chapter 13: Sound](13_sound.md)** - Audio system
+6. **[Appendix J: Modding Cookbook](appendix_j_cookbook.md)** - Step-by-step mod recipes
+7. **[Appendix L: Shapes File Format](appendix_l_shapes_format.md)** - Sprite collection format
 
 ### 📚 "I want to read everything"
 
 **Complete path (chapter order is designed for this):**
 - Start with Chapter 1 and read sequentially through Chapter 32
-- Use Appendices A-D as reference while reading
+- Use Appendices A-L as reference while reading
 
 ---
 

@@ -1962,7 +1962,176 @@ This ensures:
 - Overlapping objects sorted correctly
 ```
 
-> **Source:** `render.c:1674-1850` for `build_render_object_list()`, `render.c:1850-1950` for object sorting
+> **Source:** `render.c:1674-1850` for `build_render_object_list()`, `render.c:1831-1946` for object sorting
+
+### Object Rendering Order: Depth Sorting Within Polygons
+
+When multiple objects exist in the same polygon (or overlapping polygons), Marathon must determine their rendering order. This is handled by `sort_render_object_into_tree()` which uses an **insertion sort** into a depth-ordered linked list.
+
+**The Problem:**
+
+```
+Two monsters in the same room - which draws first?
+
+    Screen view:           Top-down view:
+    ┌─────────────────┐
+    │     ╔═══╗       │         @  ← Player
+    │     ║ A ║       │        ╱ ╲
+    │     ╠═══╣       │       ╱   ╲
+    │     ║ B ║       │      A     B
+    │     ╚═══╝       │     (far) (near)
+    └─────────────────┘
+
+    Monster A is farther - should draw first (behind B)
+    Monster B is closer - should draw last (in front of A)
+```
+
+**The Algorithm** (from `render.c:1831-1946`):
+
+```c
+void sort_render_object_into_tree(
+    struct render_object_data *new_object,
+    struct sorted_node_data **base_nodes,
+    short base_node_count
+)
+{
+    // For each polygon the object spans
+    for (i = 0; i < base_node_count; i++) {
+        struct sorted_node_data *node = base_nodes[i];
+        struct render_object_data **reference;  // Pointer to insertion point
+        struct render_object_data *object;
+
+        // Determine if interior (origin here) or exterior (overlapping)
+        if (new_object->node == node) {
+            reference = &node->interior_objects;
+        } else {
+            reference = &node->exterior_objects;
+        }
+
+        // Walk the linked list, finding correct depth position
+        object = *reference;
+        while (object) {
+            // Only compare if objects actually overlap on screen
+            if (objects_overlap_on_screen(new_object, object)) {
+                // Depth comparison - farther objects come earlier in list
+                if (new_object->rectangle.depth >= object->rectangle.depth) {
+                    break;  // Insert here (new_object is farther or equal)
+                }
+            }
+            reference = &object->next_object;
+            object = *reference;
+        }
+
+        // Insert new_object into linked list
+        new_object->next_object = object;
+        *reference = new_object;
+    }
+}
+```
+
+**Key Data Structure:**
+
+```c
+struct render_object_data {
+    struct sorted_node_data *node;           // Which polygon contains origin
+    struct clipping_window_data *clipping_windows;
+    struct render_object_data *next_object;  // Linked list for sorting
+    struct rectangle_definition rectangle;   // Contains depth and screen bounds
+    short ymedia;
+};
+
+struct rectangle_definition {
+    // ... texture info ...
+    world_distance depth;       // Distance from camera (sorting key)
+    short x0, x1, y0, y1;      // Screen bounding box
+};
+```
+
+**Overlap Test (AABB):**
+
+Before comparing depth, Marathon checks if two objects actually overlap on screen. Non-overlapping objects don't need depth comparison—their draw order is irrelevant.
+
+```c
+boolean objects_overlap_on_screen(
+    struct render_object_data *a,
+    struct render_object_data *b
+)
+{
+    // Axis-Aligned Bounding Box (AABB) overlap test
+    // Objects overlap if their screen rectangles intersect
+
+    return !(a->rectangle.x1 < b->rectangle.x0 ||  // A entirely left of B
+             a->rectangle.x0 > b->rectangle.x1 ||  // A entirely right of B
+             a->rectangle.y1 < b->rectangle.y0 ||  // A entirely above B
+             a->rectangle.y0 > b->rectangle.y1);   // A entirely below B
+}
+```
+
+**Visual Explanation of Overlap Test:**
+
+```
+Case 1: Objects OVERLAP (need depth sorting)
+┌───────────────────────────────────────┐
+│                                       │
+│     ┌───────────┐                     │
+│     │  Object A │                     │
+│     │    ┌──────┼────────┐            │
+│     │    │      │        │            │
+│     └────┼──────┘        │            │
+│          │   Object B    │            │
+│          └───────────────┘            │
+│                                       │
+└───────────────────────────────────────┘
+    A and B overlap → compare depths
+
+Case 2: Objects DON'T overlap (order irrelevant)
+┌───────────────────────────────────────┐
+│                                       │
+│  ┌───────────┐    ┌───────────┐       │
+│  │  Object A │    │  Object B │       │
+│  │           │    │           │       │
+│  └───────────┘    └───────────┘       │
+│                                       │
+└───────────────────────────────────────┘
+    A and B don't overlap → skip depth compare
+```
+
+**Why Insertion Sort?**
+
+1. **Small lists**: Most polygons have 0-5 objects, where O(n²) insertion sort beats O(n log n) merge sort overhead
+2. **Already sorted input**: Objects often arrive roughly sorted by distance
+3. **Simple implementation**: No additional memory allocation needed
+4. **Linked list friendly**: Only pointer updates, no array shifting
+
+**Complete Object Draw Order:**
+
+```
+For each sorted polygon (back to front):
+    │
+    ├─► Draw ceiling (if visible)
+    │
+    ├─► Draw walls (back to front within polygon)
+    │
+    ├─► Draw interior_objects (linked list, back to front)
+    │     ├─► Object with depth 1000 (farthest)
+    │     ├─► Object with depth 800
+    │     └─► Object with depth 500 (nearest)
+    │
+    ├─► Draw exterior_objects (overlapping from other polygons)
+    │     └─► Same depth ordering
+    │
+    └─► Draw floor (if visible)
+```
+
+**Historical Note** (from `render.c:19-36`):
+
+Jason Jones documented the complexity of object sorting:
+
+> *"the way to fix the render object sorting problem is to ignore overlap and sort everything by depth, regardless. imagine: two, far, non-overlapping objects; by the old algorithm their drawing order is irrelevant. when a closer object which overlaps both of them is sorted, it only attempts to lie in front of the closest of the two (leaving the farthest one in an uncertain position)."*
+
+This comment from January 1995 describes the fix that became the final algorithm: sort by depth regardless of overlap to ensure consistent ordering even when a third object enters the scene.
+
+> **Source:** `render.c:1831-1946` for `sort_render_object_into_tree()`, `render.c:267-277` for `struct render_object_data`, `render.c:2182-2341` for `render_tree()` draw order
 
 ### Polygon Clipping System
 

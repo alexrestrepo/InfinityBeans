@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 700">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 750">
   <!-- Background -->
-  <rect width="950" height="700" fill="#f8fafc"/>
+  <rect width="950" height="750" fill="#f8fafc"/>
 
   <!-- Title -->
   <text x="475" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Life of a Frame — Complete Render Pipeline</text>
@@ -130,7 +130,7 @@
   </g>
 
   <!-- Texture mapping detail -->
-  <g transform="translate(300, 440)">
+  <g transform="translate(300, 490)">
     <rect x="0" y="0" width="280" height="120" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
     <text x="140" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#166534">Texture Mapping</text>
     <text x="15" y="45" font-family="system-ui, sans-serif" font-size="10" fill="#166534">Floors/Ceilings: Affine (fast)</text>
@@ -141,7 +141,7 @@
   </g>
 
   <!-- Clipping detail -->
-  <g transform="translate(600, 440)">
+  <g transform="translate(600, 490)">
     <rect x="0" y="0" width="280" height="120" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
     <text x="140" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#991b1b">Portal Clipping</text>
     <text x="15" y="45" font-family="system-ui, sans-serif" font-size="10" fill="#991b1b">Each portal narrows the view:</text>
@@ -152,7 +152,7 @@
   </g>
 
   <!-- Key stats -->
-  <g transform="translate(300, 580)">
+  <g transform="translate(300, 630)">
     <rect x="0" y="0" width="580" height="70" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1"/>
     <text x="290" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#475569">Typical Frame Statistics</text>
     <text x="20" y="45" font-family="system-ui, sans-serif" font-size="10" fill="#475569">Polygons rendered: 50-100 (from 500-1000 total)</text>
@@ -162,5 +162,5 @@
   </g>
 
   <!-- Source reference -->
-  <text x="475" y="690" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: render.c — render_view(), build_render_tree(), render_tree()</text>
+  <text x="475" y="735" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: render.c — render_view(), build_render_tree(), render_tree()</text>
 </svg>

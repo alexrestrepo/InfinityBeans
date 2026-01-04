@@ -514,9 +514,158 @@ Running (Shift held):
 
 ## 6.6 Collision Detection
 
-Marathon uses several techniques to detect and respond to collisions.
+Marathon uses several techniques to detect and respond to collisions. This section provides a detailed walkthrough of the collision algorithms.
 
-### Player vs Walls
+### Object Movement: translate_map_object()
+
+The core movement function `translate_map_object()` handles moving any object (player, monster, projectile) through the polygon graph while detecting collisions.
+
+**Algorithm** (from `map.c:518-583`):
+
+```
+translate_map_object(object_index, delta_x, delta_y, delta_z)
+    │
+    ├─► 1. Calculate new_position = old_position + delta
+    │
+    ├─► 2. Find line crossed (if any)
+    │       line = find_line_crossed_leaving_polygon(current_polygon,
+    │                                                 old_x, old_y, new_x, new_y)
+    │
+    ├─► 3. If no line crossed:
+    │       ├─► Update object position
+    │       └─► Return success
+    │
+    ├─► 4. If line crossed:
+    │       │
+    │       ├─► Calculate intersection point with line
+    │       │     find_line_intersection(endpoint0, endpoint1,
+    │       │                            old_pos, new_pos, &intersection)
+    │       │
+    │       ├─► 4a. If line is solid (no adjacent polygon):
+    │       │         └─► Collision! Stop at intersection point
+    │       │
+    │       ├─► 4b. If line has adjacent polygon:
+    │       │         │
+    │       │         ├─► Check vertical clearance:
+    │       │         │     adjacent_floor, adjacent_ceiling =
+    │       │         │         get_adjacent_polygon_heights(line, intersection.z)
+    │       │         │
+    │       │         ├─► Can object fit?
+    │       │         │     headroom = adjacent_ceiling - intersection.z
+    │       │         │     stepup = adjacent_floor - intersection.z
+    │       │         │
+    │       │         ├─► If headroom < object_height OR stepup > max_step:
+    │       │         │         └─► Collision! Stop at intersection
+    │       │         │
+    │       │         └─► Otherwise:
+    │       │               ├─► Move object to adjacent polygon
+    │       │               ├─► current_polygon = adjacent_polygon
+    │       │               └─► LOOP: Check for more line crossings
+    │       │
+    │       └─► 4c. Update object's polygon_index
+    │
+    └─► 5. Handle vertical collision:
+          ├─► If new_z < floor_height: land on floor
+          └─► If new_z + height > ceiling_height: hit ceiling
+```
+
+### Line Crossing Detection: Cross Product Test
+
+The function `find_line_crossed_leaving_polygon()` determines which polygon edge (if any) the movement crosses. It uses the **cross product sign test**.
+
+**Algorithm** (from `map.c:1008-1041`):
+
+```c
+short find_line_crossed_leaving_polygon(
+    short polygon_index,
+    world_point2d *p0,      // Starting position
+    world_point2d *p1       // Ending position
+)
+{
+    for each line_index in polygon.line_indexes:
+        e0, e1 = line endpoints
+
+        // Cross products to determine which side of line each point is on
+        cross0 = (p0->x - e0.x) × (e1.y - e0.y) - (p0->y - e0.y) × (e1.x - e0.x)
+        cross1 = (p1->x - e0.x) × (e1.y - e0.y) - (p1->y - e0.y) × (e1.x - e0.x)
+
+        // If signs differ, points are on opposite sides of the line
+        // AND one must be outside (positive cross for CCW polygons)
+        if (cross0 <= 0 && cross1 > 0):
+            return line_index  // We crossed this line leaving the polygon
+
+    return NONE  // Stayed inside polygon
+}
+```
+
+**Visual Explanation:**
+
+```
+Polygon with counterclockwise winding:
+
+         e1
+          ↑
+          │
+          │ Line
+          │
+          ↓
+         e0
+
+    Points on LEFT of line (inside polygon): cross < 0
+    Points on RIGHT of line (outside polygon): cross > 0
+
+    Moving from inside to outside:
+        p0 (cross0 < 0)    ────────────>    p1 (cross1 > 0)
+              INSIDE           crosses          OUTSIDE
+                               line
+```
+
+### Line Intersection Calculation
+
+Once we know a line is crossed, `find_line_intersection()` calculates the exact intersection point in 3D.
+
+**Algorithm** (from `map.c:1044-1081`):
+
+```c
+void find_line_intersection(
+    world_point2d *e0,      // Line endpoint 0
+    world_point2d *e1,      // Line endpoint 1
+    world_point3d *p0,      // Ray start (3D)
+    world_point3d *p1,      // Ray end (3D)
+    world_point3d *intersection  // OUTPUT
+)
+{
+    // Line direction
+    line_dx = e1->x - e0->x
+    line_dy = e1->y - e0->y
+
+    // Ray direction
+    ray_dx = p1->x - p0->x
+    ray_dy = p1->y - p0->y
+    ray_dz = p1->z - p0->z
+
+    // Solve for intersection parameter t:
+    // Line: L(s) = e0 + s × (e1 - e0)
+    // Ray:  R(t) = p0 + t × (p1 - p0)
+    //
+    // Setting L(s) = R(t) and solving for t:
+    // t = ((e0 - p0) × line_perp) / (ray × line_perp)
+    //   = ((e0.y - p0.y) × line_dx - (e0.x - p0.x) × line_dy)
+    //     / (ray_dy × line_dx - ray_dx × line_dy)
+
+    denominator = ray_dy × line_dx - ray_dx × line_dy
+    numerator = (e0->y - p0->y) × line_dx - (e0->x - p0->x) × line_dy
+
+    t = numerator / denominator  // Fixed-point division
+
+    // Interpolate to find intersection point
+    intersection->x = p0->x + (t × ray_dx)
+    intersection->y = p0->y + (t × ray_dy)
+    intersection->z = p0->z + (t × ray_dz)
+}
+```
+
+### Player vs Walls: The Three-Pass Algorithm
 
 The main wall collision function is `keep_line_segment_out_of_walls()`.
 

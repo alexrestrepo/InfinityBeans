@@ -45,6 +45,8 @@ Every frame in Marathon follows this path:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+![Frame Lifecycle Overview](diagrams/frame_lifecycle.svg)
+
 ---
 
 ## 32.2 Phase 1: Input Gathering

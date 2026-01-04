@@ -38,6 +38,7 @@ Marathon organizes graphics into **32 collections**:
 
 ## 19.3 Collection Types
 
+From `collection_definition.h:27-34`:
 ```c
 enum {
     _unused_collection = 0,     // Raw data
@@ -262,6 +263,8 @@ Color Index   (Dark)   (Mid)   (Bright)
 
 Usage: shaded_pixel = shading_table[light_level][original_pixel]
 ```
+
+![Shading Tables Visualization](diagrams/shading_tables.svg)
 
 ---
 

@@ -138,16 +138,17 @@ The `cseries.lib` directory provides the base abstraction layer.
 
 ### Platform-Independent Definitions (cseries.h)
 
+From `cseries.lib/cseries.h:110-130`:
 ```c
-typedef long fixed;           // 16.16 fixed-point
-typedef unsigned short word;
-typedef unsigned char byte;
-typedef byte boolean;
+typedef long fixed;           // 16.16 fixed-point (line 122)
+typedef unsigned short word;  // (line 94)
+typedef unsigned char byte;   // (line 93)
+typedef byte boolean;         // (line 95)
 
-#define FIXED_ONE (1<<16)     // 65536
+#define FIXED_ONE (1<<16)     // 65536 (line 110)
 #define TRUE 1
 #define FALSE 0
-#define NONE -1
+#define NONE -1               // (line 118)
 
 // Memory management (redirects to platform layer)
 void *new_pointer(long size);

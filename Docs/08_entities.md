@@ -935,6 +935,8 @@ Special states for dual-wielded weapons (pistols, shotguns):
   _waiting_for_other_idle_to_reload  - Waiting for partner to be idle
 ```
 
+![Weapon State Machine](diagrams/weapon_states.svg)
+
 ### Firing Pipeline
 
 1. Input check (trigger pressed)

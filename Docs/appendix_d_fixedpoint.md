@@ -239,6 +239,8 @@ fixed dy = (sine_table[angle] * distance) >> TRIG_SHIFT;
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+![Fixed-Point Number Format](diagrams/fixed_point.svg)
+
 ---
 
 ## D.9 World Units vs Fixed-Point

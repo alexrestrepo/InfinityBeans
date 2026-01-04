@@ -110,7 +110,7 @@
 
       <!-- Surface line -->
       <line x1="5" y1="80" x2="495" y2="80" stroke="#60a5fa" stroke-width="3"/>
-      <text x="510" y="85" font-family="system-ui, sans-serif" font-size="10" fill="#3b82f6">surface</text>
+      <text x="480" y="75" text-anchor="end" font-family="system-ui, sans-serif" font-size="10" fill="#60a5fa">surface</text>
 
       <!-- Player above water -->
       <circle cx="80" cy="50" r="20" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
@@ -141,16 +141,16 @@
       <text x="15" y="38" font-family="monospace" font-size="8" fill="#92400e">feet_entering</text>
       <text x="15" y="52" font-family="monospace" font-size="8" fill="#92400e">feet_leaving</text>
 
-      <text x="120" y="38" font-family="monospace" font-size="8" fill="#92400e">head_entering</text>
-      <text x="120" y="52" font-family="monospace" font-size="8" fill="#92400e">head_leaving</text>
+      <text x="110" y="38" font-family="monospace" font-size="8" fill="#92400e">head_entering</text>
+      <text x="110" y="52" font-family="monospace" font-size="8" fill="#92400e">head_leaving</text>
 
-      <text x="230" y="38" font-family="monospace" font-size="8" fill="#92400e">splashing</text>
-      <text x="230" y="52" font-family="monospace" font-size="8" fill="#92400e">ambient_over</text>
+      <text x="205" y="38" font-family="monospace" font-size="8" fill="#92400e">splashing</text>
+      <text x="205" y="52" font-family="monospace" font-size="8" fill="#92400e">ambient_over</text>
 
-      <text x="340" y="38" font-family="monospace" font-size="8" fill="#92400e">ambient_under</text>
-      <text x="340" y="52" font-family="monospace" font-size="8" fill="#92400e">platform_entering</text>
+      <text x="295" y="38" font-family="monospace" font-size="8" fill="#92400e">ambient_under</text>
+      <text x="295" y="52" font-family="monospace" font-size="8" fill="#92400e">platform_entering</text>
 
-      <text x="460" y="45" font-family="monospace" font-size="8" fill="#92400e">platform_leaving</text>
+      <text x="410" y="45" font-family="monospace" font-size="8" fill="#92400e">platform_leaving</text>
     </g>
   </g>
 
