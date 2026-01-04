@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 750">
+  <!-- Background -->
+  <rect width="950" height="750" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="475" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Map Topology: Four Levels of Geometry</text>
+  <text x="475" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">from map.h, map.c — how polygons, lines, endpoints, and sides interconnect</text>
+
+  <!-- Level hierarchy (left side) -->
+  <g transform="translate(50, 80)">
+    <text x="100" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#475569">Hierarchy</text>
+
+    <!-- Level 4: Polygons -->
+    <rect x="0" y="20" width="200" height="50" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="100" y="42" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#1e40af">Level 4: POLYGONS</text>
+    <text x="100" y="58" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#3b82f6">(Rooms) 128 bytes each</text>
+
+    <!-- Arrow down -->
+    <line x1="100" y1="70" x2="100" y2="90" stroke="#475569" stroke-width="2"/>
+    <polygon points="100,95 95,85 105,85" fill="#475569"/>
+    <text x="115" y="85" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">reference</text>
+
+    <!-- Level 3: Lines -->
+    <rect x="0" y="100" width="200" height="50" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="100" y="122" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#166534">Level 3: LINES</text>
+    <text x="100" y="138" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">(Edges) 32 bytes each</text>
+
+    <!-- Arrow down -->
+    <line x1="100" y1="150" x2="100" y2="170" stroke="#475569" stroke-width="2"/>
+    <polygon points="100,175 95,165 105,165" fill="#475569"/>
+    <text x="115" y="165" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">reference</text>
+
+    <!-- Level 2: Sides -->
+    <rect x="0" y="180" width="200" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="100" y="202" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#92400e">Level 2: SIDES</text>
+    <text x="100" y="218" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#d97706">(Wall textures) 64 bytes each</text>
+
+    <!-- Arrow down -->
+    <line x1="100" y1="230" x2="100" y2="250" stroke="#475569" stroke-width="2"/>
+    <polygon points="100,255 95,245 105,245" fill="#475569"/>
+    <text x="115" y="245" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">reference</text>
+
+    <!-- Level 1: Endpoints -->
+    <rect x="0" y="260" width="200" height="50" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="2"/>
+    <text x="100" y="282" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#7e22ce">Level 1: ENDPOINTS</text>
+    <text x="100" y="298" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#9333ea">(Vertices) 16 bytes each</text>
+  </g>
+
+  <!-- Visual example (center) -->
+  <g transform="translate(280, 80)">
+    <text x="170" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#475569">Two-Room Example (Top-Down View)</text>
+
+    <!-- Room A -->
+    <g transform="translate(20, 30)">
+      <!-- Polygon A fill -->
+      <polygon points="0,0 200,0 200,120 0,120" fill="#dbeafe" fill-opacity="0.3" stroke="#2563eb" stroke-width="2"/>
+
+      <!-- Polygon B fill -->
+      <polygon points="0,120 200,120 200,240 0,240" fill="#dcfce7" fill-opacity="0.3" stroke="#16a34a" stroke-width="2"/>
+
+      <!-- Endpoints (vertices) -->
+      <circle cx="0" cy="0" r="8" fill="#9333ea"/>
+      <text x="-15" y="5" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#7e22ce">e0</text>
+
+      <circle cx="200" cy="0" r="8" fill="#9333ea"/>
+      <text x="210" y="5" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#7e22ce">e1</text>
+
+      <circle cx="200" cy="120" r="8" fill="#9333ea"/>
+      <text x="210" y="125" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#7e22ce">e2</text>
+
+      <circle cx="0" cy="120" r="8" fill="#9333ea"/>
+      <text x="-15" y="125" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#7e22ce">e3</text>
+
+      <circle cx="0" cy="240" r="8" fill="#9333ea"/>
+      <text x="-15" y="245" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#7e22ce">e4</text>
+
+      <circle cx="200" cy="240" r="8" fill="#9333ea"/>
+      <text x="210" y="245" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#7e22ce">e5</text>
+
+      <!-- Lines -->
+      <text x="100" y="-10" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">L0 (solid)</text>
+      <text x="220" y="60" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">L1</text>
+      <text x="100" y="135" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="bold" fill="#dc2626">L2 (PORTAL)</text>
+      <text x="-25" y="60" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">L3</text>
+      <text x="220" y="180" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">L4</text>
+      <text x="100" y="258" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">L5 (solid)</text>
+      <text x="-25" y="180" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">L6</text>
+
+      <!-- Portal highlight -->
+      <line x1="0" y1="120" x2="200" y2="120" stroke="#dc2626" stroke-width="4" stroke-dasharray="8,4"/>
+
+      <!-- Room labels -->
+      <text x="100" y="60" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#1e40af">Polygon A</text>
+      <text x="100" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#166534">Polygon B</text>
+    </g>
+  </g>
+
+  <!-- Data structures (right side) -->
+  <g transform="translate(580, 80)">
+    <text x="170" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#475569">Data Structures</text>
+
+    <!-- endpoint_data -->
+    <rect x="0" y="20" width="320" height="70" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="1"/>
+    <text x="160" y="38" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#7e22ce">endpoint_data (16 bytes)</text>
+    <text x="10" y="55" font-family="monospace" font-size="8" fill="#7e22ce">world_point2d vertex;    // X,Y position</text>
+    <text x="10" y="68" font-family="monospace" font-size="8" fill="#7e22ce">world_point2d transformed; // View-space cache</text>
+    <text x="10" y="81" font-family="monospace" font-size="8" fill="#7e22ce">short supporting_polygon_index;</text>
+
+    <!-- line_data -->
+    <rect x="0" y="100" width="320" height="95" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1"/>
+    <text x="160" y="118" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#166534">line_data (32 bytes)</text>
+    <text x="10" y="135" font-family="monospace" font-size="8" fill="#166534">short endpoint_indexes[2];      // e0, e1</text>
+    <text x="10" y="148" font-family="monospace" font-size="8" fill="#166534">short clockwise_polygon_owner;  // Poly A</text>
+    <text x="10" y="161" font-family="monospace" font-size="8" fill="#166534">short counterclockwise_polygon_owner; // Poly B</text>
+    <text x="10" y="174" font-family="monospace" font-size="8" fill="#166534">short clockwise_polygon_side_index;</text>
+    <text x="10" y="187" font-family="monospace" font-size="8" fill="#166534">short counterclockwise_polygon_side_index;</text>
+
+    <!-- side_data -->
+    <rect x="0" y="205" width="320" height="85" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+    <text x="160" y="223" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#92400e">side_data (64 bytes)</text>
+    <text x="10" y="240" font-family="monospace" font-size="8" fill="#92400e">word type;  // _full_side, _high_side, etc.</text>
+    <text x="10" y="253" font-family="monospace" font-size="8" fill="#92400e">side_texture_definition primary_texture;</text>
+    <text x="10" y="266" font-family="monospace" font-size="8" fill="#92400e">side_texture_definition secondary_texture;</text>
+    <text x="10" y="279" font-family="monospace" font-size="8" fill="#92400e">short primary_lightsource_index;</text>
+
+    <!-- polygon_data -->
+    <rect x="0" y="300" width="320" height="110" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+    <text x="160" y="318" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">polygon_data (128 bytes)</text>
+    <text x="10" y="335" font-family="monospace" font-size="8" fill="#1e40af">short vertex_count;                  // max 8</text>
+    <text x="10" y="348" font-family="monospace" font-size="8" fill="#1e40af">short endpoint_indexes[8];           // vertices</text>
+    <text x="10" y="361" font-family="monospace" font-size="8" fill="#1e40af">short line_indexes[8];               // edges</text>
+    <text x="10" y="374" font-family="monospace" font-size="8" fill="#1e40af">short adjacent_polygon_indexes[8];   // neighbors</text>
+    <text x="10" y="387" font-family="monospace" font-size="8" fill="#1e40af">world_distance floor_height, ceiling_height;</text>
+    <text x="10" y="400" font-family="monospace" font-size="8" fill="#1e40af">shape_descriptor floor_texture, ceiling_texture;</text>
+  </g>
+
+  <!-- Clockwise/Counterclockwise explanation -->
+  <g transform="translate(50, 430)">
+    <rect x="0" y="0" width="400" height="160" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="200" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#991b1b">Line Ownership (CW/CCW)</text>
+
+    <g transform="translate(20, 40)">
+      <!-- Mini diagram -->
+      <rect x="0" y="0" width="120" height="50" fill="#dbeafe" fill-opacity="0.5" stroke="#2563eb" stroke-width="1"/>
+      <rect x="0" y="50" width="120" height="50" fill="#dcfce7" fill-opacity="0.5" stroke="#16a34a" stroke-width="1"/>
+      <line x1="0" y1="50" x2="120" y2="50" stroke="#dc2626" stroke-width="3"/>
+
+      <text x="60" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#1e40af">Poly A</text>
+      <text x="60" y="75" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#166534">Poly B</text>
+
+      <!-- Arrows showing direction -->
+      <line x1="20" y1="48" x2="100" y2="48" stroke="#1e40af" stroke-width="2"/>
+      <polygon points="100,48 90,44 90,52" fill="#1e40af"/>
+      <text x="60" y="42" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" fill="#1e40af">CW</text>
+
+      <line x1="100" y1="52" x2="20" y2="52" stroke="#166534" stroke-width="2"/>
+      <polygon points="20,52 30,48 30,56" fill="#166534"/>
+      <text x="60" y="62" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" fill="#166534">CCW</text>
+    </g>
+
+    <text x="160" y="60" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">Walking around Poly A clockwise:</text>
+    <text x="165" y="75" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">Line L2 traversed e2 → e3</text>
+    <text x="165" y="90" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">∴ Poly A is clockwise_owner</text>
+
+    <text x="160" y="110" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">Walking around Poly B clockwise:</text>
+    <text x="165" y="125" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">Line L2 traversed e3 → e2 (opposite!)</text>
+    <text x="165" y="140" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">∴ Poly B is counterclockwise_owner</text>
+  </g>
+
+  <!-- O(1) traversal -->
+  <g transform="translate(480, 430)">
+    <rect x="0" y="0" width="420" height="160" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="210" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#166534">O(1) Adjacent Polygon Lookup</text>
+
+    <text x="20" y="50" font-family="monospace" font-size="9" fill="#166534">short find_adjacent_polygon(short poly, short line) {</text>
+    <text x="30" y="65" font-family="monospace" font-size="9" fill="#166534">  struct line_data *l = get_line_data(line);</text>
+    <text x="30" y="80" font-family="monospace" font-size="9" fill="#166534">  return (poly == l-&gt;clockwise_polygon_owner)</text>
+    <text x="50" y="95" font-family="monospace" font-size="9" fill="#166534">       ? l-&gt;counterclockwise_polygon_owner</text>
+    <text x="50" y="110" font-family="monospace" font-size="9" fill="#166534">       : l-&gt;clockwise_polygon_owner;</text>
+    <text x="20" y="125" font-family="monospace" font-size="9" fill="#166534">}</text>
+
+    <text x="20" y="150" font-family="system-ui, sans-serif" font-size="10" fill="#166534">No searching! Just follow the pre-baked connectivity.</text>
+  </g>
+
+  <!-- Max limits -->
+  <g transform="translate(50, 610)">
+    <rect x="0" y="0" width="850" height="90" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+    <text x="425" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#475569">Map Limits</text>
+
+    <g transform="translate(30, 35)">
+      <text x="0" y="15" font-family="monospace" font-size="10" fill="#475569">MAXIMUM_ENDPOINTS_PER_MAP  = 2048</text>
+      <text x="0" y="32" font-family="monospace" font-size="10" fill="#475569">MAXIMUM_LINES_PER_MAP      = 4096</text>
+      <text x="0" y="49" font-family="monospace" font-size="10" fill="#475569">MAXIMUM_SIDES_PER_MAP      = 8192</text>
+
+      <text x="300" y="15" font-family="monospace" font-size="10" fill="#475569">MAXIMUM_POLYGONS_PER_MAP   = 1024</text>
+      <text x="300" y="32" font-family="monospace" font-size="10" fill="#475569">MAXIMUM_VERTICES_PER_POLYGON = 8</text>
+      <text x="300" y="49" font-family="monospace" font-size="10" fill="#475569">WORLD_ONE = 1024 (fixed-point units)</text>
+
+      <text x="600" y="15" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">Endpoints: 16 bytes × 2048 = 32KB</text>
+      <text x="600" y="32" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">Lines: 32 bytes × 4096 = 128KB</text>
+      <text x="600" y="49" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">Polygons: 128 bytes × 1024 = 128KB</text>
+    </g>
+  </g>
+
+  <!-- Source reference -->
+  <text x="475" y="740" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: map.h (endpoint_data:378, line_data:416, side_data:499, polygon_data:571)</text>
+</svg>

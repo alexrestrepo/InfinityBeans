@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550">
+  <!-- Background -->
+  <rect width="900" height="550" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Platform State Machine</text>
+  <text x="450" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">from platforms.c — moving floors, ceilings, doors</text>
+
+  <!-- Main state machine -->
+  <g transform="translate(100, 80)">
+    <!-- _platform_is_stationary (initial) -->
+    <rect x="280" y="0" width="160" height="50" rx="25" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="360" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#166534">_platform_is_stationary</text>
+    <text x="360" y="38" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">(at rest position)</text>
+
+    <!-- Arrow to extending -->
+    <line x1="360" y1="50" x2="360" y2="85" stroke="#475569" stroke-width="2"/>
+    <polygon points="360,90 355,80 365,80" fill="#475569"/>
+    <text x="375" y="75" font-family="system-ui, sans-serif" font-size="9" fill="#475569">activate</text>
+
+    <!-- _platform_is_extending -->
+    <rect x="280" y="95" width="160" height="50" rx="25" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="360" y="117" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#1e40af">_platform_is_extending</text>
+    <text x="360" y="133" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#2563eb">(moving to max height)</text>
+
+    <!-- Arrow to fully extended -->
+    <line x1="360" y1="145" x2="360" y2="180" stroke="#475569" stroke-width="2"/>
+    <polygon points="360,185 355,175 365,175" fill="#475569"/>
+    <text x="375" y="168" font-family="system-ui, sans-serif" font-size="9" fill="#475569">reached max</text>
+
+    <!-- _platform_is_fully_extended -->
+    <rect x="280" y="190" width="160" height="50" rx="25" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="360" y="212" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#92400e">_platform_is_fully_extended</text>
+    <text x="360" y="228" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">(waiting at top)</text>
+
+    <!-- Arrow to contracting -->
+    <line x1="360" y1="240" x2="360" y2="275" stroke="#475569" stroke-width="2"/>
+    <polygon points="360,280 355,270 365,270" fill="#475569"/>
+    <text x="375" y="263" font-family="system-ui, sans-serif" font-size="9" fill="#475569">delay done</text>
+
+    <!-- _platform_is_contracting -->
+    <rect x="280" y="285" width="160" height="50" rx="25" fill="#f3e8ff" stroke="#9333ea" stroke-width="2"/>
+    <text x="360" y="307" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#7e22ce">_platform_is_contracting</text>
+    <text x="360" y="323" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#9333ea">(moving to min height)</text>
+
+    <!-- Arrow to fully contracted -->
+    <line x1="360" y1="335" x2="360" y2="370" stroke="#475569" stroke-width="2"/>
+    <polygon points="360,375 355,365 365,375" fill="#475569"/>
+    <text x="375" y="358" font-family="system-ui, sans-serif" font-size="9" fill="#475569">reached min</text>
+
+    <!-- _platform_is_fully_contracted -->
+    <rect x="280" y="380" width="160" height="50" rx="25" fill="#cffafe" stroke="#0891b2" stroke-width="2"/>
+    <text x="360" y="402" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#0e7490">_platform_is_fully_contracted</text>
+    <text x="360" y="418" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#0891b2">(waiting at bottom)</text>
+
+    <!-- Loop back to stationary or extending -->
+    <path d="M 280,405 L 200,405 L 200,25 L 280,25" stroke="#16a34a" stroke-width="2" fill="none"/>
+    <polygon points="280,25 270,20 270,30" fill="#16a34a"/>
+    <text x="170" y="220" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a" transform="rotate(-90, 170, 220)">one-shot: stop</text>
+
+    <path d="M 440,405 L 520,405 L 520,120 L 440,120" stroke="#2563eb" stroke-width="2" fill="none"/>
+    <polygon points="440,120 450,115 450,125" fill="#2563eb"/>
+    <text x="550" y="270" font-family="system-ui, sans-serif" font-size="9" fill="#2563eb" transform="rotate(90, 550, 270)">looping: extend again</text>
+  </g>
+
+  <!-- Platform types -->
+  <g transform="translate(620, 80)">
+    <rect x="0" y="0" width="230" height="200" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="115" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#166534">Platform Types</text>
+
+    <text x="15" y="48" font-family="monospace" font-size="9" fill="#166534">_platform_is_door</text>
+    <text x="15" y="65" font-family="monospace" font-size="9" fill="#166534">_platform_is_split_door</text>
+    <text x="15" y="82" font-family="monospace" font-size="9" fill="#166534">_platform_is_elevator</text>
+    <text x="15" y="99" font-family="monospace" font-size="9" fill="#166534">_platform_is_crushing</text>
+    <text x="15" y="116" font-family="monospace" font-size="9" fill="#166534">_platform_is_rising</text>
+    <text x="15" y="133" font-family="monospace" font-size="9" fill="#166534">_platform_is_sinking</text>
+
+    <text x="15" y="160" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Door: ceiling lowers</text>
+    <text x="15" y="175" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Elevator: floor rises</text>
+    <text x="15" y="190" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Split: floor+ceiling move</text>
+  </g>
+
+  <!-- Platform flags -->
+  <g transform="translate(620, 300)">
+    <rect x="0" y="0" width="230" height="180" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="115" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#991b1b">Platform Flags</text>
+
+    <text x="15" y="48" font-family="monospace" font-size="8" fill="#991b1b">_platform_is_initially_active</text>
+    <text x="15" y="63" font-family="monospace" font-size="8" fill="#991b1b">_platform_is_initially_extended</text>
+    <text x="15" y="78" font-family="monospace" font-size="8" fill="#991b1b">_platform_deactivates_at_each_level</text>
+    <text x="15" y="93" font-family="monospace" font-size="8" fill="#991b1b">_platform_activates_only_once</text>
+    <text x="15" y="108" font-family="monospace" font-size="8" fill="#991b1b">_platform_is_player_controllable</text>
+    <text x="15" y="123" font-family="monospace" font-size="8" fill="#991b1b">_platform_is_monster_controllable</text>
+    <text x="15" y="138" font-family="monospace" font-size="8" fill="#991b1b">_platform_causes_damage</text>
+    <text x="15" y="153" font-family="monospace" font-size="8" fill="#991b1b">_platform_does_not_activate_parent</text>
+    <text x="15" y="168" font-family="monospace" font-size="8" fill="#991b1b">_platform_contracts_slower</text>
+  </g>
+
+  <!-- Visual example -->
+  <g transform="translate(50, 320)">
+    <rect x="0" y="0" width="200" height="160" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1"/>
+    <text x="100" y="20" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#475569">Door Example</text>
+
+    <!-- Closed door -->
+    <rect x="20" y="40" width="60" height="100" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <rect x="20" y="40" width="60" height="80" fill="#64748b"/>
+    <text x="50" y="85" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="white">closed</text>
+
+    <!-- Open door -->
+    <rect x="110" y="40" width="60" height="100" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <rect x="110" y="40" width="60" height="20" fill="#64748b"/>
+    <text x="140" y="100" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="white">open</text>
+
+    <!-- Arrow -->
+    <line x1="85" y1="90" x2="105" y2="90" stroke="#16a34a" stroke-width="2"/>
+    <polygon points="108,90 100,86 100,94" fill="#16a34a"/>
+  </g>
+
+  <!-- Source reference -->
+  <text x="450" y="540" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: platforms.c, platforms.h — update_platform(), struct platform_data</text>
+</svg>

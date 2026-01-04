@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
+  <!-- Background -->
+  <rect width="900" height="700" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Portal-Based Visibility Culling</text>
+
+  <!-- Top-down map view -->
+  <g transform="translate(50, 60)">
+    <text x="175" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Top-Down View (Map)</text>
+
+    <!-- Polygon A (player room) -->
+    <polygon points="50,40 230,40 230,170 50,170" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="140" y="110" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#1e40af">Polygon A</text>
+    <text x="140" y="125" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#1e40af">(Player here)</text>
+
+    <!-- Player -->
+    <circle cx="100" cy="105" r="8" fill="#dc2626"/>
+    <line x1="100" y1="105" x2="140" y2="85" stroke="#dc2626" stroke-width="2"/>
+    <polygon points="145,82 132,78 135,88" fill="#dc2626"/>
+    <text x="85" y="145" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">Player</text>
+
+    <!-- Portal 1 (line between A and B) -->
+    <line x1="230" y1="75" x2="230" y2="135" stroke="#16a34a" stroke-width="4"/>
+    <text x="245" y="105" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">Portal 1</text>
+
+    <!-- Polygon B -->
+    <polygon points="230,55 370,55 370,155 230,155" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="300" y="110" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#166534">Polygon B</text>
+
+    <!-- Portal 2 -->
+    <line x1="370" y1="80" x2="370" y2="130" stroke="#ca8a04" stroke-width="4"/>
+    <text x="385" y="105" font-family="system-ui, sans-serif" font-size="9" fill="#ca8a04">Portal 2</text>
+
+    <!-- Polygon C -->
+    <polygon points="370,45 480,45 480,165 370,165" fill="#fef9c3" stroke="#ca8a04" stroke-width="2"/>
+    <text x="425" y="110" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#854d0e">Polygon C</text>
+
+    <!-- Polygon D (not visible - behind wall) -->
+    <polygon points="50,170 230,170 230,250 50,250" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+    <text x="140" y="210" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">Polygon D</text>
+    <text x="140" y="225" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">(Not visible)</text>
+
+    <!-- Solid wall -->
+    <line x1="50" y1="170" x2="230" y2="170" stroke="#64748b" stroke-width="4"/>
+    <text x="140" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Solid Wall</text>
+
+    <!-- View frustum -->
+    <polygon points="100,105 350,30 350,180" fill="#fecaca" fill-opacity="0.3" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,2"/>
+    <text x="250" y="25" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">View Frustum</text>
+  </g>
+
+  <!-- Process flow (right side) -->
+  <g transform="translate(550, 60)">
+    <text x="150" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Render Process</text>
+
+    <!-- Step 1 -->
+    <rect x="20" y="25" width="260" height="50" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="150" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#1e40af">1. Start at player's polygon</text>
+    <text x="150" y="62" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#1e40af">Render Polygon A (floor, ceiling, walls)</text>
+
+    <line x1="150" y1="75" x2="150" y2="95" stroke="#333" stroke-width="2"/>
+    <polygon points="150,100 145,90 155,90" fill="#333"/>
+
+    <!-- Step 2 -->
+    <rect x="20" y="105" width="260" height="50" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="150" y="125" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#166534">2. Find visible portals</text>
+    <text x="150" y="142" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#166534">Portal 1 in view: queue Polygon B</text>
+
+    <line x1="150" y1="155" x2="150" y2="175" stroke="#333" stroke-width="2"/>
+    <polygon points="150,180 145,170 155,170" fill="#333"/>
+
+    <!-- Step 3 -->
+    <rect x="20" y="185" width="260" height="50" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="150" y="205" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#166534">3. Render through portal</text>
+    <text x="150" y="222" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#166534">Clip Polygon B to Portal 1 bounds</text>
+
+    <line x1="150" y1="235" x2="150" y2="255" stroke="#333" stroke-width="2"/>
+    <polygon points="150,260 145,250 155,250" fill="#333"/>
+
+    <!-- Step 4 -->
+    <rect x="20" y="265" width="260" height="50" rx="6" fill="#fef9c3" stroke="#ca8a04" stroke-width="2"/>
+    <text x="150" y="285" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#854d0e">4. Recurse through Portal 2</text>
+    <text x="150" y="302" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#854d0e">Clip Polygon C to Portal 1 AND Portal 2</text>
+
+    <line x1="150" y1="315" x2="150" y2="335" stroke="#333" stroke-width="2"/>
+    <polygon points="150,340 145,330 155,330" fill="#333"/>
+
+    <!-- Step 5 -->
+    <rect x="20" y="345" width="260" height="50" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+    <text x="150" y="365" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#475569">5. Stop at solid walls</text>
+    <text x="150" y="382" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">Polygon D never visited (behind wall)</text>
+  </g>
+
+  <!-- Screen view (bottom left) -->
+  <g transform="translate(50, 400)">
+    <text x="200" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Rendered Screen View</text>
+
+    <!-- Screen frame -->
+    <rect x="25" y="15" width="350" height="200" rx="4" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+    <!-- Floor (Polygon A) -->
+    <polygon points="25,215 375,215 330,130 70,130" fill="#3b82f6"/>
+
+    <!-- Ceiling (Polygon A) -->
+    <polygon points="25,15 375,15 330,85 70,85" fill="#60a5fa"/>
+
+    <!-- Left wall -->
+    <polygon points="25,15 70,85 70,130 25,215" fill="#2563eb"/>
+
+    <!-- Right wall -->
+    <polygon points="375,15 330,85 330,130 375,215" fill="#2563eb"/>
+
+    <!-- Portal 1 opening - shows Polygon B -->
+    <polygon points="160,85 240,85 240,130 160,130" fill="#22c55e"/>
+
+    <!-- Portal 2 through Portal 1 - shows Polygon C -->
+    <polygon points="180,90 220,90 220,125 180,125" fill="#eab308"/>
+
+    <!-- Labels -->
+    <text x="55" y="180" font-family="system-ui, sans-serif" font-size="10" fill="white">Polygon A</text>
+    <text x="200" y="112" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="white">B</text>
+    <text x="200" y="107" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#854d0e">C</text>
+  </g>
+
+  <!-- Key insight box (bottom right) -->
+  <g transform="translate(480, 450)">
+    <rect x="0" y="0" width="370" height="140" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="185" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#166534">Key Insights</text>
+    <text x="20" y="55" font-family="system-ui, sans-serif" font-size="11" fill="#166534">Only polygons visible through portals are rendered</text>
+    <text x="20" y="78" font-family="system-ui, sans-serif" font-size="11" fill="#166534">Each portal clips the view frustum narrower</text>
+    <text x="20" y="101" font-family="system-ui, sans-serif" font-size="11" fill="#166534">Solid walls terminate the recursion</text>
+    <text x="20" y="124" font-family="system-ui, sans-serif" font-size="11" fill="#166534">No Z-buffer needed: render front-to-back</text>
+  </g>
+
+  <!-- Source reference -->
+  <text x="450" y="680" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: render.c — render_tree(), cast_render_ray()</text>
+</svg>

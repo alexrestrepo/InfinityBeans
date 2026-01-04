@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 550">
+  <!-- Background -->
+  <rect width="900" height="550" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Fixed-Point Number Representation</text>
+  <text x="450" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">Deterministic math without floating-point hardware</text>
+
+  <!-- 16.16 Format -->
+  <g transform="translate(50, 80)">
+    <text x="400" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#2563eb">Standard Fixed-Point (16.16 Format)</text>
+
+    <!-- Bit layout -->
+    <g transform="translate(0, 20)">
+      <!-- Integer part (bits 31-16) -->
+      <rect x="0" y="0" width="400" height="50" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+      <text x="200" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#1e40af">Integer Part (16 bits)</text>
+      <text x="200" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#3b82f6">bits 31-16: signed whole number</text>
+
+      <!-- Fractional part (bits 15-0) -->
+      <rect x="400" y="0" width="400" height="50" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+      <text x="600" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#166534">Fractional Part (16 bits)</text>
+      <text x="600" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">bits 15-0: fraction (0 to 65535/65536)</text>
+
+      <!-- Bit markers -->
+      <text x="0" y="65" font-family="monospace" font-size="9" fill="#64748b">bit 31</text>
+      <text x="380" y="65" font-family="monospace" font-size="9" fill="#64748b">bit 16</text>
+      <text x="400" y="65" font-family="monospace" font-size="9" fill="#64748b">bit 15</text>
+      <text x="780" y="65" font-family="monospace" font-size="9" fill="#64748b">bit 0</text>
+    </g>
+
+    <!-- Example -->
+    <g transform="translate(0, 100)">
+      <rect x="0" y="0" width="800" height="80" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1"/>
+      <text x="400" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#475569">Example: Representing 1.5</text>
+
+      <text x="20" y="45" font-family="monospace" font-size="10" fill="#1e40af">Integer: 1 = 0x0001</text>
+      <text x="200" y="45" font-family="monospace" font-size="10" fill="#166534">Fraction: 0.5 = 32768/65536 = 0x8000</text>
+
+      <text x="20" y="65" font-family="monospace" font-size="10" fill="#475569">Combined: 0x00018000 = 98304 (decimal)</text>
+      <text x="400" y="65" font-family="monospace" font-size="10" fill="#475569">Verify: 98304 / 65536 = 1.5 ✓</text>
+    </g>
+  </g>
+
+  <!-- Key constants -->
+  <g transform="translate(50, 290)">
+    <rect x="0" y="0" width="380" height="130" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="190" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#1e40af">Fixed-Point Constants</text>
+
+    <text x="20" y="50" font-family="monospace" font-size="10" fill="#1e40af">FIXED_FRACTIONAL_BITS = 16</text>
+    <text x="20" y="70" font-family="monospace" font-size="10" fill="#1e40af">FIXED_ONE = (1 &lt;&lt; 16) = 65536</text>
+    <text x="20" y="90" font-family="monospace" font-size="10" fill="#1e40af">FIXED_ONE_HALF = 32768</text>
+
+    <text x="20" y="115" font-family="system-ui, sans-serif" font-size="10" fill="#3b82f6">Precision: ~0.000015 (1/65536)</text>
+  </g>
+
+  <!-- World units -->
+  <g transform="translate(460, 290)">
+    <rect x="0" y="0" width="380" height="130" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="190" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#166534">World Coordinate Scale</text>
+
+    <text x="20" y="50" font-family="monospace" font-size="10" fill="#166534">WORLD_FRACTIONAL_BITS = 10</text>
+    <text x="20" y="70" font-family="monospace" font-size="10" fill="#166534">WORLD_ONE = (1 &lt;&lt; 10) = 1024</text>
+
+    <text x="20" y="95" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">1 game unit = 1024 world units</text>
+    <text x="20" y="115" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">Player height ≈ 819 world units</text>
+  </g>
+
+  <!-- Conversion operations -->
+  <g transform="translate(50, 440)">
+    <rect x="0" y="0" width="800" height="80" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="400" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#92400e">Conversion Macros</text>
+
+    <text x="20" y="48" font-family="monospace" font-size="10" fill="#92400e">INTEGER_TO_FIXED(x)  = (x) &lt;&lt; 16     // Multiply by 65536</text>
+    <text x="20" y="65" font-family="monospace" font-size="10" fill="#92400e">FIXED_TO_INTEGER(x)  = (x) &gt;&gt; 16     // Divide by 65536 (truncates)</text>
+
+    <text x="420" y="48" font-family="monospace" font-size="10" fill="#92400e">WORLD_TO_FIXED(x)    = (x) &lt;&lt; 6      // World has 10 frac bits</text>
+    <text x="420" y="65" font-family="monospace" font-size="10" fill="#92400e">FIXED_TO_WORLD(x)    = (x) &gt;&gt; 6      // Fixed has 16 frac bits</text>
+  </g>
+
+  <!-- Why fixed-point -->
+  <g transform="translate(50, 200)">
+    <rect x="0" y="0" width="380" height="75" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="190" y="20" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#166534">Why Fixed-Point?</text>
+    <text x="15" y="40" font-family="system-ui, sans-serif" font-size="9" fill="#166534">• Identical results on all machines (deterministic)</text>
+    <text x="15" y="55" font-family="system-ui, sans-serif" font-size="9" fill="#166534">• Fast on 68K Macs (no FPU)</text>
+    <text x="15" y="70" font-family="system-ui, sans-serif" font-size="9" fill="#166534">• Critical for network sync</text>
+  </g>
+
+  <g transform="translate(460, 200)">
+    <rect x="0" y="0" width="380" height="75" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="190" y="20" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#991b1b">Arithmetic Caution</text>
+    <text x="15" y="40" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">• Multiply: result has 32 frac bits, shift right 16</text>
+    <text x="15" y="55" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">• Watch for overflow in intermediate results</text>
+    <text x="15" y="70" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">• Use 64-bit intermediate for (a * b) &gt;&gt; 16</text>
+  </g>
+
+  <!-- Source reference -->
+  <text x="450" y="540" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: world.h — typedef long fixed, FIXED_ONE, WORLD_ONE</text>
+</svg>

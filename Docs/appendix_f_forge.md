@@ -35,6 +35,8 @@ The engine enforces hard limits on map geometry:
 
 ## F.2 Polygon Construction Rules
 
+![Polygon Winding and Line Ownership](diagrams/polygon_winding.svg)
+
 ### Clockwise Winding Order
 
 Polygon vertices **must** be stored in clockwise order when viewed from above:
@@ -159,6 +161,8 @@ static void calculate_adjacent_polygons(short polygon_index, short *polygon_inde
 ---
 
 ## F.4 Side (Wall Texture) Definitions
+
+![Side Types Diagram](diagrams/side_types.svg)
 
 Sides define how textures are applied to lines. Each line can have 0, 1, or 2 sides:
 

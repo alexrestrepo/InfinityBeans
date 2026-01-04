@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600">
+  <!-- Background -->
+  <rect width="900" height="600" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Marathon Game Loop — 30 Ticks Per Second</text>
+  <text x="450" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">from marathon2.c, shell.c — deterministic simulation</text>
+
+  <!-- Tick duration bar -->
+  <g transform="translate(50, 70)">
+    <rect x="0" y="0" width="800" height="30" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+    <text x="400" y="20" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#0369a1">1 Tick = 1/30 second ≈ 33.33 ms</text>
+  </g>
+
+  <!-- Main loop phases -->
+  <g transform="translate(50, 120)">
+    <!-- Phase 1: Input -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="180" height="100" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+      <text x="90" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#1e40af">1. INPUT</text>
+      <text x="90" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#1e40af">get_player_input()</text>
+      <text x="15" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#3b82f6">• Read keyboard/mouse</text>
+      <text x="15" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#3b82f6">• Build action_flags</text>
+      <text x="15" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#3b82f6">• Queue for network</text>
+    </g>
+
+    <!-- Arrow 1→2 -->
+    <line x1="180" y1="50" x2="210" y2="50" stroke="#475569" stroke-width="2"/>
+    <polygon points="215,50 205,45 205,55" fill="#475569"/>
+
+    <!-- Phase 2: Physics -->
+    <g transform="translate(220, 0)">
+      <rect x="0" y="0" width="180" height="100" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+      <text x="90" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#166534">2. PHYSICS</text>
+      <text x="90" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#166534">update_world()</text>
+      <text x="15" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">• Move players</text>
+      <text x="15" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">• Collision detection</text>
+      <text x="15" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">• Update projectiles</text>
+    </g>
+
+    <!-- Arrow 2→3 -->
+    <line x1="400" y1="50" x2="430" y2="50" stroke="#475569" stroke-width="2"/>
+    <polygon points="435,50 425,45 425,55" fill="#475569"/>
+
+    <!-- Phase 3: AI -->
+    <g transform="translate(440, 0)">
+      <rect x="0" y="0" width="180" height="100" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+      <text x="90" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#92400e">3. AI</text>
+      <text x="90" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#92400e">update_monsters()</text>
+      <text x="15" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">• Monster state machines</text>
+      <text x="15" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">• Pathfinding (1/frame)</text>
+      <text x="15" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">• Target acquisition</text>
+    </g>
+
+    <!-- Arrow 3→4 -->
+    <line x1="620" y1="50" x2="650" y2="50" stroke="#475569" stroke-width="2"/>
+    <polygon points="655,50 645,45 645,55" fill="#475569"/>
+
+    <!-- Phase 4: Effects -->
+    <g transform="translate(660, 0)">
+      <rect x="0" y="0" width="140" height="100" rx="8" fill="#f3e8ff" stroke="#9333ea" stroke-width="2"/>
+      <text x="70" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#7e22ce">4. EFFECTS</text>
+      <text x="70" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#7e22ce">update_effects()</text>
+      <text x="10" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#9333ea">• Animations</text>
+      <text x="10" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#9333ea">• Particles</text>
+      <text x="10" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#9333ea">• Lights/platforms</text>
+    </g>
+  </g>
+
+  <!-- Second row -->
+  <g transform="translate(50, 250)">
+    <!-- Phase 5: Weapons -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="180" height="100" rx="8" fill="#fecaca" stroke="#dc2626" stroke-width="2"/>
+      <text x="90" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#991b1b">5. WEAPONS</text>
+      <text x="90" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#991b1b">update_weapons()</text>
+      <text x="15" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">• Weapon state machine</text>
+      <text x="15" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">• Fire projectiles</text>
+      <text x="15" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">• Reload handling</text>
+    </g>
+
+    <!-- Arrow 5→6 -->
+    <line x1="180" y1="50" x2="210" y2="50" stroke="#475569" stroke-width="2"/>
+    <polygon points="215,50 205,45 205,55" fill="#475569"/>
+
+    <!-- Phase 6: Items -->
+    <g transform="translate(220, 0)">
+      <rect x="0" y="0" width="180" height="100" rx="8" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+      <text x="90" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#4338ca">6. ITEMS</text>
+      <text x="90" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4338ca">update_items()</text>
+      <text x="15" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#6366f1">• Pickup detection</text>
+      <text x="15" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#6366f1">• Item respawn</text>
+      <text x="15" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#6366f1">• Inventory updates</text>
+    </g>
+
+    <!-- Arrow 6→7 -->
+    <line x1="400" y1="50" x2="430" y2="50" stroke="#475569" stroke-width="2"/>
+    <polygon points="435,50 425,45 425,55" fill="#475569"/>
+
+    <!-- Phase 7: Sound -->
+    <g transform="translate(440, 0)">
+      <rect x="0" y="0" width="180" height="100" rx="8" fill="#cffafe" stroke="#0891b2" stroke-width="2"/>
+      <text x="90" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#0e7490">7. SOUND</text>
+      <text x="90" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#0e7490">queue_sounds()</text>
+      <text x="15" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#0891b2">• 3D sound positioning</text>
+      <text x="15" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#0891b2">• Ambient sounds</text>
+      <text x="15" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#0891b2">• Music control</text>
+    </g>
+
+    <!-- Arrow 7→8 -->
+    <line x1="620" y1="50" x2="650" y2="50" stroke="#475569" stroke-width="2"/>
+    <polygon points="655,50 645,45 645,55" fill="#475569"/>
+
+    <!-- Phase 8: Render -->
+    <g transform="translate(660, 0)">
+      <rect x="0" y="0" width="140" height="100" rx="8" fill="#fef9c3" stroke="#ca8a04" stroke-width="2"/>
+      <text x="70" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#a16207">8. RENDER</text>
+      <text x="70" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#a16207">render_view()</text>
+      <text x="10" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#ca8a04">• Portal culling</text>
+      <text x="10" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#ca8a04">• Draw world</text>
+      <text x="10" y="91" font-family="system-ui, sans-serif" font-size="9" fill="#ca8a04">• HUD overlay</text>
+    </g>
+  </g>
+
+  <!-- Loop back arrow -->
+  <path d="M 800,380 L 830,380 L 830,160 L 50,160 L 50,120" stroke="#475569" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+  <polygon points="50,115 45,125 55,125" fill="#475569"/>
+  <text x="830" y="270" font-family="system-ui, sans-serif" font-size="10" fill="#475569" transform="rotate(90, 830, 270)">next tick</text>
+
+  <!-- Key insight boxes -->
+  <g transform="translate(50, 400)">
+    <rect x="0" y="0" width="390" height="100" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="195" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#166534">Deterministic Simulation</text>
+    <text x="15" y="48" font-family="system-ui, sans-serif" font-size="10" fill="#166534">Same inputs always produce same outputs</text>
+    <text x="15" y="65" font-family="system-ui, sans-serif" font-size="10" fill="#166534">Critical for network synchronization</text>
+    <text x="15" y="82" font-family="system-ui, sans-serif" font-size="10" fill="#166534">Uses fixed-point math (no floating point variance)</text>
+  </g>
+
+  <g transform="translate(460, 400)">
+    <rect x="0" y="0" width="390" height="100" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="195" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#991b1b">AI Load Distribution</text>
+    <text x="15" y="48" font-family="system-ui, sans-serif" font-size="10" fill="#991b1b">Only ONE monster gets pathfinding per frame</text>
+    <text x="15" y="65" font-family="system-ui, sans-serif" font-size="10" fill="#991b1b">Only ONE monster gets target search per frame</text>
+    <text x="15" y="82" font-family="system-ui, sans-serif" font-size="10" fill="#991b1b">Round-robin via last_monster_index_to_get_time</text>
+  </g>
+
+  <!-- Timing info -->
+  <g transform="translate(50, 520)">
+    <rect x="0" y="0" width="800" height="50" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1"/>
+    <text x="20" y="20" font-family="monospace" font-size="10" fill="#475569">TICKS_PER_SECOND = 30</text>
+    <text x="200" y="20" font-family="monospace" font-size="10" fill="#475569">MACHINE_TICKS_PER_TICK = 2</text>
+    <text x="420" y="20" font-family="monospace" font-size="10" fill="#475569">dynamic_world-&gt;tick_count++</text>
+    <text x="20" y="40" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">All game state advances exactly once per tick — rendering may run faster or slower independently</text>
+  </g>
+
+  <!-- Source reference -->
+  <text x="450" y="590" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: marathon2.c, shell.c — game_state_loop(), update_world()</text>
+</svg>

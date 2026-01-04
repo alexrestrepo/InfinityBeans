@@ -530,6 +530,8 @@ The main wall collision function is `keep_line_segment_out_of_walls()`.
 
 ### Exclusion Zone Visualization
 
+![Exclusion Zone Diagram](diagrams/exclusion_zones.svg)
+
 Walls are expanded into collision boundaries:
 
 ```

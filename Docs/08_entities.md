@@ -125,6 +125,8 @@ struct monster_definition {
 
 ### Monster AI State Machine
 
+![Monster State Machine Diagram](diagrams/monster_states.svg)
+
 Monsters use a **two-layer state system**:
 
 1. **Action State** - What the monster is physically doing (moving, attacking, dying)

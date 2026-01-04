@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 600">
+  <!-- Background -->
+  <rect width="950" height="600" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="475" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Marathon Coordinate Systems</text>
+  <text x="475" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">World, Screen, and Texture coordinate transformations</text>
+
+  <!-- World coordinates (left) -->
+  <g transform="translate(50, 80)">
+    <text x="130" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#2563eb">World Coordinates</text>
+
+    <!-- 3D axis diagram -->
+    <g transform="translate(20, 30)">
+      <!-- Grid -->
+      <rect x="0" y="50" width="200" height="150" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+
+      <!-- Y axis (into screen, shown as depth) -->
+      <line x1="100" y1="200" x2="100" y2="50" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="100,45 95,55 105,55" fill="#16a34a"/>
+      <text x="110" y="45" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">+Y (north)</text>
+
+      <!-- X axis (right) -->
+      <line x1="0" y1="125" x2="200" y2="125" stroke="#dc2626" stroke-width="2"/>
+      <polygon points="205,125 195,120 195,130" fill="#dc2626"/>
+      <text x="210" y="130" font-family="system-ui, sans-serif" font-size="10" fill="#dc2626">+X (east)</text>
+
+      <!-- Z axis (up, shown vertical) -->
+      <line x1="100" y1="200" x2="100" y2="220" stroke="#7c3aed" stroke-width="2"/>
+      <line x1="100" y1="220" x2="60" y2="260" stroke="#7c3aed" stroke-width="2"/>
+      <polygon points="55,265 65,255 70,265" fill="#7c3aed"/>
+      <text x="30" y="270" font-family="system-ui, sans-serif" font-size="10" fill="#7c3aed">+Z (up)</text>
+
+      <!-- Origin -->
+      <circle cx="100" cy="125" r="5" fill="#1e293b"/>
+      <text x="85" y="145" font-family="system-ui, sans-serif" font-size="9" fill="#1e293b">origin</text>
+
+      <!-- Player marker -->
+      <circle cx="100" cy="170" r="8" fill="#f97316"/>
+      <text x="115" y="175" font-family="system-ui, sans-serif" font-size="9" fill="#f97316">player</text>
+    </g>
+
+    <!-- World coordinate notes -->
+    <g transform="translate(0, 310)">
+      <rect x="0" y="0" width="260" height="100" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
+      <text x="130" y="20" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#166534">World Units</text>
+      <text x="15" y="40" font-family="monospace" font-size="9" fill="#166534">WORLD_ONE = 1024</text>
+      <text x="15" y="55" font-family="system-ui, sans-serif" font-size="9" fill="#166534">1 game unit = 1024 world units</text>
+      <text x="15" y="72" font-family="system-ui, sans-serif" font-size="9" fill="#166534">Y increases northward (top-down)</text>
+      <text x="15" y="87" font-family="system-ui, sans-serif" font-size="9" fill="#166534">Z increases upward (height)</text>
+    </g>
+  </g>
+
+  <!-- Screen coordinates (center) -->
+  <g transform="translate(340, 80)">
+    <text x="130" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#dc2626">Screen Coordinates</text>
+
+    <!-- Screen frame -->
+    <g transform="translate(0, 30)">
+      <rect x="0" y="0" width="260" height="180" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+      <!-- Origin marker (top-left) -->
+      <circle cx="5" cy="5" r="4" fill="#dc2626"/>
+      <text x="15" y="20" font-family="system-ui, sans-serif" font-size="9" fill="white">(0,0)</text>
+
+      <!-- X axis -->
+      <line x1="0" y1="10" x2="250" y2="10" stroke="#dc2626" stroke-width="1" stroke-dasharray="4,2"/>
+      <polygon points="255,10 245,5 245,15" fill="#dc2626"/>
+      <text x="230" y="30" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">+X</text>
+
+      <!-- Y axis -->
+      <line x1="10" y1="0" x2="10" y2="170" stroke="#16a34a" stroke-width="1" stroke-dasharray="4,2"/>
+      <polygon points="10,175 5,165 15,165" fill="#16a34a"/>
+      <text x="20" y="170" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">+Y</text>
+
+      <!-- Center crosshair -->
+      <line x1="120" y1="90" x2="140" y2="90" stroke="#fbbf24" stroke-width="2"/>
+      <line x1="130" y1="80" x2="130" y2="100" stroke="#fbbf24" stroke-width="2"/>
+      <text x="145" y="95" font-family="system-ui, sans-serif" font-size="8" fill="#fbbf24">center</text>
+
+      <!-- Resolution label -->
+      <text x="130" y="195" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">640×480 (typical)</text>
+    </g>
+
+    <!-- Screen coordinate notes -->
+    <g transform="translate(0, 240)">
+      <rect x="0" y="0" width="260" height="90" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
+      <text x="130" y="18" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#991b1b">Screen Space</text>
+      <text x="15" y="38" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">Origin at top-left</text>
+      <text x="15" y="53" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">+X goes right</text>
+      <text x="15" y="68" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">+Y goes DOWN (inverted)</text>
+      <text x="15" y="83" font-family="system-ui, sans-serif" font-size="9" fill="#991b1b">Pixel coordinates (integers)</text>
+    </g>
+  </g>
+
+  <!-- Texture coordinates (right) -->
+  <g transform="translate(640, 80)">
+    <text x="130" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#7c3aed">Texture Coordinates</text>
+
+    <!-- Texture sample -->
+    <g transform="translate(15, 30)">
+      <rect x="0" y="0" width="128" height="128" fill="#8b5cf6" stroke="#7c3aed" stroke-width="2"/>
+
+      <!-- Grid lines -->
+      <line x1="32" y1="0" x2="32" y2="128" stroke="#a78bfa" stroke-width="1"/>
+      <line x1="64" y1="0" x2="64" y2="128" stroke="#a78bfa" stroke-width="1"/>
+      <line x1="96" y1="0" x2="96" y2="128" stroke="#a78bfa" stroke-width="1"/>
+      <line x1="0" y1="32" x2="128" y2="32" stroke="#a78bfa" stroke-width="1"/>
+      <line x1="0" y1="64" x2="128" y2="64" stroke="#a78bfa" stroke-width="1"/>
+      <line x1="0" y1="96" x2="128" y2="96" stroke="#a78bfa" stroke-width="1"/>
+
+      <!-- Origin -->
+      <circle cx="0" cy="0" r="4" fill="#fbbf24"/>
+      <text x="8" y="15" font-family="system-ui, sans-serif" font-size="8" fill="white">(0,0)</text>
+
+      <!-- U axis -->
+      <line x1="0" y1="128" x2="128" y2="128" stroke="#dc2626" stroke-width="2"/>
+      <polygon points="133,128 123,123 123,133" fill="#dc2626"/>
+      <text x="140" y="133" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">+U</text>
+
+      <!-- V axis -->
+      <line x1="0" y1="0" x2="0" y2="128" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="0,133 -5,123 5,123" fill="#16a34a"/>
+      <text x="8" y="145" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">+V</text>
+
+      <!-- Size label -->
+      <text x="64" y="170" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">128×128 typical</text>
+    </g>
+
+    <!-- Texture coordinate notes -->
+    <g transform="translate(0, 210)">
+      <rect x="0" y="0" width="260" height="120" rx="6" fill="#faf5ff" stroke="#7c3aed" stroke-width="1"/>
+      <text x="130" y="18" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#7c22ce">Texture Space</text>
+      <text x="15" y="40" font-family="system-ui, sans-serif" font-size="9" fill="#7c3aed">Power-of-2 dimensions</text>
+      <text x="15" y="55" font-family="system-ui, sans-serif" font-size="9" fill="#7c3aed">U/V range: 0 to texture_width-1</text>
+      <text x="15" y="70" font-family="system-ui, sans-serif" font-size="9" fill="#7c3aed">Wrapping via bitmask:</text>
+      <text x="25" y="85" font-family="monospace" font-size="9" fill="#6b21a8">u &amp; (width - 1)</text>
+      <text x="15" y="102" font-family="system-ui, sans-serif" font-size="9" fill="#7c3aed">Column-major storage (for walls)</text>
+    </g>
+  </g>
+
+  <!-- Transformation arrows -->
+  <g transform="translate(50, 450)">
+    <rect x="0" y="0" width="850" height="100" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+    <text x="425" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#475569">Coordinate Transformations</text>
+
+    <!-- World to View -->
+    <text x="80" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#2563eb">World</text>
+    <line x1="130" y1="47" x2="200" y2="47" stroke="#475569" stroke-width="2"/>
+    <polygon points="205,47 195,42 195,52" fill="#475569"/>
+    <text x="165" y="65" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">-player.pos</text>
+    <text x="165" y="77" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">rotate(-yaw)</text>
+
+    <!-- View label -->
+    <text x="250" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">View</text>
+    <line x1="290" y1="47" x2="360" y2="47" stroke="#475569" stroke-width="2"/>
+    <polygon points="365,47 355,42 355,52" fill="#475569"/>
+    <text x="325" y="65" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">project()</text>
+    <text x="325" y="77" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">x/z, y/z</text>
+
+    <!-- Screen label -->
+    <text x="420" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#dc2626">Screen</text>
+    <line x1="470" y1="47" x2="540" y2="47" stroke="#475569" stroke-width="2"/>
+    <polygon points="545,47 535,42 535,52" fill="#475569"/>
+    <text x="505" y="65" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">texture_map()</text>
+
+    <!-- Texture label -->
+    <text x="600" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#7c3aed">Texture</text>
+    <line x1="650" y1="47" x2="720" y2="47" stroke="#475569" stroke-width="2"/>
+    <polygon points="725,47 715,42 715,52" fill="#475569"/>
+    <text x="685" y="65" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">lookup pixel</text>
+
+    <!-- Framebuffer label -->
+    <text x="785" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#f97316">Framebuffer</text>
+  </g>
+
+  <!-- Source reference -->
+  <text x="475" y="590" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: render.c, scottish_textures.c — coordinate transformation pipeline</text>
+</svg>

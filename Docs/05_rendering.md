@@ -196,6 +196,8 @@ This architectural difference enabled Marathon's complex environments with overl
 
 ### The Core Idea
 
+![Portal Rendering Diagram](diagrams/portal_rendering.svg)
+
 Imagine you're standing in a room. You can see:
 1. The walls, floor, and ceiling of your current room
 2. Through any doorways, you can see into adjacent rooms

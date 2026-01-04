@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 480">
+  <!-- Background -->
+  <rect width="950" height="480" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="475" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Side Types — Wall Texture Configurations</text>
+  <text x="475" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">from map.h:478-486</text>
+
+  <!-- _full_side -->
+  <g transform="translate(40, 80)">
+    <text x="60" y="0" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold" fill="#2563eb">_full_side</text>
+
+    <!-- Side view frame -->
+    <rect x="10" y="15" width="100" height="150" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+    <!-- Full wall texture -->
+    <rect x="10" y="15" width="100" height="150" fill="#3b82f6"/>
+    <text x="60" y="95" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">PRIMARY</text>
+    <text x="60" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">texture</text>
+
+    <!-- Labels (moved inside) -->
+    <text x="15" y="30" font-family="system-ui, sans-serif" font-size="8" fill="white">ceiling</text>
+    <text x="15" y="160" font-family="system-ui, sans-serif" font-size="8" fill="white">floor</text>
+
+    <!-- Description -->
+    <text x="60" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">Floor-to-ceiling</text>
+    <text x="60" y="198" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">solid wall</text>
+  </g>
+
+  <!-- _high_side -->
+  <g transform="translate(180, 80)">
+    <text x="60" y="0" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold" fill="#16a34a">_high_side</text>
+
+    <!-- Side view frame -->
+    <rect x="10" y="15" width="100" height="150" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+    <!-- Upper texture (step down) -->
+    <rect x="10" y="15" width="100" height="60" fill="#22c55e"/>
+    <text x="60" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">PRIMARY</text>
+
+    <!-- Portal opening below -->
+    <rect x="10" y="75" width="100" height="90" fill="#0f172a"/>
+    <text x="60" y="115" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">portal to</text>
+    <text x="60" y="128" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">adjacent</text>
+    <text x="60" y="141" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">polygon</text>
+
+    <!-- Height indicator (inside diagram) -->
+    <line x1="100" y1="75" x2="105" y2="75" stroke="#22c55e" stroke-width="2"/>
+    <text x="98" y="70" text-anchor="end" font-family="system-ui, sans-serif" font-size="8" fill="#22c55e">step</text>
+
+    <!-- Description -->
+    <text x="60" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">Step down into</text>
+    <text x="60" y="198" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">lower floor</text>
+  </g>
+
+  <!-- _low_side -->
+  <g transform="translate(320, 80)">
+    <text x="60" y="0" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold" fill="#dc2626">_low_side</text>
+
+    <!-- Side view frame -->
+    <rect x="10" y="15" width="100" height="150" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+    <!-- Portal opening above -->
+    <rect x="10" y="15" width="100" height="90" fill="#0f172a"/>
+    <text x="60" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">portal to</text>
+    <text x="60" y="68" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">adjacent</text>
+    <text x="60" y="81" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">polygon</text>
+
+    <!-- Lower texture (step up) -->
+    <rect x="10" y="105" width="100" height="60" fill="#ef4444"/>
+    <text x="60" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">PRIMARY</text>
+
+    <!-- Height indicator (inside diagram) -->
+    <line x1="100" y1="105" x2="105" y2="105" stroke="#ef4444" stroke-width="2"/>
+    <text x="98" y="115" text-anchor="end" font-family="system-ui, sans-serif" font-size="8" fill="#ef4444">step</text>
+
+    <!-- Description -->
+    <text x="60" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">Step up from</text>
+    <text x="60" y="198" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">lower floor</text>
+  </g>
+
+  <!-- _composite_side -->
+  <g transform="translate(460, 80)">
+    <text x="60" y="0" text-anchor="middle" font-family="monospace" font-size="11" font-weight="bold" fill="#7c3aed">_composite_side</text>
+
+    <!-- Side view frame -->
+    <rect x="10" y="15" width="100" height="150" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+    <!-- Full wall texture -->
+    <rect x="10" y="15" width="100" height="150" fill="#8b5cf6"/>
+    <text x="60" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">PRIMARY</text>
+
+    <!-- Overlay panel (control panel) -->
+    <rect x="30" y="65" width="60" height="50" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+    <text x="60" y="88" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#78350f">SECONDARY</text>
+    <text x="60" y="100" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#78350f">(control panel)</text>
+
+    <!-- Description -->
+    <text x="60" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">Wall with embedded</text>
+    <text x="60" y="198" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">control panel</text>
+  </g>
+
+  <!-- _split_side -->
+  <g transform="translate(600, 80)">
+    <text x="60" y="0" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold" fill="#0891b2">_split_side</text>
+
+    <!-- Side view frame -->
+    <rect x="10" y="15" width="100" height="150" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+    <!-- Upper texture -->
+    <rect x="10" y="15" width="100" height="50" fill="#06b6d4"/>
+    <text x="60" y="45" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="white">PRIMARY</text>
+
+    <!-- Middle opening (window) -->
+    <rect x="10" y="65" width="100" height="50" fill="#0f172a"/>
+    <text x="60" y="95" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">window</text>
+
+    <!-- Lower texture -->
+    <rect x="10" y="115" width="100" height="50" fill="#14b8a6"/>
+    <text x="60" y="145" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="white">SECONDARY</text>
+
+    <!-- Description -->
+    <text x="60" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">Window with</text>
+    <text x="60" y="198" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">upper and lower walls</text>
+  </g>
+
+  <!-- Exterior wall note -->
+  <g transform="translate(740, 80)">
+    <text x="60" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="bold" fill="#64748b">Exterior Wall</text>
+
+    <!-- Side view frame -->
+    <rect x="10" y="15" width="100" height="150" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+    <!-- Solid wall -->
+    <rect x="10" y="15" width="100" height="150" fill="#64748b"/>
+    <text x="60" y="85" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">Only ONE</text>
+    <text x="60" y="100" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">polygon</text>
+    <text x="60" y="115" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">owns line</text>
+
+    <!-- Description -->
+    <text x="60" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">Impassable edge</text>
+    <text x="60" y="198" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#475569">of map</text>
+  </g>
+
+  <!-- Height calculation explanation -->
+  <g transform="translate(40, 310)">
+    <rect x="0" y="0" width="420" height="130" rx="8" fill="#f0f9ff" stroke="#0284c7" stroke-width="2"/>
+    <text x="210" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#0369a1">Side Type Determination</text>
+
+    <text x="15" y="50" font-family="system-ui, sans-serif" font-size="10" fill="#0369a1">The engine calculates side type from adjacent polygon heights:</text>
+
+    <text x="20" y="72" font-family="monospace" font-size="9" fill="#0c4a6e">if (poly_A.floor == poly_B.floor</text>
+    <text x="20" y="84" font-family="monospace" font-size="9" fill="#0c4a6e">    &amp;&amp; poly_A.ceiling == poly_B.ceiling)</text>
+    <text x="30" y="98" font-family="system-ui, sans-serif" font-size="9" fill="#0369a1">→ No side needed (flat portal)</text>
+
+    <text x="20" y="114" font-family="monospace" font-size="9" fill="#0c4a6e">if (poly_A.floor &gt; poly_B.floor) → _low_side on B</text>
+    <text x="20" y="126" font-family="monospace" font-size="9" fill="#0c4a6e">if (poly_A.ceiling &lt; poly_B.ceiling) → _high_side on B</text>
+  </g>
+
+  <!-- Texture mapping note -->
+  <g transform="translate(490, 310)">
+    <rect x="0" y="0" width="420" height="130" rx="8" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+    <text x="210" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#a16207">Texture Coordinates</text>
+
+    <text x="15" y="50" font-family="system-ui, sans-serif" font-size="10" fill="#a16207">Each side has texture offset origins:</text>
+
+    <text x="20" y="75" font-family="monospace" font-size="9" fill="#78350f">primary_texture.x0, y0</text>
+    <text x="200" y="75" font-family="system-ui, sans-serif" font-size="9" fill="#a16207">// main wall texture</text>
+
+    <text x="20" y="95" font-family="monospace" font-size="9" fill="#78350f">secondary_texture.x0, y0</text>
+    <text x="200" y="95" font-family="system-ui, sans-serif" font-size="9" fill="#a16207">// overlay/lower panel</text>
+
+    <text x="20" y="115" font-family="monospace" font-size="9" fill="#78350f">transparent_texture</text>
+    <text x="200" y="115" font-family="system-ui, sans-serif" font-size="9" fill="#a16207">// see-through sections</text>
+  </g>
+
+  <!-- Source reference -->
+  <text x="475" y="465" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: map.h:478-492 — enum side types, struct side_texture_definition</text>
+</svg>

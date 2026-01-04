@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 550">
+  <defs>
+    <marker id="arrow-small" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#dc2626"/>
+    </marker>
+    <pattern id="diagonal-stripes" patternUnits="userSpaceOnUse" width="8" height="8">
+      <path d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4" stroke="#fca5a5" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="550" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Exclusion Zone Expansion</text>
+  <text x="400" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">How walls become collision boundaries — from map_constructors.c:264-266</text>
+
+  <!-- Before expansion -->
+  <g transform="translate(50, 80)">
+    <text x="150" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">Original Wall Line</text>
+
+    <!-- Polygon area -->
+    <rect x="20" y="30" width="260" height="200" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="150" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#1e40af">Polygon Interior</text>
+
+    <!-- Wall line -->
+    <line x1="20" y1="30" x2="280" y2="30" stroke="#1e293b" stroke-width="4"/>
+
+    <!-- Endpoints -->
+    <circle cx="20" cy="30" r="6" fill="#1e293b"/>
+    <text x="20" y="20" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#1e293b">e0</text>
+
+    <circle cx="280" cy="30" r="6" fill="#1e293b"/>
+    <text x="280" y="20" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#1e293b">e1</text>
+
+    <!-- Player attempting to touch wall -->
+    <circle cx="150" cy="50" r="20" fill="#22c55e" fill-opacity="0.5" stroke="#16a34a" stroke-width="2"/>
+    <circle cx="150" cy="50" r="3" fill="#16a34a"/>
+    <text x="150" y="85" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">Player could clip</text>
+    <text x="150" y="98" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#16a34a">into wall!</text>
+
+    <!-- Problem indicator -->
+    <text x="150" y="250" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#dc2626">❌ No collision buffer</text>
+  </g>
+
+  <!-- After expansion -->
+  <g transform="translate(420, 80)">
+    <text x="170" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#475569">With Exclusion Zone</text>
+
+    <!-- Exclusion zone (expanded quad) -->
+    <polygon points="20,30 340,30 340,90 20,90" fill="url(#diagonal-stripes)" stroke="#dc2626" stroke-width="2"/>
+
+    <!-- Polygon area (below exclusion zone) -->
+    <rect x="20" y="90" width="320" height="140" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="180" y="170" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#1e40af">Safe Polygon Interior</text>
+
+    <!-- Original wall line -->
+    <line x1="20" y1="30" x2="340" y2="30" stroke="#1e293b" stroke-width="4"/>
+
+    <!-- Expanded boundary line -->
+    <line x1="20" y1="90" x2="340" y2="90" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,3"/>
+
+    <!-- Exclusion zone vertices -->
+    <circle cx="20" cy="30" r="5" fill="#1e293b"/>
+    <text x="8" y="25" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#1e293b">e0</text>
+
+    <circle cx="340" cy="30" r="5" fill="#1e293b"/>
+    <text x="352" y="25" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#1e293b">e1</text>
+
+    <circle cx="340" cy="90" r="5" fill="#dc2626"/>
+    <text x="352" y="95" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#dc2626">e2</text>
+
+    <circle cx="20" cy="90" r="5" fill="#dc2626"/>
+    <text x="8" y="95" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" fill="#dc2626">e3</text>
+
+    <!-- Separation distance indicator -->
+    <line x1="360" y1="30" x2="360" y2="90" stroke="#dc2626" stroke-width="1"/>
+    <line x1="355" y1="30" x2="365" y2="30" stroke="#dc2626" stroke-width="1"/>
+    <line x1="355" y1="90" x2="365" y2="90" stroke="#dc2626" stroke-width="1"/>
+    <text x="370" y="65" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">MINIMUM_</text>
+    <text x="370" y="76" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">SEPARATION</text>
+
+    <!-- Player stopped at boundary -->
+    <circle cx="180" cy="110" r="20" fill="#22c55e" fill-opacity="0.5" stroke="#16a34a" stroke-width="2"/>
+    <circle cx="180" cy="110" r="3" fill="#16a34a"/>
+
+    <!-- Collision arrow -->
+    <line x1="180" y1="95" x2="180" y2="75" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-small)"/>
+    <text x="205" y="85" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">BLOCKED!</text>
+
+    <!-- Success indicator -->
+    <text x="180" y="250" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#16a34a">✓ Player stays outside wall</text>
+  </g>
+
+  <!-- Quad structure explanation -->
+  <g transform="translate(50, 340)">
+    <rect x="0" y="0" width="350" height="180" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="175" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#991b1b">Exclusion Zone Quad</text>
+
+    <text x="20" y="50" font-family="monospace" font-size="11" fill="#7f1d1d">struct side_exclusion_zone {</text>
+    <text x="30" y="68" font-family="monospace" font-size="11" fill="#7f1d1d">  world_point2d e0, e1;  // original</text>
+    <text x="30" y="86" font-family="monospace" font-size="11" fill="#7f1d1d">  world_point2d e2, e3;  // expanded</text>
+    <text x="20" y="104" font-family="monospace" font-size="11" fill="#7f1d1d">};</text>
+
+    <text x="20" y="130" font-family="system-ui, sans-serif" font-size="11" fill="#991b1b">The quad [e0, e1, e2, e3] forms a collision region.</text>
+    <text x="20" y="148" font-family="system-ui, sans-serif" font-size="11" fill="#991b1b">Points inside this quad are rejected during</text>
+    <text x="20" y="166" font-family="system-ui, sans-serif" font-size="11" fill="#991b1b">collision detection.</text>
+  </g>
+
+  <!-- push_out_line explanation -->
+  <g transform="translate(420, 340)">
+    <rect x="0" y="0" width="350" height="180" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="175" y="25" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#166534">How Expansion Works</text>
+
+    <text x="20" y="55" font-family="monospace" font-size="10" fill="#14532d">push_out_line(&amp;e0, &amp;e1,</text>
+    <text x="20" y="70" font-family="monospace" font-size="10" fill="#14532d">    MINIMUM_SEPARATION_FROM_WALL,</text>
+    <text x="20" y="85" font-family="monospace" font-size="10" fill="#14532d">    line-&gt;length);</text>
+
+    <text x="20" y="115" font-family="system-ui, sans-serif" font-size="11" fill="#166534">Expansion distance:</text>
+    <text x="30" y="133" font-family="monospace" font-size="11" fill="#15803d">MINIMUM_SEPARATION_FROM_WALL = WORLD_ONE/4</text>
+    <text x="30" y="151" font-family="system-ui, sans-serif" font-size="11" fill="#166534">= 256 world units ≈ 0.25 game units</text>
+    <text x="30" y="169" font-family="system-ui, sans-serif" font-size="11" fill="#64748b">Roughly player radius</text>
+  </g>
+
+  <!-- Source reference -->
+  <text x="400" y="540" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: map_constructors.c:264-266, map.h:494-499 — push_out_line(), struct side_exclusion_zone</text>
+</svg>

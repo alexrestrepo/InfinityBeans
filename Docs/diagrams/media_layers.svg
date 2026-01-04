@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 650">
+  <!-- Background -->
+  <rect width="950" height="650" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="475" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" fill="#1e293b">Media/Liquid System</text>
+  <text x="475" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748b">from media.c, media.h — water, lava, goo, and environmental effects</text>
+
+  <!-- Media types (top left) -->
+  <g transform="translate(50, 80)">
+    <rect x="0" y="0" width="280" height="200" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="140" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#166534">Media Types</text>
+
+    <!-- Water -->
+    <rect x="15" y="38" width="250" height="26" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+    <text x="25" y="55" font-family="monospace" font-size="10" fill="#1e40af">_media_water</text>
+    <text x="180" y="55" font-family="system-ui, sans-serif" font-size="9" fill="#2563eb">Safe, blue tint</text>
+
+    <!-- Lava -->
+    <rect x="15" y="68" width="250" height="26" rx="4" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+    <text x="25" y="85" font-family="monospace" font-size="10" fill="#991b1b">_media_lava</text>
+    <text x="180" y="85" font-family="system-ui, sans-serif" font-size="9" fill="#dc2626">16 dmg/0.5s</text>
+
+    <!-- Goo -->
+    <rect x="15" y="98" width="250" height="26" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="1"/>
+    <text x="25" y="115" font-family="monospace" font-size="10" fill="#166534">_media_goo</text>
+    <text x="180" y="115" font-family="system-ui, sans-serif" font-size="9" fill="#16a34a">8 dmg/0.25s</text>
+
+    <!-- Sewage -->
+    <rect x="15" y="128" width="250" height="26" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+    <text x="25" y="145" font-family="monospace" font-size="10" fill="#92400e">_media_sewage</text>
+    <text x="180" y="145" font-family="system-ui, sans-serif" font-size="9" fill="#d97706">Safe, murky</text>
+
+    <!-- Jjaro -->
+    <rect x="15" y="158" width="250" height="26" rx="4" fill="#f3e8ff" stroke="#9333ea" stroke-width="1"/>
+    <text x="25" y="175" font-family="monospace" font-size="10" fill="#7e22ce">_media_jjaro</text>
+    <text x="180" y="175" font-family="system-ui, sans-serif" font-size="9" fill="#9333ea">Safe, alien</text>
+
+    <text x="140" y="195" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">MAXIMUM_MEDIAS_PER_MAP = 16</text>
+  </g>
+
+  <!-- Height animation via lights (top center) -->
+  <g transform="translate(360, 80)">
+    <rect x="0" y="0" width="280" height="200" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="140" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#1e40af">Height Animation via Lights</text>
+
+    <text x="15" y="45" font-family="system-ui, sans-serif" font-size="10" fill="#1e40af">Light intensity controls water level!</text>
+    <text x="15" y="62" font-family="monospace" font-size="9" fill="#3b82f6">height = low + (high-low) × light_intensity</text>
+
+    <!-- Three states visualization -->
+    <g transform="translate(15, 75)">
+      <!-- Low state -->
+      <rect x="0" y="0" width="70" height="80" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <rect x="0" y="60" width="70" height="20" fill="#3b82f6"/>
+      <text x="35" y="95" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#64748b">light=0.0</text>
+      <text x="35" y="107" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#3b82f6">(at low)</text>
+
+      <!-- Mid state -->
+      <rect x="90" y="0" width="70" height="80" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <rect x="90" y="40" width="70" height="40" fill="#3b82f6"/>
+      <text x="125" y="95" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#64748b">light=0.5</text>
+      <text x="125" y="107" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#3b82f6">(midpoint)</text>
+
+      <!-- High state -->
+      <rect x="180" y="0" width="70" height="80" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <rect x="180" y="10" width="70" height="70" fill="#3b82f6"/>
+      <text x="215" y="95" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#64748b">light=1.0</text>
+      <text x="215" y="107" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#3b82f6">(at high)</text>
+
+      <!-- Arrows -->
+      <line x1="72" y1="40" x2="88" y2="40" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="88,40 82,36 82,44" fill="#16a34a"/>
+
+      <line x1="162" y1="40" x2="178" y2="40" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="178,40 172,36 172,44" fill="#16a34a"/>
+    </g>
+
+    <text x="140" y="195" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Reuses light system for rising water!</text>
+  </g>
+
+  <!-- Media data structure (top right) -->
+  <g transform="translate(670, 80)">
+    <rect x="0" y="0" width="230" height="200" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+    <text x="115" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#475569">media_data (32 bytes)</text>
+
+    <text x="15" y="45" font-family="monospace" font-size="9" fill="#475569">short type;</text>
+    <text x="15" y="60" font-family="monospace" font-size="9" fill="#475569">short light_index;</text>
+    <text x="15" y="75" font-family="monospace" font-size="9" fill="#475569">angle current_direction;</text>
+    <text x="15" y="90" font-family="monospace" font-size="9" fill="#475569">world_distance magnitude;</text>
+    <text x="15" y="105" font-family="monospace" font-size="9" fill="#475569">world_distance low, high;</text>
+    <text x="15" y="120" font-family="monospace" font-size="9" fill="#475569">world_point2d origin;</text>
+    <text x="15" y="135" font-family="monospace" font-size="9" fill="#475569">world_distance height;</text>
+    <text x="15" y="150" font-family="monospace" font-size="9" fill="#475569">shape_descriptor texture;</text>
+    <text x="15" y="165" font-family="monospace" font-size="9" fill="#475569">short transfer_mode;</text>
+
+    <text x="115" y="190" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Current calculated from light</text>
+  </g>
+
+  <!-- Player interaction diagram (middle) -->
+  <g transform="translate(50, 300)">
+    <text x="250" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="bold" fill="#475569">Player Interaction States</text>
+
+    <!-- Cross-section view -->
+    <g transform="translate(0, 20)">
+      <!-- Room walls -->
+      <rect x="0" y="0" width="500" height="150" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+      <!-- Water surface -->
+      <rect x="5" y="80" width="490" height="65" fill="#3b82f6" opacity="0.6"/>
+
+      <!-- Surface line -->
+      <line x1="5" y1="80" x2="495" y2="80" stroke="#60a5fa" stroke-width="3"/>
+      <text x="510" y="85" font-family="system-ui, sans-serif" font-size="10" fill="#3b82f6">surface</text>
+
+      <!-- Player above water -->
+      <circle cx="80" cy="50" r="20" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
+      <text x="80" y="55" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">P</text>
+      <text x="80" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#f97316">ABOVE</text>
+
+      <!-- Player feet in water -->
+      <circle cx="200" cy="70" r="20" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
+      <text x="200" y="75" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">P</text>
+      <text x="200" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#f97316">WADING</text>
+
+      <!-- Player head at surface -->
+      <circle cx="320" cy="90" r="20" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
+      <text x="320" y="95" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">P</text>
+      <text x="320" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#f97316">HEAD AT SURFACE</text>
+
+      <!-- Player submerged -->
+      <circle cx="420" cy="115" r="20" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
+      <text x="420" y="120" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="white">P</text>
+      <text x="420" y="0" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#f97316">SUBMERGED</text>
+    </g>
+
+    <!-- Sound events -->
+    <g transform="translate(0, 185)">
+      <rect x="0" y="0" width="500" height="70" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+      <text x="250" y="18" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#92400e">Sound Events (9 types)</text>
+
+      <text x="15" y="38" font-family="monospace" font-size="8" fill="#92400e">feet_entering</text>
+      <text x="15" y="52" font-family="monospace" font-size="8" fill="#92400e">feet_leaving</text>
+
+      <text x="120" y="38" font-family="monospace" font-size="8" fill="#92400e">head_entering</text>
+      <text x="120" y="52" font-family="monospace" font-size="8" fill="#92400e">head_leaving</text>
+
+      <text x="230" y="38" font-family="monospace" font-size="8" fill="#92400e">splashing</text>
+      <text x="230" y="52" font-family="monospace" font-size="8" fill="#92400e">ambient_over</text>
+
+      <text x="340" y="38" font-family="monospace" font-size="8" fill="#92400e">ambient_under</text>
+      <text x="340" y="52" font-family="monospace" font-size="8" fill="#92400e">platform_entering</text>
+
+      <text x="460" y="45" font-family="monospace" font-size="8" fill="#92400e">platform_leaving</text>
+    </g>
+  </g>
+
+  <!-- Submerged effects (bottom left) -->
+  <g transform="translate(50, 580)">
+    <rect x="0" y="0" width="250" height="55" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+    <text x="125" y="18" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">Submerged Effects</text>
+    <text x="15" y="35" font-family="system-ui, sans-serif" font-size="9" fill="#2563eb">• Screen tint (blue/green/orange)</text>
+    <text x="15" y="48" font-family="system-ui, sans-serif" font-size="9" fill="#2563eb">• Movement slowed, oxygen depletes</text>
+  </g>
+
+  <!-- Current/flow (middle bottom) -->
+  <g transform="translate(580, 300)">
+    <rect x="0" y="0" width="320" height="180" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="160" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#166534">Current Flow</text>
+
+    <!-- Flow visualization -->
+    <g transform="translate(20, 40)">
+      <rect x="0" y="0" width="130" height="80" fill="#3b82f6" opacity="0.4" stroke="#2563eb" stroke-width="1"/>
+
+      <!-- Flow arrows -->
+      <line x1="20" y1="40" x2="50" y2="40" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="55,40 45,35 45,45" fill="#16a34a"/>
+
+      <line x1="50" y1="25" x2="80" y2="25" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="85,25 75,20 75,30" fill="#16a34a"/>
+
+      <line x1="50" y1="55" x2="80" y2="55" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="85,55 75,50 75,60" fill="#16a34a"/>
+
+      <line x1="80" y1="40" x2="110" y2="40" stroke="#16a34a" stroke-width="2"/>
+      <polygon points="115,40 105,35 105,45" fill="#16a34a"/>
+
+      <!-- Player being pushed -->
+      <circle cx="65" cy="60" r="12" fill="#f97316" stroke="#ea580c" stroke-width="2"/>
+      <text x="65" y="64" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="white">P</text>
+    </g>
+
+    <text x="165" y="50" font-family="system-ui, sans-serif" font-size="10" fill="#166534">current_direction</text>
+    <text x="165" y="65" font-family="system-ui, sans-serif" font-size="10" fill="#166534">current_magnitude</text>
+    <text x="165" y="85" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Texture scrolls in flow direction</text>
+    <text x="165" y="100" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Player pushed by current</text>
+
+    <text x="20" y="135" font-family="monospace" font-size="8" fill="#166534">origin.x += cos(direction) × magnitude</text>
+    <text x="20" y="150" font-family="monospace" font-size="8" fill="#166534">origin.y += sin(direction) × magnitude</text>
+    <text x="20" y="168" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Player velocity += magnitude / 32</text>
+  </g>
+
+  <!-- Damage frequency (bottom right) -->
+  <g transform="translate(580, 495)">
+    <rect x="0" y="0" width="320" height="140" rx="8" fill="#fecaca" stroke="#dc2626" stroke-width="2"/>
+    <text x="160" y="22" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#991b1b">Damage Frequency (Tick Masking)</text>
+
+    <text x="20" y="48" font-family="system-ui, sans-serif" font-size="10" fill="#991b1b">Damage applied when: (tick &amp; mask) == 0</text>
+
+    <g transform="translate(20, 58)">
+      <text x="0" y="12" font-family="monospace" font-size="9" fill="#991b1b">Lava:  mask=0x0F → every 16 ticks</text>
+      <text x="0" y="27" font-family="monospace" font-size="9" fill="#991b1b">Goo:   mask=0x07 → every 8 ticks</text>
+      <text x="0" y="42" font-family="monospace" font-size="9" fill="#166534">Water: mask=0x00 → never (safe)</text>
+    </g>
+
+    <text x="20" y="120" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">At 30 ticks/sec: Lava=2 hits/sec, Goo=4 hits/sec</text>
+    <text x="20" y="133" font-family="system-ui, sans-serif" font-size="9" fill="#64748b">Lava: 32 dmg/sec, Goo: 32 dmg/sec (but faster)</text>
+  </g>
+
+  <!-- Splash effects (bottom middle) -->
+  <g transform="translate(320, 580)">
+    <rect x="0" y="0" width="240" height="55" rx="6" fill="#f3e8ff" stroke="#9333ea" stroke-width="1"/>
+    <text x="120" y="18" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#7e22ce">Splash Effects</text>
+    <text x="15" y="35" font-family="system-ui, sans-serif" font-size="9" fill="#9333ea">small/medium/large_splash</text>
+    <text x="15" y="48" font-family="system-ui, sans-serif" font-size="9" fill="#9333ea">large_emergence (object surfacing)</text>
+  </g>
+
+  <!-- Source reference -->
+  <text x="475" y="645" text-anchor="middle" font-family="monospace" font-size="10" fill="#94a3b8">Source: media.c, media.h, physics.c — media update, damage, swimming</text>
+</svg>
