@@ -130,33 +130,33 @@ Marathon uses a full mesh topology where every player connects to every other pl
 ```
 4-Player Game (Full Mesh - every player connects to every other):
 
-          Player 1 ●──────────────────────────● Player 2
-                   │╲                        ╱│
-                   │ ╲                      ╱ │
-                   │  ╲                    ╱  │
-                   │   ╲                  ╱   │
-                   │    ╲                ╱    │
-                   │     ╲              ╱     │
-                   │      ╲            ╱      │
-                   │       ╲          ╱       │
-                   │        ╲        ╱        │
-                   │         ╲      ╱         │
-                   │          ╲    ╱          │
-                   │           ╲  ╱           │
-                   │            ╳             │  ← All paths cross (X-shape)
-                   │           ╱  ╲           │
-                   │          ╱    ╲          │
-                   │         ╱      ╲         │
-                   │        ╱        ╲        │
-                   │       ╱          ╲       │
-                   │      ╱            ╲      │
-                   │     ╱              ╲     │
-                   │    ╱                ╲    │
-                   │   ╱                  ╲   │
-                   │  ╱                    ╲  │
-                   │ ╱                      ╲ │
-                   │╱                        ╲│
-          Player 4 ●──────────────────────────● Player 3
+          Player 1 ●─────────────────────────● Player 2
+                   │╲                       ╱│
+                   │ ╲                     ╱ │
+                   │  ╲                   ╱  │
+                   │   ╲                 ╱   │
+                   │    ╲               ╱    │
+                   │     ╲             ╱     │
+                   │      ╲           ╱      │
+                   │       ╲         ╱       │
+                   │        ╲       ╱        │
+                   │         ╲     ╱         │
+                   │          ╲   ╱          │
+                   │           ╲ ╱           │
+                   │            ╳            │  ← All paths cross (X-shape)
+                   │           ╱ ╲           │
+                   │          ╱   ╲          │
+                   │         ╱     ╲         │
+                   │        ╱       ╲        │
+                   │       ╱         ╲       │
+                   │      ╱           ╲      │
+                   │     ╱             ╲     │
+                   │    ╱               ╲    │
+                   │   ╱                 ╲   │
+                   │  ╱                   ╲  │
+                   │ ╱                     ╲ │
+                   │╱                       ╲│
+          Player 4 ●─────────────────────────● Player 3
 
 Connection Count:
   P1 ↔ P2, P1 ↔ P3, P1 ↔ P4  (3 connections from P1)
@@ -205,27 +205,27 @@ Tick N begins:
 Player 1's Machine:
     ┌─────────────────────────────────────┐
     │ 1. Read local input (keyboard/mouse)│
-    │    → Generate action_flags           │
-    │                                      │
-    │ 2. Broadcast to all peers:           │
-    │    send(action_flags, tick=N, p=1)   │
-    │                                      │
-    │ 3. Wait for all other players:       │
-    │    recv(action_flags, tick=N, p=2)   │
-    │    recv(action_flags, tick=N, p=3)   │
-    │    recv(action_flags, tick=N, p=4)   │
-    │                                      │
-    │ 4. ALL inputs for tick N ready!      │
-    │                                      │
-    │ 5. Run game logic for 1 tick:        │
-    │    update_players(all_actions)       │
-    │    move_projectiles()                │
-    │    move_monsters()                   │
-    │    physics_update()                  │
-    │                                      │
-    │ 6. World state now at tick N+1       │
-    │                                      │
-    │ 7. Render current state              │
+    │    → Generate action_flags          │
+    │                                     │
+    │ 2. Broadcast to all peers:          │
+    │    send(action_flags, tick=N, p=1)  │
+    │                                     │
+    │ 3. Wait for all other players:      │
+    │    recv(action_flags, tick=N, p=2)  │
+    │    recv(action_flags, tick=N, p=3)  │
+    │    recv(action_flags, tick=N, p=4)  │
+    │                                     │
+    │ 4. ALL inputs for tick N ready!     │
+    │                                     │
+    │ 5. Run game logic for 1 tick:       │
+    │    update_players(all_actions)      │
+    │    move_projectiles()               │
+    │    move_monsters()                  │
+    │    physics_update()                 │
+    │                                     │
+    │ 6. World state now at tick N+1      │
+    │                                     │
+    │ 7. Render current state             │
     └─────────────────────────────────────┘
 
 Player 2's Machine:

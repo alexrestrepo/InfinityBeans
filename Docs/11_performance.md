@@ -55,7 +55,7 @@ Player's view through portals:
      │                                                  │
      │      Portal to B ──────►  ┌───────────────────┐  │
      │      (window)             │  Polygon B        │  │
-     │                           │                    │  │
+     │                           │                   │  │
      │                           │   Portal to C ───►│  │
      │                           │   (smaller)       │  │
      │                           └───────────────────┘  │

@@ -901,7 +901,7 @@ _weapon_finishing_reload
           │           │   _charged    │   │ _waiting_to_load│             │          │
           │           └───────┬───────┘   └────────┬────────┘             │          │
           │                   │                    │                      │          │
-          │           Release or                 Load ammo               │          │
+          │           Release or                 Load ammo                │          │
           │           Overload                     │                      │          │
           │                   │                    ▼                      │          │
           │                   │           ┌─────────────────┐             │          │
@@ -1303,15 +1303,15 @@ Terminals provide story content through an interactive text/image system.
 Player approaches terminal
            │
            ▼
-    ┌─────────────┐
+    ┌───────────────┐
     │ enter_computer│
-    │ _interface() │
-    └──────┬──────┘
+    │ _interface()  │
+    └──────┬────────┘
            │
            ▼
-    ┌─────────────┐     Tab/Space      ┌─────────────┐
+    ┌──────────────┐     Tab/Space     ┌─────────────┐
     │ Display page ├──────────────────►│ Next page   │
-    └──────┬──────┘                    └──────┬──────┘
+    └──────┬───────┘                   └──────┬──────┘
            │                                  │
            │ Last page                        │
            ▼                                  │
@@ -1322,7 +1322,7 @@ Player approaches terminal
            │
     ┌──────┴──────┐
     │             │
-Teleport?     Exit
+Teleport?       Exit
     │             │
     ▼             ▼
 goto_level() abort_terminal_mode()

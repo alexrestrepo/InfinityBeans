@@ -14,34 +14,34 @@ Every frame in Marathon follows this path:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MARATHON FRAME LIFECYCLE                      │
+│                    MARATHON FRAME LIFECYCLE                     │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   ┌──────────────────────┐                                       │
-│   │  1. INPUT GATHERING  │  Read keyboard/mouse, build action    │
-│   │     (at interrupt)   │  flags, queue for game loop           │
-│   └──────────┬───────────┘                                       │
-│              │                                                   │
-│              ▼                                                   │
-│   ┌──────────────────────┐                                       │
-│   │  2. WORLD UPDATE     │  Physics, monsters, projectiles       │
-│   │     update_world()   │  (may run 0-N times per frame)        │
-│   └──────────┬───────────┘                                       │
-│              │                                                   │
-│              ▼                                                   │
-│   ┌──────────────────────┐                                       │
-│   │  3. RENDER SCREEN    │  Build view, render 3D world,         │
-│   │     render_screen()  │  draw HUD, apply fades                │
-│   └──────────┬───────────┘                                       │
-│              │                                                   │
-│              ▼                                                   │
-│   ┌──────────────────────┐                                       │
-│   │  4. DISPLAY          │  Copy framebuffer to screen           │
-│   │     (blit/flip)      │                                       │
-│   └──────────────────────┘                                       │
-│                                                                  │
-│   Target: 30 game ticks/second, unlimited render FPS             │
-│                                                                  │
+│                                                                 │
+│   ┌──────────────────────┐                                      │
+│   │  1. INPUT GATHERING  │  Read keyboard/mouse, build action   │
+│   │     (at interrupt)   │  flags, queue for game loop          │
+│   └──────────┬───────────┘                                      │
+│              │                                                  │
+│              ▼                                                  │
+│   ┌──────────────────────┐                                      │
+│   │  2. WORLD UPDATE     │  Physics, monsters, projectiles      │
+│   │     update_world()   │  (may run 0-N times per frame)       │
+│   └──────────┬───────────┘                                      │
+│              │                                                  │
+│              ▼                                                  │
+│   ┌──────────────────────┐                                      │
+│   │  3. RENDER SCREEN    │  Build view, render 3D world,        │
+│   │     render_screen()  │  draw HUD, apply fades               │
+│   └──────────┬───────────┘                                      │
+│              │                                                  │
+│              ▼                                                  │
+│   ┌──────────────────────┐                                      │
+│   │  4. DISPLAY          │  Copy framebuffer to screen          │
+│   │     (blit/flip)      │                                      │
+│   └──────────────────────┘                                      │
+│                                                                 │
+│   Target: 30 game ticks/second, unlimited render FPS            │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -195,64 +195,64 @@ short update_world(void) {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    UPDATE ORDER (PER TICK)                       │
+│                    UPDATE ORDER (PER TICK)                      │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   1. update_lights()                                             │
+│                                                                 │
+│   1. update_lights()                                            │
 │      └─► Animate light sources (flicker, pulse, fade)           │
-│          This affects media heights too!                         │
-│                                                                  │
-│   2. update_medias()                                             │
+│          This affects media heights too!                        │
+│                                                                 │
+│   2. update_medias()                                            │
 │      └─► Calculate new liquid heights from light intensities    │
 │          Update current/flow texture scrolling                  │
-│                                                                  │
-│   3. update_platforms()                                          │
+│                                                                 │
+│   3. update_platforms()                                         │
 │      └─► Move elevators, doors, crushing ceilings               │
 │          Damage monsters/players caught in crushers             │
-│                                                                  │
+│                                                                 │
 │   4. update_control_panels()  ← BEFORE update_players!          │
 │      └─► Process switch states                                  │
 │          Must run before players to avoid race conditions       │
-│                                                                  │
-│   5. update_players()                                            │
+│                                                                 │
+│   5. update_players()                                           │
 │      └─► For each player:                                       │
 │            • Dequeue action flags                               │
 │            • Apply movement physics                             │
 │            • Handle weapon firing                               │
 │            • Process item pickups                               │
 │            • Update view bobbing                                │
-│                                                                  │
-│   6. move_projectiles()                                          │
+│                                                                 │
+│   6. move_projectiles()                                         │
 │      └─► For each projectile:                                   │
 │            • Apply velocity                                     │
 │            • Check collisions                                   │
 │            • Spawn effects on impact                            │
 │            • Deal damage on hit                                 │
-│                                                                  │
-│   7. move_monsters()                                             │
+│                                                                 │
+│   7. move_monsters()                                            │
 │      └─► For each monster:                                      │
 │            • Run AI state machine                               │
 │            • Calculate pathfinding                              │
 │            • Apply movement                                     │
 │            • Attack if in range                                 │
-│                                                                  │
-│   8. update_effects()                                            │
+│                                                                 │
+│   8. update_effects()                                           │
 │      └─► Animate explosions, blood, sparks                      │
 │          Remove completed effects                               │
-│                                                                  │
-│   9. recreate_objects()                                          │
+│                                                                 │
+│   9. recreate_objects()                                         │
 │      └─► Rebuild sorted object lists for rendering              │
-│                                                                  │
-│  10. handle_random_sound_image()                                 │
+│                                                                 │
+│  10. handle_random_sound_image()                                │
 │      └─► Play ambient sounds (wind, water, etc.)                │
-│                                                                  │
-│  11. animate_scenery()                                           │
+│                                                                 │
+│  11. animate_scenery()                                          │
 │      └─► Update animated decorations (max 20)                   │
-│                                                                  │
-│  12. update_net_game()                                           │
+│                                                                 │
+│  12. update_net_game()                                          │
 │      └─► Sync state for multiplayer                             │
 │          Check win/lose conditions                              │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -363,49 +363,49 @@ The render tree is Marathon's visibility system:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    RENDER TREE BUILDING                          │
+│                    RENDER TREE BUILDING                         │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   build_render_tree(view):                                       │
-│                                                                  │
-│   1. Start at viewer's polygon                                   │
+│                                                                 │
+│   build_render_tree(view):                                      │
+│                                                                 │
+│   1. Start at viewer's polygon                                  │
 │      ┌─────────────────────────────────────────┐                │
 │      │  Polygon Queue: [viewer_polygon]        │                │
 │      └─────────────────────────────────────────┘                │
-│                                                                  │
-│   2. For each polygon in queue:                                  │
+│                                                                 │
+│   2. For each polygon in queue:                                 │
 │      • Check each line (edge)                                   │
 │      • If line is transparent/portal AND visible in view cone:  │
 │        - Add neighboring polygon to queue                       │
 │        - Create render node with clipping info                  │
-│                                                                  │
+│                                                                 │
 │   3. Result: Tree of visible polygons with clip windows         │
-│                                                                  │
-│   Example scene:                                                 │
+│                                                                 │
+│   Example scene:                                                │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │                                                          │   │
+│   │                                                         │   │
 │   │   ┌───────┐           ┌───────┐         ┌───────┐       │   │
 │   │   │ Poly5 │           │ Poly3 │         │ Poly4 │       │   │
 │   │   │ (far) │───portal──│       │─portal──│       │       │   │
 │   │   └───────┘           └───────┘         └───────┘       │   │
-│   │                            │                             │   │
-│   │                         portal                           │   │
-│   │                            │                             │   │
-│   │                       ┌───────┐                          │   │
-│   │                       │ Poly1 │                          │   │
-│   │                       │(start)│ ← Viewer here            │   │
-│   │                       └───────┘                          │   │
-│   │                                                          │   │
+│   │                            │                            │   │
+│   │                         portal                          │   │
+│   │                            │                            │   │
+│   │                       ┌───────┐                         │   │
+│   │                       │ Poly1 │                         │   │
+│   │                       │(start)│ ← Viewer here           │   │
+│   │                       └───────┘                         │   │
+│   │                                                         │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│   Resulting render tree:                                         │
-│                                                                  │
-│                         Poly1                                    │
-│                        /     \                                   │
-│                    Poly3     Poly4                               │
-│                      │                                           │
-│                    Poly5                                         │
-│                                                                  │
+│                                                                 │
+│   Resulting render tree:                                        │
+│                                                                 │
+│                         Poly1                                   │
+│                        /     \                                  │
+│                    Poly3     Poly4                              │
+│                      │                                          │
+│                    Poly5                                        │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -416,41 +416,41 @@ The render tree is Marathon's visibility system:
 For each visible surface:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    TEXTURE MAPPING PIPELINE                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   1. CLIP TO VIEW FRUSTUM                                        │
-│      • Left/right cone edges                                    │
-│      • Top/bottom scan limits                                   │
-│      • Near plane                                               │
-│                                                                  │
-│   2. PROJECT TO SCREEN                                           │
-│      screen_x = (world_x * world_to_screen_x) / world_z         │
+┌─────────────────────────────────────────────────────────────────────┐
+│                    TEXTURE MAPPING PIPELINE                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   1. CLIP TO VIEW FRUSTUM                                           │
+│      • Left/right cone edges                                        │
+│      • Top/bottom scan limits                                       │
+│      • Near plane                                                   │
+│                                                                     │
+│   2. PROJECT TO SCREEN                                              │
+│      screen_x = (world_x * world_to_screen_x) / world_z             │
 │      screen_y = (world_y * world_to_screen_y) / world_z + dtanpitch │
-│                                                                  │
-│   3. CHOOSE TEXTURE MAPPER                                       │
-│      • Walls: texture_horizontal_polygon (perspective-correct)  │
-│      • Floors/Ceilings: texture_vertical_polygon (affine)       │
-│                                                                  │
-│   4. FOR EACH COLUMN (walls) OR ROW (floors):                    │
-│      │                                                          │
-│      ├─► Calculate texture coordinates                          │
-│      │                                                          │
-│      ├─► Calculate lighting (from light index → intensity)      │
-│      │                                                          │
-│      ├─► Look up shading table for this light level             │
-│      │                                                          │
-│      └─► Write pixels: dest[x] = shading_table[texture[u,v]]    │
-│                                                                  │
-│   5. APPLY TRANSFER MODE                                         │
-│      • _normal: Direct texture lookup                           │
-│      • _tint: Multiply by tint color                            │
-│      • _static: Random noise                                    │
-│      • _landscape: Spherical mapping                            │
-│      • _xfer_fold_in/out: Teleport effect                       │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+│                                                                     │
+│   3. CHOOSE TEXTURE MAPPER                                          │
+│      • Walls: texture_horizontal_polygon (perspective-correct)      │
+│      • Floors/Ceilings: texture_vertical_polygon (affine)           │
+│                                                                     │
+│   4. FOR EACH COLUMN (walls) OR ROW (floors):                       │
+│      │                                                              │
+│      ├─► Calculate texture coordinates                              │
+│      │                                                              │
+│      ├─► Calculate lighting (from light index → intensity)          │
+│      │                                                              │
+│      ├─► Look up shading table for this light level                 │
+│      │                                                              │
+│      └─► Write pixels: dest[x] = shading_table[texture[u,v]]        │
+│                                                                     │
+│   5. APPLY TRANSFER MODE                                            │
+│      • _normal: Direct texture lookup                               │
+│      • _tint: Multiply by tint color                                │
+│      • _static: Random noise                                        │
+│      • _landscape: Spherical mapping                                │
+│      • _xfer_fold_in/out: Teleport effect                           │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---

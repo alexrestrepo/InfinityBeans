@@ -159,15 +159,15 @@ PORTAL CLIPPING:
     World: Room A → Portal → Room B             Screen with portal clip window
 
     ┌──────────┬───Portal───┬──────────┐    ┌─────────────────────────────┐
-    │          │ p0     p1  │          │    │      Portal bounds          │
-    │  Room A  │     ↓      │  Room B  │    │      ┃ p0    p1 ┃           │
-    │          │            │          │    │      ┃    ↓     ┃           │
-    │    @─────┼────────────┼─────     │    │ Room A  ┃ Room B ┃           │
-    │  Player  │            │          │    │ visible ┃visible ┃           │
-    └──────────┴────────────┴──────────┘    │      ┃█████████┃           │
-                                            │      ┃█ wall  █┃           │
-    Wall in Room B spans w0────────w1       │      ┃█████████┃           │
-                                            │   w0'┃ clipped ┃w1         │
+    │          │ p0     p1  │          │    │        Portal bounds        │
+    │  Room A  │     ↓      │  Room B  │    │         ┃ p0    p1 ┃        │
+    │          │            │          │    │         ┃    ↓     ┃        │
+    │    @─────┼────────────┼─────     │    │ Room A  ┃ Room B   ┃        │
+    │  Player  │            │          │    │ visible ┃ visible  ┃        │
+    └──────────┴────────────┴──────────┘    │         ┃██████████┃        │
+                                            │         ┃█ wall  ██┃        │
+    Wall in Room B spans w0────────w1       │         ┃██████████┃        │
+                                            │      w0'┃ clipped  ┃w1      │
                                             └─────────────────────────────┘
 
     Wall endpoints w0, w1 project to screen, but get CLIPPED to portal bounds.
@@ -1622,31 +1622,31 @@ Now let's see how all the pieces fit together in Marathon's actual `render_view(
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      render_view() PIPELINE                          │
+│                      render_view() PIPELINE                         │
 ├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  1. UPDATE CAMERA                                                    │
-│     update_view_data() - Set up projection matrices                  │
-│                                                                      │
-│  2. BUILD VISIBILITY                                                 │
-│     build_render_tree() - Ray cast to find visible polygons          │
-│                                                                      │
-│  3. SORT FOR RENDERING                                               │
-│     sort_render_tree() - Convert tree to back-to-front order         │
-│                                                                      │
-│  4. COLLECT OBJECTS                                                  │
-│     build_render_object_list() - Find visible sprites/monsters       │
-│                                                                      │
-│  5. RENDER POLYGONS                                                  │
-│     render_tree() - For each polygon back-to-front:                  │
-│       ├─ Render ceiling (if camera below ceiling)                    │
-│       ├─ Render walls/sides                                          │
-│       ├─ Render interior objects (monsters, items in this polygon)   │
-│       └─ Render floor (if camera above floor)                        │
-│                                                                      │
-│  6. RENDER OVERLAY                                                   │
-│     render_viewer_sprite_layer() - Weapon sprite, HUD overlays       │
-│                                                                      │
+│                                                                     │
+│  1. UPDATE CAMERA                                                   │
+│     update_view_data() - Set up projection matrices                 │
+│                                                                     │
+│  2. BUILD VISIBILITY                                                │
+│     build_render_tree() - Ray cast to find visible polygons         │
+│                                                                     │
+│  3. SORT FOR RENDERING                                              │
+│     sort_render_tree() - Convert tree to back-to-front order        │
+│                                                                     │
+│  4. COLLECT OBJECTS                                                 │
+│     build_render_object_list() - Find visible sprites/monsters      │
+│                                                                     │
+│  5. RENDER POLYGONS                                                 │
+│     render_tree() - For each polygon back-to-front:                 │
+│       ├─ Render ceiling (if camera below ceiling)                   │
+│       ├─ Render walls/sides                                         │
+│       ├─ Render interior objects (monsters, items in this polygon)  │
+│       └─ Render floor (if camera above floor)                       │
+│                                                                     │
+│  6. RENDER OVERLAY                                                  │
+│     render_viewer_sprite_layer() - Weapon sprite, HUD overlays      │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -2384,7 +2384,7 @@ pixel = read[source_x >> landscape_texture_width_downshift];
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Landscape Rendering Flow                      │
+│                    Landscape Rendering Flow                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1. Polygon has _xfer_landscape transfer mode                   │

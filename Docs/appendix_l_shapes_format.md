@@ -14,20 +14,20 @@ Shapes files contain multiple **collections** — groups of related graphics. Ea
 ```
 Shapes File Structure:
 ┌────────────────────────────────────────┐
-│ Collection Headers                      │
+│ Collection Headers                     │
 │   [32 entries × 32 bytes = 1024 bytes] │
 ├────────────────────────────────────────┤
-│ Collection 0 Data                       │
-│   collection_definition                 │
-│   color_tables                          │
-│   high_level_shapes                     │
-│   low_level_shapes                      │
-│   bitmaps                               │
+│ Collection 0 Data                      │
+│   collection_definition                │
+│   color_tables                         │
+│   high_level_shapes                    │
+│   low_level_shapes                     │
+│   bitmaps                              │
 ├────────────────────────────────────────┤
-│ Collection 1 Data                       │
-│   ...                                   │
+│ Collection 1 Data                      │
+│   ...                                  │
 ├────────────────────────────────────────┤
-│ ...                                     │
+│ ...                                    │
 └────────────────────────────────────────┘
 ```
 

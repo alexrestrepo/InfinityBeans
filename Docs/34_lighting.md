@@ -146,7 +146,7 @@ struct light_data {  /* 128 bytes */
                     Light activated (tag switch/initial)
                                    │
                                    ▼
-                    ┌──────────────────────────┐
+                   ┌───────────────────────────┐
            ┌───────│    BECOMING_ACTIVE (0)    │───────┐
            │       │   Transition to active    │       │
            │       └───────────┬───────────────┘       │
@@ -157,7 +157,7 @@ struct light_data {  /* 128 bytes */
            │       ┌──────────────────────────┐        │
            │       │    PRIMARY_ACTIVE (1)    │◄───────┤
            │       │   Main lit state         │        │
-           │       └───────────┬───────────────┘       │
+           │       └───────────┬──────────────┘        │
            │                   │                       │
            │         phase >= period                   │
            │         (if stateless)                    │
@@ -174,7 +174,7 @@ struct light_data {  /* 128 bytes */
            │       ┌──────────────────────────┐
            └──────►│   BECOMING_INACTIVE (3)  │◄───────┐
                    │   Transition to dark     │        │
-                   └───────────┬───────────────┘       │
+                   └───────────┬──────────────┘        │
                                │                       │
                      phase >= period                   │
                                │                       │
@@ -182,7 +182,7 @@ struct light_data {  /* 128 bytes */
                    ┌──────────────────────────┐        │
                    │   PRIMARY_INACTIVE (4)   │◄───────┤
                    │   Main dark state        │        │
-                   └───��───────┬───────────────┘       │
+                   └───────────┬──────────────┘        │
                                │                       │
                      phase >= period                   │
                      (if stateless)                    │
@@ -312,15 +312,15 @@ fixed flicker_function(short phase, short period,
 ### Visual Representation
 
 ```
-CONSTANT:               LINEAR:                 SMOOTH:                 FLICKER:
-intensity               intensity               intensity               intensity
-    │                       │                       │                       │
-max ├─────────────      max ├            ╱      max ├          ╭───╮    max ├    ╱╲  ╱╲╱╲
-    │                       │          ╱            │        ╱     ╲       │  ╱╲╱  ╲╱
-    │                       │        ╱              │      ╱         ╲     │ ╱
-    │                       │      ╱                │    ╱             ╲   │╱
-min ├─                  min ├────╱              min ├──╯               ╰──min ├──
-    └───────────► time      └───────────► time      └───────────► time      └───────────► time
+CONSTANT:               LINEAR:                 SMOOTH:                    FLICKER:
+intensity               intensity               intensity                  intensity
+    │                       │                       │                          │
+max ├─────────────      max ├            ╱      max ├         ╭───╮        max ├    ╱╲  ╱╲╱╲
+    │                       │          ╱            │        ╱     ╲           │  ╱╲╱  ╲╱
+    │                       │        ╱              │      ╱         ╲         │ ╱
+    │                       │      ╱                │    ╱             ╲       │╱
+min ├─                  min ├────╱              min ├──╯               ╰── min ├──
+    └───────────► time      └───────────► time      └───────────► time         └───────────► time
 
     Immediate jump          Even ramp              Eased transition        Smooth + random
 ```
@@ -443,7 +443,7 @@ Light intensity progression:
 intensity = 65535 (100%)           intensity = 32768 (50%)           intensity = 0 (0%)
 ┌────────────────────────┐         ┌────────────────────────┐         ┌────────────────────────┐
 │████████████████████████│         │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│         │░░░░░░░░░░░░░░░░░░░░░░░░│
-│████ FULLY LIT █████████│         │▓▓▓▓ MEDIUM ▓▓▓▓▓▓▓▓▓▓▓│         │░░░░ DARK ░░░░░░░░░░░░░│
+│████ FULLY LIT █████████│         │▓▓▓▓ MEDIUM ▓▓▓▓▓▓▓▓▓▓▓▓│         │░░░░ DARK ░░░░░░░░░░░░░░│
 │████████████████████████│         │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│         │░░░░░░░░░░░░░░░░░░░░░░░░│
 └────────────────────────┘         └────────────────────────┘         └────────────────────────┘
    Shading table 31                   Shading table 15                   Shading table 0

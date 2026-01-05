@@ -206,22 +206,22 @@ Marathon's source code uses several terms for pixel buffers that can be confusin
 **Relationship Diagram:**
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    GRAPHICS BUFFER HIERARCHY                         │
+│                    GRAPHICS BUFFER HIERARCHY                        │
 ├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  bitmap_definition (struct)                                          │
+│                                                                     │
+│  bitmap_definition (struct)                                         │
 │  ├── width, height         : Dimensions in pixels                   │
 │  ├── bytes_per_row         : Stride (may include padding)           │
 │  ├── row_addresses[]       : Pre-computed scanline pointers         │
 │  └── pixels                : Raw pixel data                         │
-│                                                                      │
-│  world_pixels (Marathon's name)                                      │
-│  = framebuffer (modern porting term)                                 │
-│  = screen parameter in texture functions                             │
-│  = destination parameter in render functions                         │
-│                                                                      │
+│                                                                     │
+│  world_pixels (Marathon's name)                                     │
+│  = framebuffer (modern porting term)                                │
+│  = screen parameter in texture functions                            │
+│  = destination parameter in render functions                        │
+│                                                                     │
 │  All refer to the same concept: the buffer render_view() draws to   │
-│                                                                      │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 

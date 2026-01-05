@@ -12,29 +12,29 @@ Classic Macintosh files have two parts:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MACINTOSH FILE STRUCTURE                      │
+│                    MACINTOSH FILE STRUCTURE                     │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │                     DATA FORK                            │   │
-│   │                                                          │   │
-│   │   Sequential bytes, like files on other platforms        │   │
-│   │   Read with: fopen(), fread(), FSRead()                  │   │
-│   │   Open with: FSpOpenDF() (Data Fork)                     │   │
-│   │                                                          │   │
+│   │                     DATA FORK                           │   │
+│   │                                                         │   │
+│   │   Sequential bytes, like files on other platforms       │   │
+│   │   Read with: fopen(), fread(), FSRead()                 │   │
+│   │   Open with: FSpOpenDF() (Data Fork)                    │   │
+│   │                                                         │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
+│                                                                 │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │                    RESOURCE FORK                         │   │
-│   │                                                          │   │
-│   │   Structured storage with typed resources                │   │
-│   │   Read with: GetResource(), Get1Resource()               │   │
-│   │   Open with: FSpOpenRF() (Resource Fork)                 │   │
-│   │                                                          │   │
-│   │   Contains: PICT, snd, STR#, DLOG, etc.                  │   │
-│   │                                                          │   │
+│   │                    RESOURCE FORK                        │   │
+│   │                                                         │   │
+│   │   Structured storage with typed resources               │   │
+│   │   Read with: GetResource(), Get1Resource()              │   │
+│   │   Open with: FSpOpenRF() (Resource Fork)                │   │
+│   │                                                         │   │
+│   │   Contains: PICT, snd, STR#, DLOG, etc.                 │   │
+│   │                                                         │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -100,16 +100,16 @@ The confusion stems from Marathon's development history:
 ```
 1994-1995 Development:
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                  │
+│                                                                 │
 │   Original Plan: Store everything in resource forks             │
 │   (Standard Mac approach at the time)                           │
-│                                                                  │
+│                                                                 │
 │   Problem: Resource forks have 16MB size limit                  │
 │   (Shapes file is ~30MB for 16-bit graphics)                    │
-│                                                                  │
+│                                                                 │
 │   Solution: Store large data in DATA forks                      │
 │   Keep only interface graphics in resource fork                 │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 
 Result:
@@ -164,10 +164,10 @@ header.length = swap32(header.length);
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    SHAPES FILE STRUCTURE                         │
+│                    SHAPES FILE STRUCTURE                        │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   Offset 0:                                                      │
+│                                                                 │
+│   Offset 0:                                                     │
 │   ┌─────────────────────────────────────────────────────────┐   │
 │   │  collection_header[32]  (32 headers × 12 bytes = 384)   │   │
 │   │    • offset (4 bytes) - Position of 8-bit data          │   │
@@ -175,13 +175,13 @@ header.length = swap32(header.length);
 │   │    • offset16 (4 bytes) - Position of 16-bit data       │   │
 │   │    • length16 (4 bytes) - Size of 16-bit data           │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│   Variable offsets:                                              │
+│                                                                 │
+│   Variable offsets:                                             │
 │   ┌─────────────────────────────────────────────────────────┐   │
 │   │  collection_definition[0] (8-bit graphics)              │   │
-│   │    • color tables                                        │   │
-│   │    • bitmap data                                         │   │
-│   │    • shape definitions                                   │   │
+│   │    • color tables                                       │   │
+│   │    • bitmap data                                        │   │
+│   │    • shape definitions                                  │   │
 │   └─────────────────────────────────────────────────────────┘   │
 │   ┌─────────────────────────────────────────────────────────┐   │
 │   │  collection_definition[0] (16-bit graphics)             │   │
@@ -190,7 +190,7 @@ header.length = swap32(header.length);
 │   ┌─────────────────────────────────────────────────────────┐   │
 │   │  collection_definition[1]...                            │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -200,38 +200,38 @@ header.length = swap32(header.length);
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    SOUNDS FILE STRUCTURE                         │
+│                    SOUNDS FILE STRUCTURE                        │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   Header:                                                        │
+│                                                                 │
+│   Header:                                                       │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │  version (2 bytes)                                       │   │
-│   │  tag (2 bytes) - 'snd2' for Marathon 2                   │   │
-│   │  source_count (2 bytes)                                  │   │
-│   │  sound_count (2 bytes)                                   │   │
+│   │  version (2 bytes)                                      │   │
+│   │  tag (2 bytes) - 'snd2' for Marathon 2                  │   │
+│   │  source_count (2 bytes)                                 │   │
+│   │  sound_count (2 bytes)                                  │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│   Sound definitions:                                             │
+│                                                                 │
+│   Sound definitions:                                            │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │  sound_definition[sound_count]                           │   │
-│   │    • sound_code                                          │   │
-│   │    • behavior_index                                      │   │
-│   │    • flags                                               │   │
-│   │    • chance                                              │   │
-│   │    • low/high_pitch                                      │   │
-│   │    • permutations                                        │   │
-│   │    • permutations_played                                 │   │
-│   │    • group_offset (position in file)                     │   │
-│   │    • single_length, total_length                         │   │
-│   │    • sound_offsets[]                                     │   │
+│   │  sound_definition[sound_count]                          │   │
+│   │    • sound_code                                         │   │
+│   │    • behavior_index                                     │   │
+│   │    • flags                                              │   │
+│   │    • chance                                             │   │
+│   │    • low/high_pitch                                     │   │
+│   │    • permutations                                       │   │
+│   │    • permutations_played                                │   │
+│   │    • group_offset (position in file)                    │   │
+│   │    • single_length, total_length                        │   │
+│   │    • sound_offsets[]                                    │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│   Audio data:                                                    │
+│                                                                 │
+│   Audio data:                                                   │
 │   ┌─────────────────────────────────────────────────────────┐   │
 │   │  Raw audio samples (8-bit or 16-bit PCM)                │   │
 │   │  Referenced by sound_definition.sound_offsets           │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -268,9 +268,9 @@ Resource fork structure (if you really need it):
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    RESOURCE FORK FORMAT                          │
+│                    RESOURCE FORK FORMAT                         │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │   Offset 0: Resource Header (16 bytes)                          │
 │   ┌─────────────────────────────────────────────────────────┐   │
 │   │  data_offset (4 bytes) - Offset to resource data        │   │
@@ -278,43 +278,43 @@ Resource fork structure (if you really need it):
 │   │  data_length (4 bytes) - Length of data section         │   │
 │   │  map_length (4 bytes) - Length of map section           │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│   Data Section (at data_offset):                                 │
+│                                                                 │
+│   Data Section (at data_offset):                                │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │  For each resource:                                      │   │
-│   │    length (4 bytes)                                      │   │
-│   │    data (length bytes)                                   │   │
+│   │  For each resource:                                     │   │
+│   │    length (4 bytes)                                     │   │
+│   │    data (length bytes)                                  │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│   Map Section (at map_offset):                                   │
+│                                                                 │
+│   Map Section (at map_offset):                                  │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │  header_copy (16 bytes)                                  │   │
-│   │  next_map (4 bytes)                                      │   │
-│   │  file_ref (2 bytes)                                      │   │
-│   │  attributes (2 bytes)                                    │   │
-│   │  type_list_offset (2 bytes)                              │   │
-│   │  name_list_offset (2 bytes)                              │   │
+│   │  header_copy (16 bytes)                                 │   │
+│   │  next_map (4 bytes)                                     │   │
+│   │  file_ref (2 bytes)                                     │   │
+│   │  attributes (2 bytes)                                   │   │
+│   │  type_list_offset (2 bytes)                             │   │
+│   │  name_list_offset (2 bytes)                             │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
+│                                                                 │
 │   Type List (at map_offset + type_list_offset):                 │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │  type_count-1 (2 bytes)                                  │   │
-│   │  For each type:                                          │   │
+│   │  type_count-1 (2 bytes)                                 │   │
+│   │  For each type:                                         │   │
 │   │    type (4 bytes) - e.g., 'PICT', 'snd '                │   │
-│   │    count-1 (2 bytes)                                     │   │
-│   │    ref_list_offset (2 bytes)                             │   │
+│   │    count-1 (2 bytes)                                    │   │
+│   │    ref_list_offset (2 bytes)                            │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
-│   Reference List:                                                │
+│                                                                 │
+│   Reference List:                                               │
 │   ┌─────────────────────────────────────────────────────────┐   │
-│   │  For each resource of type:                              │   │
-│   │    id (2 bytes)                                          │   │
-│   │    name_offset (2 bytes)                                 │   │
-│   │    attributes (1 byte)                                   │   │
+│   │  For each resource of type:                             │   │
+│   │    id (2 bytes)                                         │   │
+│   │    name_offset (2 bytes)                                │   │
+│   │    attributes (1 byte)                                  │   │
 │   │    data_offset (3 bytes) - Offset in data section       │   │
-│   │    handle (4 bytes)                                      │   │
+│   │    handle (4 bytes)                                     │   │
 │   └─────────────────────────────────────────────────────────┘   │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

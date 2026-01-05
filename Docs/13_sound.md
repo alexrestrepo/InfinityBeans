@@ -72,12 +72,12 @@ enum
 ```
 Audio Channel Layout:
 
-┌─────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────┐
 │  Channel 0   │  Channel 1   │  Channel 2   │  Channel 3    │
 │  (Normal)    │  (Normal)    │  (Normal)    │  (Normal)     │
-├─────────────────────────────────────────────────────────────┤
+├────────────────────────────────────────────────────────────┤
 │       Channel 4 (Ambient)   │       Channel 5 (Ambient)    │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
 
 Normal channels: Sound effects (weapons, monsters, items)
 Ambient channels: Environmental loops (water, wind, machinery)

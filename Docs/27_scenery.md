@@ -183,7 +183,7 @@ void damage_scenery(short object_index) {
 ### Destruction Flow
 
 ```
-┌──────────────────────┐     damage_scenery()     ┌──────────────────────┐
+┌──────────────────────┐     damage_scenery()      ┌──────────────────────┐
 │   INTACT SCENERY     │ ────────────────────────► │   DESTROYED STATE    │
 │                      │                           │                      │
 │      ┌──┐            │                           │       ╲╱             │

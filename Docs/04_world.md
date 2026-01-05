@@ -70,7 +70,7 @@ A simple two-room level:
          │     (Polygon 0)      │
          │                      │
          │                      │
-         e3 ═══════L2═══════ e2 ← This line is shared!
+         e3 ═══════ L2 ═══════ e2 ← This line is shared!
          │      (portal)        │
          │                      │
         L6      Room B         L4

@@ -283,18 +283,18 @@ long map_terminal_data_length;
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  static_preprocessed_terminal_data (10 bytes)                    │
+│  static_preprocessed_terminal_data (10 bytes)                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  terminal_groupings[grouping_count] (12 bytes each)              │
+│  terminal_groupings[grouping_count] (12 bytes each)             │
 │    ├─ Group 0: flags, type, permutation, start_index, length    │
-│    ├─ Group 1: ...                                               │
-│    └─ Group N: ...                                               │
+│    ├─ Group 1: ...                                              │
+│    └─ Group N: ...                                              │
 ├─────────────────────────────────────────────────────────────────┤
-│  text_face_data[font_changes_count] (6 bytes each)               │
-│    ├─ Face 0: index, face, color                                 │
-│    └─ Face N: ...                                                │
+│  text_face_data[font_changes_count] (6 bytes each)              │
+│    ├─ Face 0: index, face, color                                │
+│    └─ Face N: ...                                               │
 ├─────────────────────────────────────────────────────────────────┤
-│  char text[] (raw text with formatting codes stripped)           │
+│  char text[] (raw text with formatting codes stripped)          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -601,7 +601,7 @@ static void teleport_to_polygon(
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         BORDER (18px)                            │
+│                         BORDER (18px)                           │
 ├─────────────────────────────────────────────────────────────────┤
 │ ┌─────────────────────────────────────────────────────────────┐ │
 │ │                                                             │ │
@@ -620,7 +620,7 @@ static void teleport_to_polygon(
 │ │                                                             │ │
 │ └─────────────────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────────────────┤
-│                    [Press SPACE to continue]                     │
+│                    [Press SPACE to continue]                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

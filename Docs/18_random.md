@@ -32,7 +32,7 @@ Marathon uses two separate random number generators:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                RANDOM NUMBER SYSTEM                      │
+│                RANDOM NUMBER SYSTEM                     │
 ├─────────────────────────┬───────────────────────────────┤
 │    Synchronized RNG     │       Local RNG               │
 │    (random())           │       (local_random())        │

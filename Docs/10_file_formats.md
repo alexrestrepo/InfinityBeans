@@ -105,19 +105,19 @@ Marathon uses its own WAD format for maps—**NOT** Doom WADs despite the simila
 │  ┌───────────────────────────────────────────────────│───────┐  │
 │  │         LEVEL DATA (repeated per level)           │       │  │
 │  │                                                   │       │  │
-│  │  [Entry Header] tag='PNTS' length=N              │       │  │
-│  │  [Point Data - N bytes]                          │       │  │
+│  │  [Entry Header] tag='PNTS' length=N               │       │  │
+│  │  [Point Data - N bytes]                           │       │  │
 │  │                                                   │       │  │
-│  │  [Entry Header] tag='LINS' length=M              │       │  │
-│  │  [Line Data - M bytes]                           │       │  │
+│  │  [Entry Header] tag='LINS' length=M               │       │  │
+│  │  [Line Data - M bytes]                            │       │  │
 │  │                                                   │       │  │
-│  │  [Entry Header] tag='SIDS' length=...            │       │  │
-│  │  [Side Data]                                     │       │  │
+│  │  [Entry Header] tag='SIDS' length=...             │       │  │
+│  │  [Side Data]                                      │       │  │
 │  │                                                   │       │  │
-│  │  [Entry Header] tag='POLY' length=...            │       │  │
-│  │  [Polygon Data]                                  │       │  │
+│  │  [Entry Header] tag='POLY' length=...             │       │  │
+│  │  [Polygon Data]                                   │       │  │
 │  │                                                   │       │  │
-│  │  ... more tagged entries ...                     │       │  │
+│  │  ... more tagged entries ...                      │       │  │
 │  └───────────────────────────────────────────────────│───────┘  │
 │                                                      │          │
 │  ┌───────────────────────────────────────────────────▼───────┐  │

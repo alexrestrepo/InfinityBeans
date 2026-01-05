@@ -21,36 +21,36 @@ Marathon needs background music that:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MUSIC STATE MACHINE                           │
+│                    MUSIC STATE MACHINE                          │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   _no_song_playing                                               │
-│          │                                                       │
-│          │ queue_song(index)                                     │
-│          ▼                                                       │
+│                                                                 │
+│   _no_song_playing                                              │
+│          │                                                      │
+│          │ queue_song(index)                                    │
+│          ▼                                                      │
 │   _delaying_for_loop ──────────────────────┐                    │
-│          │                                  │                    │
-│          │ delay expires                    │                    │
-│          ▼                                  │                    │
-│   _playing_introduction                     │                    │
-│          │                                  │                    │
-│          │ intro complete                   │                    │
-│          ▼                                  │                    │
-│   _playing_chorus ◄────────────────────────┐│                    │
-│          │                      │          ││                    │
-│          │                      │ loop     ││                    │
-│          │ chorus count done    └──────────┘│                    │
-│          ▼                                  │                    │
-│   _playing_trailer                          │                    │
-│          │                                  │                    │
-│          │ trailer complete                 │                    │
-│          ▼                                  │                    │
-│   _song_completed flag ─────────────────────┘                    │
-│          │                     (if _song_automatically_loops)    │
-│          │                                                       │
-│          ▼ (if no loop)                                          │
-│   _no_song_playing                                               │
-│                                                                  │
+│          │                                  │                   │
+│          │ delay expires                    │                   │
+│          ▼                                  │                   │
+│   _playing_introduction                     │                   │
+│          │                                  │                   │
+│          │ intro complete                   │                   │
+│          ▼                                  │                   │
+│   _playing_chorus ◄────────────────────────┐│                   │
+│          │                      │          ││                   │
+│          │                      │ loop     ││                   │
+│          │ chorus count done    └──────────┘│                   │
+│          ▼                                  │                   │
+│   _playing_trailer                          │                   │
+│          │                                  │                   │
+│          │ trailer complete                 │                   │
+│          ▼                                  │                   │
+│   _song_completed flag ─────────────────────┘                   │
+│          │                     (if _song_automatically_loops)   │
+│          │                                                      │
+│          ▼ (if no loop)                                         │
+│   _no_song_playing                                              │
+│                                                                 │
 │   ┌────────────────────────────────────────────────────────┐    │
 │   │ fade_out_music() can transition to:                    │    │
 │   │   _music_fading ──► gradual volume decrease            │    │
@@ -110,7 +110,7 @@ struct sound_snippet {
 ```
 Song File Layout:
 ┌─────────────────────────────────────────────────────────────────┐
-│ │◄── Introduction ──►│◄───── Chorus ─────►│◄── Trailer ──►│    │
+│ │◄── Introduction ──►│◄───── Chorus ─────►│◄── Trailer ──► │    │
 │ ├────────────────────┼────────────────────┼────────────────┤    │
 │ │    intro.start     │   chorus.start     │  trailer.start │    │
 │ │         ↓          │        ↓           │       ↓        │    │

@@ -185,15 +185,15 @@ Panels have two states tracked by the side's `flags` field:
     ┌──────────────┼──────────────┐             │
     │              │              │             │
     ▼              ▼              ▼             │
- TOGGLE       MOMENTARY      ONE-SHOT          │
- switches     switches       switches          │
+ TOGGLE       MOMENTARY      ONE-SHOT           │
+ switches     switches       switches           │
     │              │              │             │
-    │         Held down:     Stays on          │
-    │         stays active   permanently       │
+    │         Held down:     Stays on           │
+    │         stays active   permanently        │
     │              │              │             │
- Player        Released:         │             │
- reactivates   returns to        │             │
-    │          inactive          │             │
+ Player        Released:          │             │
+ reactivates   returns to         │             │
+    │          inactive           │             │
     │              │              │             │
     └──────────────┴──────────────┴─────────────┘
 ```
@@ -266,8 +266,8 @@ fixed get_recharge_rate(short panel_class)
 Oxygen Station:             Shield Station:
 ┌──────────────┐           ┌──────────────┐
 │ ░░░░░░░░░░░░ │           │ ▓▓▓▓▓▓▓▓▓▓▓▓ │
-│ ░░ O2  ░░░░ │           │ ▓▓ ⚡ ▓▓▓▓▓ │
-│ ░░ REFUEL░░ │           │ ▓▓ CHARGE ▓▓ │
+│ ░░ O2   ░░░░ │           │ ▓▓ shld▓▓▓▓▓ │
+│ ░░ REFUEL ░░ │           │ ▓▓ CHARGE ▓▓ │
 │ ░░░░░░░░░░░░ │           │ ▓▓▓▓▓▓▓▓▓▓▓▓ │
 └──────────────┘           └──────────────┘
 

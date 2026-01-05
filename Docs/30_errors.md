@@ -47,10 +47,10 @@ enum /* game errors */ {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                   ERROR STATE MACHINE                            │
+│                   ERROR STATE MACHINE                           │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   ┌─────────────┐                                                │
+│                                                                 │
+│   ┌─────────────┐                                               │
 │   │  NO ERROR   │◄───────────────────┐                          │
 │   │  (default)  │                    │                          │
 │   └──────┬──────┘                    │                          │
@@ -59,20 +59,20 @@ enum /* game errors */ {
 │          ▼                           │                          │
 │   ┌─────────────┐                    │                          │
 │   │ ERROR SET   │────────────────────┘                          │
-│   │             │                                                │
-│   │ last_type   │                                                │
-│   │ last_error  │                                                │
-│   └──────┬──────┘                                                │
-│          │                                                       │
-│          │ error_pending() → TRUE                                │
-│          │ get_game_error() → returns error code                 │
-│          │                                                       │
-│          ▼                                                       │
-│   ┌─────────────┐                                                │
+│   │             │                                               │
+│   │ last_type   │                                               │
+│   │ last_error  │                                               │
+│   └──────┬──────┘                                               │
+│          │                                                      │
+│          │ error_pending() → TRUE                               │
+│          │ get_game_error() → returns error code                │
+│          │                                                      │
+│          ▼                                                      │
+│   ┌─────────────┐                                               │
 │   │  HANDLED    │  Caller displays alert, logs, or recovers     │
-│   │             │                                                │
-│   └─────────────┘                                                │
-│                                                                  │
+│   │             │                                               │
+│   └─────────────┘                                               │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -212,21 +212,21 @@ struct progress_data {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      PROGRESS DIALOG                             │
+│                      PROGRESS DIALOG                            │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
+│                                                                 │
 │           ┌─────────────────────────────────────────┐           │
 │           │  "Receiving map..."                     │           │
 │           └─────────────────────────────────────────┘           │
-│                                                                  │
+│                                                                 │
 │           ┌─────────────────────────────────────────┐           │
 │           │░░░░░░░░░░░░░░░░░░│                      │           │
 │           └─────────────────────────────────────────┘           │
-│                 ▲                 ▲                               │
-│                 │                 │                               │
-│            Filled             Unfilled                           │
-│          (sent/total)        (remaining)                         │
-│                                                                  │
+│                 ▲                 ▲                             │
+│                 │                 │                             │
+│            Filled             Unfilled                          │
+│          (sent/total)        (remaining)                        │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 
 Progress Calculation:
@@ -282,25 +282,25 @@ Progress dialogs are primarily used for multiplayer map distribution:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│              NETWORK MAP DISTRIBUTION                            │
+│              NETWORK MAP DISTRIBUTION                           │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   HOST                              CLIENT                       │
-│   ────                              ──────                       │
-│                                                                  │
-│   open_progress_dialog              open_progress_dialog         │
-│   (_distribute_map_single)          (_awaiting_map)              │
-│          │                                  │                    │
-│          ▼                                  ▼                    │
-│   For each chunk:                   For each chunk received:     │
-│     send_chunk()                      receive_chunk()            │
-│     draw_progress_bar()               draw_progress_bar()        │
-│          │                                  │                    │
-│          ▼                                  ▼                    │
-│   close_progress_dialog             close_progress_dialog        │
-│                                                                  │
+│                                                                 │
+│   HOST                              CLIENT                      │
+│   ────                              ──────                      │
+│                                                                 │
+│   open_progress_dialog              open_progress_dialog        │
+│   (_distribute_map_single)          (_awaiting_map)             │
+│          │                                  │                   │
+│          ▼                                  ▼                   │
+│   For each chunk:                   For each chunk received:    │
+│     send_chunk()                      receive_chunk()           │
+│     draw_progress_bar()               draw_progress_bar()       │
+│          │                                  │                   │
+│          ▼                                  ▼                   │
+│   close_progress_dialog             close_progress_dialog       │
+│                                                                 │
 │   Total transfer time: ~5-30 seconds depending on map size      │
-│                                                                  │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

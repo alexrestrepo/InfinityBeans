@@ -139,16 +139,16 @@ Normal FOV (80°):                          Extravision FOV (130°):
 
         ╱│╲                                     ╱───│───╲
        ╱ │ ╲                                  ╱     │     ╲
-      ╱  │  ╲                               ╱      │      ╲
-     ╱   │   ╲                            ╱       │       ╲
-    ╱    │    ╲                         ╱        │        ╲
-   ╱     │     ╲                      ╱         │         ╲
-  ╱      │      ╲                   ╱          │          ╲
- ╱       │       ╲                ╱           │           ╲
-╱────────┼────────╲             ╱────────────┼────────────╲
-    40°  │  40°                      65°     │     65°
-         ▲                                   ▲
-       Player                              Player
+      ╱  │  ╲                               ╱       │       ╲
+     ╱   │   ╲                            ╱         │         ╲
+    ╱    │    ╲                         ╱           │           ╲
+   ╱     │     ╲                      ╱             │             ╲
+  ╱      │      ╲                   ╱               │               ╲
+ ╱       │       ╲                ╱                 │                 ╲
+╱────────┼────────╲             ╱───────────────────┼───────────────────╲
+    40°  │  40°                             65°     │     65°
+         ▲                                          ▲
+       Player                                    Player
 
          Narrower view                       Much wider peripheral vision
       Objects appear larger               Objects appear smaller/compressed
@@ -213,7 +213,7 @@ Looking Down (negative pitch):
                ╱───────────────╲         ← Near edge (large, horizon)
               ╱                 ╲
              ╱                   ╲
-            ╱       FLOOR        ╲
+            ╱       FLOOR         ╲
            ╱                       ╲
           ╱                         ╲
          ╱___________________________╲   ← Far edge of floor (small)

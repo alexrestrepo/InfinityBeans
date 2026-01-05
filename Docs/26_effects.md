@@ -147,40 +147,40 @@ struct effect_definition {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    EFFECT LIFECYCLE                              │
+│                    EFFECT LIFECYCLE                             │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  new_effect()                                                    │
-│       │                                                          │
-│       ▼                                                          │
-│  ┌─────────────────┐                                             │
-│  │  CREATION       │  Allocate effect slot                       │
-│  │  • Set type     │  Create map object                          │
-│  │  • Set position │  Configure animation                        │
-│  │  • Set delay    │  May be invisible initially                 │
-│  └────────┬────────┘                                             │
-│           │                                                      │
-│           ▼                                                      │
-│  ┌─────────────────┐                                             │
-│  │  DELAY PHASE    │  (if delay > 0)                             │
-│  │  • Invisible    │  Countdown each tick                        │
-│  │  • Waiting      │  Play delay_sound when delay reaches 0      │
-│  └────────┬────────┘                                             │
-│           │ delay == 0                                           │
-│           ▼                                                      │
-│  ┌─────────────────┐                                             │
-│  │  ANIMATION      │  Object becomes visible                     │
-│  │  • Visible      │  animate_object() each tick                 │
-│  │  • Animating    │  Play through shape frames                  │
-│  └────────┬────────┘                                             │
-│           │ last frame reached                                   │
-│           ▼                                                      │
-│  ┌─────────────────┐                                             │
-│  │  REMOVAL        │  remove_effect()                            │
-│  │  • Delete object│  Free effect slot                           │
-│  │  • Free slot    │  May reveal twin object                     │
-│  └─────────────────┘                                             │
-│                                                                  │
+│                                                                 │
+│  new_effect()                                                   │
+│       │                                                         │
+│       ▼                                                         │
+│  ┌─────────────────┐                                            │
+│  │  CREATION       │  Allocate effect slot                      │
+│  │  • Set type     │  Create map object                         │
+│  │  • Set position │  Configure animation                       │
+│  │  • Set delay    │  May be invisible initially                │
+│  └────────┬────────┘                                            │
+│           │                                                     │
+│           ▼                                                     │
+│  ┌─────────────────┐                                            │
+│  │  DELAY PHASE    │  (if delay > 0)                            │
+│  │  • Invisible    │  Countdown each tick                       │
+│  │  • Waiting      │  Play delay_sound when delay reaches 0     │
+│  └────────┬────────┘                                            │
+│           │ delay == 0                                          │
+│           ▼                                                     │
+│  ┌─────────────────┐                                            │
+│  │  ANIMATION      │  Object becomes visible                    │
+│  │  • Visible      │  animate_object() each tick                │
+│  │  • Animating    │  Play through shape frames                 │
+│  └────────┬────────┘                                            │
+│           │ last frame reached                                  │
+│           ▼                                                     │
+│  ┌─────────────────┐                                            │
+│  │  REMOVAL        │  remove_effect()                           │
+│  │  • Delete object│  Free effect slot                          │
+│  │  • Free slot    │  May reveal twin object                    │
+│  └─────────────────┘                                            │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
